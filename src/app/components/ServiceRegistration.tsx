@@ -26,6 +26,7 @@ import {
   generateServiceId,
   deriveStatus,
 } from "../data/serviceStore";
+import { loadCompanyProfile } from "../data/companyStore";
 
 const formatCLP = (value: number) =>
   new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(value);
@@ -905,11 +906,13 @@ export function ServiceRegistration() {
     const saldoBg    = saldoFinal > 0 ? "#fee2e2" : "#dcfce7";
     const saldoLabelColor = saldoFinal > 0 ? "#991b1b" : "#166534";
 
+    const company = loadCompanyProfile();
+
     const html = `<!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8"/>
-  <title>Ficha de Servicio – AURA</title>
+  <title>Ficha de Servicio – ${company.name}</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
     * { margin:0; padding:0; box-sizing:border-box; }
@@ -950,8 +953,8 @@ export function ServiceRegistration() {
         </svg>
       </div>
       <div>
-        <div class="brand-name">AURA</div>
-        <div class="brand-sub">SOFTWARE FUNERARIA</div>
+        <div class="brand-name">${company.name}</div>
+        <div class="brand-sub">${company.subtitle.toUpperCase()}</div>
       </div>
     </div>
     <div class="emit-info">
@@ -1014,11 +1017,11 @@ export function ServiceRegistration() {
       <div style="text-align:center;font-size:10px;color:#9ca3af;">RUT: ${form.contractorRut || "____________________"}</div>
     </div>
     <div>
-      <div class="sign-line">Firma Responsable AURA</div>
+      <div class="sign-line">Firma Responsable ${company.name}</div>
     </div>
   </div>
 
-  <div class="foot-note">Software Funeraria AURA · Documento de uso interno</div>
+  <div class="foot-note">${company.subtitle} · Documento de uso interno</div>
 
   <script>window.onload = function(){ window.print(); }<\/script>
 </body>

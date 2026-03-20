@@ -1,6 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { ShieldCheck, Briefcase, Eye, EyeOff, AlertCircle, Lock, Loader2 } from "lucide-react";
 import { useUser, UserRole } from "../context/UserContext";
+import { loadCompanyProfile, CompanyProfile } from "../data/companyStore";
 
 export function LoginScreen() {
   const { login, verifyAdminPassword } = useUser();
@@ -10,6 +11,13 @@ export function LoginScreen() {
   const [error, setError] = useState("");
   const [shake, setShake] = useState(false);
   const [verifying, setVerifying] = useState(false);
+  const [company, setCompany] = useState<CompanyProfile>(loadCompanyProfile());
+
+  useEffect(() => {
+    const handleProfileChange = () => setCompany(loadCompanyProfile());
+    window.addEventListener("companyProfileChanged", handleProfileChange);
+    return () => window.removeEventListener("companyProfileChanged", handleProfileChange);
+  }, []);
 
   const triggerShake = () => {
     setShake(true);
@@ -108,7 +116,7 @@ export function LoginScreen() {
             </svg>
           </div>
           <h1 className="text-2xl" style={{ color: "rgba(201,168,76,0.8)", letterSpacing: "0.1em", fontWeight: 700 }}>
-            Funeraria AURA
+            {company.name}
           </h1>
         </div>
 
@@ -321,7 +329,7 @@ export function LoginScreen() {
 
         {/* Footer */}
         <p className="text-center text-xs mt-6" style={{ color: "rgba(255,255,255,0.2)" }}>
-          © 2026 — Sistema de Gestión Funeraria v2.1.0
+          © 2026 — {company.subtitle} v2.1.0
         </p>
       </div>
 

@@ -16,12 +16,15 @@ import {
   Loader2,
   Database,
   Download,
+  Building2,
+  MapPin,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { DatabaseManager } from "./DatabaseManager";
 import UpdateManagerComponent from "./UpdateManager";
+import { loadCompanyProfile, saveCompanyProfile, CompanyProfile } from "../data/companyStore";
 
-type Tab = "perfil" | "seguridad" | "database" | "updates";
+type Tab = "perfil" | "empresa" | "seguridad" | "database" | "updates";
 
 export function AdminProfile() {
   const { adminProfile, updateAdminProfile, changeAdminPassword, profileLoading } = useUser();
@@ -47,6 +50,24 @@ export function AdminProfile() {
     } finally {
       setSavingProfile(false);
       setTimeout(() => setProfileMsg(null), 3000);
+    }
+  };
+
+  // ── Company form state ──────────────────────────────────────────
+  const [empresaForm, setEmpresaForm] = useState<CompanyProfile>(loadCompanyProfile());
+  const [empresaMsg, setEmpresaMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [savingEmpresa, setSavingEmpresa] = useState(false);
+
+  const handleEmpresaSave = () => {
+    setSavingEmpresa(true);
+    try {
+      saveCompanyProfile(empresaForm);
+      setEmpresaMsg({ type: "ok", text: "Datos de empresa actualizados." });
+    } catch {
+      setEmpresaMsg({ type: "err", text: "Error al guardar empresa." });
+    } finally {
+      setSavingEmpresa(false);
+      setTimeout(() => setEmpresaMsg(null), 3000);
     }
   };
 
@@ -103,6 +124,7 @@ export function AdminProfile() {
 
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: "perfil", label: "Datos personales", icon: UserCircle },
+    { id: "empresa", label: "Empresa", icon: Building2 },
     { id: "seguridad", label: "Seguridad", icon: KeyRound },
     { id: "database", label: "Base de datos", icon: Database },
     { id: "updates", label: "Actualizaciones", icon: Download },
@@ -299,6 +321,132 @@ export function AdminProfile() {
             >
               {savingProfile ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
               {savingProfile ? "Guardando..." : "Guardar cambios"}
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* ── EMPRESA TAB ────────────────────────────────────────────── */}
+      {activeTab === "empresa" && (
+        <div
+          className="rounded-2xl p-6 shadow-sm"
+          style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
+        >
+          <p className="text-sm mb-5" style={{ color: "#0d1b3e", fontWeight: 600 }}>
+            Información de la Funeraria
+          </p>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2">
+              <label style={labelStyle}>Nombre de la Funeraria</label>
+              <div className="relative">
+                <Building2 size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9ca3af" }} />
+                <input
+                  type="text"
+                  placeholder="Ej. AURA"
+                  value={empresaForm.name}
+                  onChange={(e) => setEmpresaForm((p) => ({ ...p, name: e.target.value }))}
+                  style={inputStyle()}
+                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
+                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label style={labelStyle}>Subtítulo / Lema</label>
+              <div className="relative">
+                <Briefcase size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9ca3af" }} />
+                <input
+                  type="text"
+                  placeholder="Ej. Sistema de Gestión Funeraria"
+                  value={empresaForm.subtitle}
+                  onChange={(e) => setEmpresaForm((p) => ({ ...p, subtitle: e.target.value }))}
+                  style={inputStyle()}
+                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
+                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Correo de contacto</label>
+              <div className="relative">
+                <Mail size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9ca3af" }} />
+                <input
+                  type="email"
+                  placeholder="contacto@funeraria.com"
+                  value={empresaForm.email}
+                  onChange={(e) => setEmpresaForm((p) => ({ ...p, email: e.target.value }))}
+                  style={inputStyle()}
+                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
+                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+                />
+              </div>
+            </div>
+
+            <div>
+              <label style={labelStyle}>Teléfono principal</label>
+              <div className="relative">
+                <Phone size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9ca3af" }} />
+                <input
+                  type="tel"
+                  placeholder="Ej. +56 9 1234 5678"
+                  value={empresaForm.phone}
+                  onChange={(e) => setEmpresaForm((p) => ({ ...p, phone: e.target.value }))}
+                  style={inputStyle()}
+                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
+                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+                />
+              </div>
+            </div>
+
+            <div className="sm:col-span-2">
+              <label style={labelStyle}>Dirección comercial (Aparecerá en recibos)</label>
+              <div className="relative">
+                <MapPin size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9ca3af" }} />
+                <input
+                  type="text"
+                  placeholder="Ej. Av. Siempre Viva 123, Ciudad"
+                  value={empresaForm.address}
+                  onChange={(e) => setEmpresaForm((p) => ({ ...p, address: e.target.value }))}
+                  style={inputStyle()}
+                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
+                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+                />
+              </div>
+            </div>
+          </div>
+
+          {empresaMsg && (
+            <div
+              className="flex items-center gap-2 mt-4 px-4 py-2.5 rounded-xl text-sm"
+              style={{
+                background: empresaMsg.type === "ok" ? "rgba(34,197,94,0.1)" : "rgba(239,68,68,0.1)",
+                border: `1px solid ${empresaMsg.type === "ok" ? "rgba(34,197,94,0.3)" : "rgba(239,68,68,0.3)"}`,
+                color: empresaMsg.type === "ok" ? "#16a34a" : "#dc2626",
+              }}
+            >
+              {empresaMsg.type === "ok" ? <CheckCircle size={15} /> : <AlertCircle size={15} />}
+              {empresaMsg.text}
+            </div>
+          )}
+
+          <div className="flex justify-end mt-5">
+            <button
+              onClick={handleEmpresaSave}
+              disabled={savingEmpresa}
+              className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm transition-all"
+              style={{
+                background: "linear-gradient(135deg, #c9a84c, #e8c97a)",
+                color: "#0d1b3e",
+                fontWeight: 600,
+                opacity: savingEmpresa ? 0.7 : 1,
+                cursor: savingEmpresa ? "not-allowed" : "pointer",
+              }}
+            >
+              {savingEmpresa ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
+              {savingEmpresa ? "Guardando..." : "Guardar cambios"}
             </button>
           </div>
         </div>

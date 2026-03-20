@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router";
 import {
   LayoutDashboard,
@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { recalculateAllStatuses, loadServices } from "../data/serviceStore";
+import { loadCompanyProfile, CompanyProfile } from "../data/companyStore";
 
 const ALL_NAV = [
   { path: "/",         label: "Dashboard",           icon: LayoutDashboard, roles: ["admin"] },
@@ -50,6 +51,13 @@ export function Layout({ children }: { children: React.ReactNode }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [confirmLogout, setConfirmLogout] = useState(false);
   const [recalculating, setRecalculating] = useState(false);
+  const [company, setCompany] = useState<CompanyProfile>(loadCompanyProfile());
+
+  useEffect(() => {
+    const handleProfileChange = () => setCompany(loadCompanyProfile());
+    window.addEventListener("companyProfileChanged", handleProfileChange);
+    return () => window.removeEventListener("companyProfileChanged", handleProfileChange);
+  }, []);
 
   const navItems = ALL_NAV.filter((n) => n.roles.includes(role ?? ""));
   const currentPage = ALL_NAV.find((item) => item.path === location.pathname);
@@ -88,8 +96,8 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </svg>
           </div>
           <div>
-            <p className="text-sm" style={{ color: "rgba(255,255,255,0.95)", letterSpacing: "0.03em" }}>
-              Funeraria AURA
+            <p className="text-sm font-semibold truncate max-w-[150px]" style={{ color: "rgba(255,255,255,0.95)", letterSpacing: "0.03em" }}>
+              {company.name}
             </p>
           </div>
         </div>
@@ -301,7 +309,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
             </button>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs" style={{ color: "#9ca3af" }}>Sistema Funeraria</span>
+                <span className="text-xs truncate max-w-[150px] sm:max-w-none" style={{ color: "#9ca3af" }}>{company.subtitle}</span>
                 <ChevronRight size={12} style={{ color: "#9ca3af" }} />
                 <span className="text-xs" style={{ color: "#1a2f5a" }}>
                   {currentPage?.label || "Dashboard"}

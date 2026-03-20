@@ -1,4 +1,5 @@
 import { FuneralService, Payment } from "../data/mockData";
+import { loadCompanyProfile } from "../data/companyStore";
 
 const formatCLP = (value: number) =>
   new Intl.NumberFormat("es-CL", {
@@ -102,6 +103,7 @@ function openPrint(html: string, title: string) {
 // 1. COMPROBANTE DE SERVICIO COMPLETO
 // ─────────────────────────────────────────────────────────────────────────────
 export function printServiceVoucher(service: FuneralService) {
+  const company = loadCompanyProfile();
   const saldoFinal = Math.max(0, service.pendingBalance);
   const statusClass = service.status === "Pagado" ? "badge-ok" : service.status === "Abonando" ? "badge-partial" : "badge-debt";
 
@@ -143,8 +145,8 @@ export function printServiceVoucher(service: FuneralService) {
     <!-- HEADER -->
     <div class="header">
       <div class="brand-logo">
-        <span class="brand-name">AURA</span>
-        <span class="brand-sub">Funeraria — Sistema de Gestión</span>
+        <span class="brand-name">${company.name}</span>
+        <span class="brand-sub">${company.subtitle}</span>
       </div>
       <div class="doc-info">
         <div class="doc-title">Comprobante de Servicio</div>
@@ -244,14 +246,14 @@ export function printServiceVoucher(service: FuneralService) {
       </div>
       <div class="sig-box">
         <div class="sig-line"></div>
-        <div class="sig-name">Funeraria AURA</div>
+        <div class="sig-name">${company.name}</div>
         <div class="sig-role">Firma y Timbre Empresa</div>
       </div>
     </div>
 
     <!-- FOOTER -->
     <div class="footer">
-      <div class="footer-note">Este documento es el comprobante oficial del servicio funerario contratado con AURA.</div>
+      <div class="footer-note">Este documento es el comprobante oficial del servicio funerario contratado con ${company.name}.</div>
       <div class="footer-stamp">Generado: ${today()} ${now()}</div>
     </div>
   </div>`;
@@ -263,6 +265,7 @@ export function printServiceVoucher(service: FuneralService) {
 // 2. RECIBO DE ABONO INDIVIDUAL
 // ─────────────────────────────────────────────────────────────────────────────
 export function printPaymentReceipt(service: FuneralService, payment: Payment, paymentNum: number) {
+  const company = loadCompanyProfile();
   const receiptId = `REC-${service.id}-${String(paymentNum).padStart(2, "0")}`;
   const isPaid = payment.balance <= 0;
 
@@ -271,8 +274,8 @@ export function printPaymentReceipt(service: FuneralService, payment: Payment, p
     <!-- HEADER -->
     <div class="header">
       <div class="brand-logo">
-        <span class="brand-name">AURA</span>
-        <span class="brand-sub">Funeraria — Sistema de Gestión</span>
+        <span class="brand-name">${company.name}</span>
+        <span class="brand-sub">${company.subtitle}</span>
       </div>
       <div class="doc-info">
         <div class="doc-title">Recibo de Abono</div>
@@ -346,7 +349,7 @@ export function printPaymentReceipt(service: FuneralService, payment: Payment, p
       </div>
       <div class="sig-box">
         <div class="sig-line"></div>
-        <div class="sig-name">Funeraria AURA</div>
+        <div class="sig-name">${company.name}</div>
         <div class="sig-role">Firma y Timbre Empresa</div>
       </div>
     </div>
