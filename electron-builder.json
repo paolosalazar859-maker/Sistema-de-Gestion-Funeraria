@@ -1,0 +1,68 @@
+{
+  "appId": "com.aura.funeraria",
+  "productName": "AURA Funeraria",
+  "directories": {
+    "output": "dist-electron"
+  },
+  "files": [
+    "dist/**/*",
+    "electron.js",
+    "database.js",
+    "backup-manager.js",
+    "update-manager.js",
+    "preload.js"
+  ],
+  "extraResources": [
+    {
+      "from": "node_modules/better-sqlite3",
+      "to": "better-sqlite3",
+      "filter": ["**/*"]
+    }
+  ],
+  "publish": {
+    "provider": "github",
+    "owner": "tu-usuario-github",
+    "repo": "aura-funeraria",
+    "releaseType": "release"
+  },
+  "mac": {
+    "category": "public.app-category.business",
+    "icon": "public/icon-512x512.png",
+    "target": ["dmg", "zip"],
+    "hardenedRuntime": true,
+    "gatekeeperAssess": false,
+    "entitlements": "build/entitlements.mac.plist",
+    "entitlementsInherit": "build/entitlements.mac.plist"
+  },
+  "dmg": {
+    "contents": [
+      {
+        "x": 130,
+        "y": 220
+      },
+      {
+        "x": 410,
+        "y": 220,
+        "type": "link",
+        "path": "/Applications"
+      }
+    ]
+  },
+  "win": {
+    "icon": "public/icon-512x512.png",
+    "target": ["nsis", "portable"]
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "AURA Funeraria"
+  },
+  "linux": {
+    "icon": "public/icon-512x512.png",
+    "target": ["AppImage", "deb"],
+    "category": "Office"
+  },
+  "afterPack": "./afterPack.js"
+}

@@ -1,0 +1,227 @@
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│  🚀 GUÍA RÁPIDA: COMANDOS DIRECTOS (COPIAR Y PEGAR)        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📥 PASO 1: DESCARGAR Y PREPARAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1.1) En Figma Make:
+     → Click en menú (⋮)
+     → "Download code" o "Export"
+     → Se descarga un ZIP
+
+
+1.2) Descomprimir:
+     → Doble click en el ZIP
+     → Renombra la carpeta a "AURA"
+     → Muévela a tu Desktop
+
+
+1.3) Abrir Terminal:
+     → Cmd + Espacio
+     → Escribe "Terminal"
+     → Enter
+
+
+1.4) Ir a la carpeta:
+
+     cd ~/Desktop/AURA
+
+
+1.5) Verificar:
+
+     ls
+
+     Debes ver: package.json, electron.js, etc.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📦 PASO 2: INSTALAR DEPENDENCIAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2.1) Verificar Node.js:
+
+     node --version
+
+     Si dice "command not found":
+     → Ve a https://nodejs.org
+     → Descarga e instala LTS
+     → Reinicia Terminal
+
+
+2.2) Instalar todo (espera 3-5 min):
+
+     npm install
+
+
+✅ Debe terminar sin errores rojos grandes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔨 PASO 3: CREAR INSTALADORES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+3.1) Dar permisos:
+
+     chmod +x preparar-distribucion-completa.sh
+
+
+3.2) Crear instaladores (espera 10-15 min):
+
+     ./preparar-distribucion-completa.sh
+
+
+3.3) Presiona ENTER cuando te lo pida
+
+
+3.4) Espera a ver:
+     "✅ ¡PAQUETES DE DISTRIBUCIÓN LISTOS!"
+
+
+3.5) Se abre carpeta "dist-cliente" con:
+     ✓ AURA-1.0.0-Instalador-Mac.zip
+     ✓ AURA-1.0.0-Instalador-Windows.zip
+     ✓ AURA-1.0.0-Instalador-Completo.zip
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🚀 PASO 4: INSTALAR EN TU MAC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+OPCIÓN A: MANUAL
+────────────────────────────────────────────────────────────
+
+4.1) En Finder:
+     → Abre: dist-cliente/AURA-Instalador-Mac/
+
+4.2) Doble click en:
+     AURA-1.0.0-mac.dmg
+
+4.3) Arrastra AURA → Aplicaciones
+
+4.4) Ve a Aplicaciones
+
+4.5) ⚠️  IMPORTANTE: Click DERECHO en AURA
+
+4.6) Selecciona "Abrir"
+
+4.7) Click en "Abrir" en el mensaje
+
+4.8) AURA se abre ✅
+
+
+OPCIÓN B: AUTOMÁTICA
+────────────────────────────────────────────────────────────
+
+En Terminal:
+
+     cd dist-cliente/AURA-Instalador-Mac
+     chmod +x instalar-para-cliente.sh
+     ./instalar-para-cliente.sh
+
+Presiona ENTER cuando te lo pida.
+AURA se instala y abre automáticamente ✅
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✅ PASO 5: LOGIN Y VERIFICACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+5.1) Login:
+     Usuario:    admin
+     Contraseña: admin123
+
+
+5.2) Cambiar contraseña:
+     → Click ícono de perfil (arriba derecha)
+     → "Mi Perfil"
+     → "Cambiar Contraseña"
+     → Guarda
+
+
+5.3) Probar:
+     → Crea un servicio de prueba
+     → Verifica que se guarda
+     → Navega por las secciones
+
+
+✅ Si funciona todo: ¡LISTO! 🎉
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 COMANDOS EN SECUENCIA (TODO JUNTO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Después de descargar y descomprimir:
+
+# 1. Ir a la carpeta
+cd ~/Desktop/AURA
+
+# 2. Verificar Node.js
+node --version
+
+# 3. Instalar dependencias (espera 3-5 min)
+npm install
+
+# 4. Dar permisos al script
+chmod +x preparar-distribucion-completa.sh
+
+# 5. Crear instaladores (espera 10-15 min)
+./preparar-distribucion-completa.sh
+
+# 6. Instalar en tu Mac (después que termine paso 5)
+cd dist-cliente/AURA-Instalador-Mac
+chmod +x instalar-para-cliente.sh
+./instalar-para-cliente.sh
+
+
+¡ESO ES TODO! 🎉
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🆘 SI ALGO FALLA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Error en npm install:
+─────────────────────────────────────────────────────────────
+npm cache clean --force
+npm install --legacy-peer-deps
+
+
+AURA no abre:
+─────────────────────────────────────────────────────────────
+xattr -cr /Applications/AURA.app
+open /Applications/AURA.app
+
+
+Verificar que está en la carpeta correcta:
+─────────────────────────────────────────────────────────────
+pwd
+ls
+
+Debes ver: package.json
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⏱️  TIEMPO TOTAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Descargar de Figma Make:        2 min
+Descomprimir y preparar:        1 min
+npm install:                    3-5 min
+Crear instaladores:             10-15 min
+Instalar en Mac:                2 min
+Verificar:                      2 min
+─────────────────────────────────────────────────────────────
+TOTAL:                          20-30 min
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¡Usa GUIA-PASO-A-PASO-COMPLETA.txt para detalles! 📖
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

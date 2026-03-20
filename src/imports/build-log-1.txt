@@ -1,0 +1,44 @@
+21:28:03.259 Running build in Washington, D.C., USA (East) – iad1
+21:28:03.260 Build machine configuration: 2 cores, 8 GB
+21:28:03.270 Cloning github.com/paolosalazar859-maker/aura-funeraria-app (Branch: main, Commit: 30cbe40)
+21:28:03.271 Skipping build cache, deployment was triggered without cache.
+21:28:03.682 Cloning completed: 411.000ms
+21:28:05.586 Running "vercel build"
+21:28:06.655 Vercel CLI 50.28.0
+21:28:07.253 Installing dependencies...
+21:28:48.245 npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+21:28:50.498 npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+21:28:51.097 npm warn deprecated glob@11.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+21:28:59.400 
+21:28:59.401 added 563 packages in 52s
+21:28:59.402 
+21:28:59.402 121 packages are looking for funding
+21:28:59.402   run `npm fund` for details
+21:28:59.516 Running "npm run build"
+21:28:59.612 
+21:28:59.613 > @figma/my-make-file@0.0.1 build
+21:28:59.613 > vite build
+21:28:59.613 
+21:29:00.081 [36mvite v6.3.5 [32mbuilding for production...[36m[39m
+21:29:00.151 transforming...
+21:29:01.991 [32m✓[39m 1617 modules transformed.
+21:29:01.997 [31m✗[39m Build failed in 1.88s
+21:29:01.998 [31merror during build:
+21:29:01.998 [31m[vite-plugin-pwa:build] [plugin vite-plugin-pwa:build] There was an error during the build:
+21:29:01.998   [vite]: Rollup failed to resolve import "figma:asset/d3fbc15c8bb1f7a6a6021907b92b0aa96b0813a7.png" from "/vercel/path0/src/app/components/LoginScreen.tsx".
+21:29:01.998 This is most likely unintended because it can break your application at runtime.
+21:29:01.999 If you do want to externalize this module explicitly add it to
+21:29:01.999 `build.rollupOptions.external`
+21:29:01.999 Additionally, handling the error in the 'buildEnd' hook caused the following error:
+21:29:01.999   [vite]: Rollup failed to resolve import "figma:asset/d3fbc15c8bb1f7a6a6021907b92b0aa96b0813a7.png" from "/vercel/path0/src/app/components/LoginScreen.tsx".
+21:29:01.999 This is most likely unintended because it can break your application at runtime.
+21:29:02.000 If you do want to externalize this module explicitly add it to
+21:29:02.000 `build.rollupOptions.external`[31m
+21:29:02.000     at getRollupError (file:///vercel/path0/node_modules/rollup/dist/es/shared/parseAst.js:402:41)
+21:29:02.000     at file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:23467:39
+21:29:02.000     at async catchUnfinishedHookActions (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:22925:16)
+21:29:02.000     at async rollupInternal (file:///vercel/path0/node_modules/rollup/dist/es/shared/node-entry.js:23450:5)
+21:29:02.000     at async buildEnvironment (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46206:14)
+21:29:02.001     at async Object.defaultBuildApp [as buildApp] (file:///vercel/path0/node_modules/vite/dist/node/chunks/dep-DBxKXgDP.js:46684:5)
+21:29:02.001     at async CAC.<anonymous> (file:///vercel/path0/node_modules/vite/dist/node/cli.js:863:7)[39m
+21:29:02.034 Error: Command "npm run build" exited with 1

@@ -1,0 +1,997 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║    🎯 METODOLOGÍA COMPLETA: CÓMO DESARROLLAR APPS             ║
+║       PROFESIONALES EN FIGMA MAKE + ELECTRON                  ║
+║                                                               ║
+║    Basado en el desarrollo exitoso de AURA                   ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 ÍNDICE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Proceso de Desarrollo Paso a Paso
+2. Arquitectura Recomendada
+3. Stack Tecnológico
+4. Checklist de Funcionalidades
+5. Mejores Prácticas
+6. Plantilla de Proyecto
+7. Problemas Comunes y Soluciones
+8. Cómo Reutilizar Este Conocimiento
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1️⃣  PROCESO DE DESARROLLO PASO A PASO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+FASE 1: PLANIFICACIÓN (DÍA 1)
+──────────────────────────────────────────────────────────────
+
+[ ] Definir el propósito de la app
+    → ¿Qué problema resuelve?
+    → ¿Quién la usará?
+    → ¿Qué funcionalidades necesita?
+
+[ ] Crear lista de módulos principales
+    Ejemplo AURA:
+    ✓ Registro de servicios
+    ✓ Dashboard de cobros
+    ✓ Dashboard principal con gráficos
+    ✓ Sistema de usuarios
+
+[ ] Decidir arquitectura
+    ¿Web app o desktop app?
+    ¿Necesita funcionar offline?
+    ¿Necesita imprimir documentos?
+    ¿Necesita exportar datos?
+
+[ ] Elegir stack tecnológico
+    (Ver sección 3 de este documento)
+
+[ ] Crear mockup o diseño en Figma (opcional)
+
+
+FASE 2: DESARROLLO WEB INICIAL (DÍAS 2-5)
+──────────────────────────────────────────────────────────────
+
+[ ] Iniciar proyecto en Figma Make
+    → Crear nuevo proyecto
+    → Configurar nombre y descripción
+
+[ ] Definir paleta de colores y diseño
+    → Elegir colores principales
+    → Definir tipografía
+    → Establecer espaciados
+
+[ ] Desarrollar estructura base
+    [ ] App.tsx principal
+    [ ] Sistema de rutas (React Router)
+    [ ] Layout principal (navbar, sidebar)
+    [ ] Página de inicio
+
+[ ] Implementar autenticación (si se necesita)
+    [ ] Página de login
+    [ ] Página de registro
+    [ ] Protección de rutas
+    [ ] Perfiles de usuario
+
+[ ] Desarrollar módulos principales
+    [ ] Módulo 1: Formularios y CRUD
+    [ ] Módulo 2: Dashboard y visualización
+    [ ] Módulo 3: Reportes y exportación
+    [ ] Módulo 4: Configuración
+
+[ ] Integrar base de datos (Supabase)
+    [ ] Configurar tablas
+    [ ] Crear API endpoints
+    [ ] Conectar frontend con backend
+
+[ ] Agregar funcionalidades extra
+    [ ] Impresión de documentos
+    [ ] Exportación Excel/CSV
+    [ ] Búsqueda y filtros
+    [ ] Validaciones
+
+
+FASE 3: CONVERTIR A PWA (DÍA 6)
+──────────────────────────────────────────────────────────────
+
+[ ] Configurar Service Worker
+    → Cacheo de recursos
+    → Funcionalidad offline
+
+[ ] Agregar manifest.json
+    → Íconos de la app
+    → Colores de tema
+    → Nombre y descripción
+
+[ ] Implementar modo offline
+    [ ] IndexedDB para storage local
+    [ ] Cola de sincronización
+    [ ] Indicador de estado de conexión
+
+[ ] Hacer app instalable
+    → Agregar botón "Instalar app"
+
+
+FASE 4: MIGRACIÓN A ELECTRON (DÍAS 7-10)
+──────────────────────────────────────────────────────────────
+
+[ ] Descargar proyecto de Figma Make
+
+[ ] Configurar Electron
+    [ ] Instalar dependencias Electron
+    [ ] Crear electron/main.js
+    [ ] Configurar electron/preload.js
+    [ ] Actualizar package.json
+
+[ ] Migrar de Supabase a SQLite
+    [ ] Instalar better-sqlite3
+    [ ] Crear db.js con funciones SQL
+    [ ] Crear electron/ipc-handlers.js
+    [ ] Reemplazar llamadas de API con IPC
+
+[ ] Configurar comunicación IPC
+    → Main process ↔ Renderer process
+
+[ ] Probar funcionamiento local
+    → npm run electron:dev
+
+[ ] Implementar funcionalidades desktop
+    [ ] Manejo de archivos
+    [ ] Impresión nativa
+    [ ] Notificaciones del sistema
+
+
+FASE 5: SISTEMA DE BACKUPS (DÍA 11)
+──────────────────────────────────────────────────────────────
+
+[ ] Implementar backups automáticos
+    → Cron job para backups periódicos
+    → Guardar en carpeta userData/backups
+
+[ ] Crear interfaz de backups
+    [ ] Botón "Crear backup ahora"
+    [ ] Lista de backups disponibles
+    [ ] Opción de restaurar
+    [ ] Opción de exportar
+
+[ ] Configuración de backups
+    → Frecuencia (diario/semanal/mensual)
+    → Cantidad de backups a mantener
+
+
+FASE 6: ACTUALIZACIONES AUTOMÁTICAS (DÍA 12)
+──────────────────────────────────────────────────────────────
+
+[ ] Instalar electron-updater
+
+[ ] Configurar auto-updater
+    → Repositorio de releases
+    → Servidor de actualizaciones
+
+[ ] Implementar notificaciones
+    → "Nueva versión disponible"
+    → Progreso de descarga
+    → Reiniciar para actualizar
+
+[ ] Probar flujo de actualización
+
+
+FASE 7: CREAR INSTALADORES (DÍA 13)
+──────────────────────────────────────────────────────────────
+
+[ ] Configurar electron-builder
+
+[ ] Crear íconos
+    [ ] .icns para Mac (1024x1024)
+    [ ] .ico para Windows (256x256)
+    [ ] .png para Linux
+
+[ ] Configurar certificados (opcional)
+    → Code signing para Mac
+    → Code signing para Windows
+
+[ ] Crear instaladores
+    [ ] Mac: .dmg
+    [ ] Windows: .exe
+    [ ] Linux: .AppImage (opcional)
+
+[ ] Probar instaladores
+    → Instalar en máquina limpia
+    → Verificar todas las funcionalidades
+
+
+FASE 8: DOCUMENTACIÓN (DÍA 14)
+──────────────────────────────────────────────────────────────
+
+[ ] Crear manual de usuario
+    → MANUAL-USUARIO-MAC.txt
+    → MANUAL-USUARIO-WINDOWS.txt
+
+[ ] Documentar instalación
+    → Requisitos del sistema
+    → Pasos de instalación
+    → Solución de problemas
+
+[ ] Documentar funcionalidades
+    → Cómo usar cada módulo
+    → Screenshots o videos
+
+[ ] Crear README.md para desarrolladores
+    → Arquitectura
+    → Cómo compilar
+    → Cómo contribuir
+
+
+FASE 9: DISTRIBUCIÓN (DÍA 15)
+──────────────────────────────────────────────────────────────
+
+[ ] Crear paquetes de distribución
+    → Instalador + Manual
+    → Comprimido en ZIP
+
+[ ] Subir a plataforma de distribución
+    → GitHub Releases
+    → Sitio web propio
+    → Tiendas de apps (opcional)
+
+[ ] Crear landing page (opcional)
+    → Descripción de la app
+    → Botones de descarga
+    → Videos demostrativos
+
+[ ] Establecer canal de soporte
+    → Email de contacto
+    → Formulario de feedback
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  2️⃣  ARQUITECTURA RECOMENDADA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+ESTRUCTURA DE CARPETAS:
+──────────────────────────────────────────────────────────────
+
+mi-app/
+├── electron/
+│   ├── main.js              # Proceso principal de Electron
+│   ├── preload.js           # Script preload (IPC bridge)
+│   ├── ipc-handlers.js      # Manejadores de IPC
+│   ├── db.js                # Funciones de base de datos SQLite
+│   └── auto-updater.js      # Configuración de actualizaciones
+│
+├── src/
+│   ├── app/
+│   │   ├── App.tsx          # Componente principal
+│   │   ├── routes.ts        # Configuración de rutas
+│   │   │
+│   │   ├── components/      # Componentes reutilizables
+│   │   │   ├── Button.tsx
+│   │   │   ├── Modal.tsx
+│   │   │   ├── Table.tsx
+│   │   │   └── ...
+│   │   │
+│   │   ├── pages/           # Páginas de la app
+│   │   │   ├── Home.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── Login.tsx
+│   │   │   └── ...
+│   │   │
+│   │   └── utils/           # Utilidades
+│   │       ├── api.ts       # Llamadas a IPC
+│   │       ├── storage.ts   # LocalStorage helpers
+│   │       └── format.ts    # Formateo de datos
+│   │
+│   └── styles/
+│       ├── theme.css        # Variables de tema
+│       └── fonts.css        # Fuentes
+│
+├── build/
+│   └── icons/               # Íconos de la app
+│       ├── icon.icns        # Mac
+│       ├── icon.ico         # Windows
+│       └── icon.png         # Linux
+│
+├── package.json
+├── electron-builder.json    # Configuración de builder
+└── README.md
+
+
+FLUJO DE DATOS:
+──────────────────────────────────────────────────────────────
+
+┌─────────────────────────────────────────────────────────┐
+│  FRONTEND (Renderer Process)                            │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  React Components                               │   │
+│  │  (App.tsx, Dashboard.tsx, etc.)                 │   │
+│  └────────────────────┬────────────────────────────┘   │
+│                       │                                 │
+│                       ↓                                 │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  API Utils                                      │   │
+│  │  (Llamadas a window.electron.invoke)           │   │
+│  └────────────────────┬────────────────────────────┘   │
+└───────────────────────┼─────────────────────────────────┘
+                        │
+                        │ IPC (Inter-Process Communication)
+                        │
+┌───────────────────────┼─────────────────────────────────┐
+│                       ↓                                 │
+│  BACKEND (Main Process)                                 │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  IPC Handlers                                   │   │
+│  │  (ipc-handlers.js)                             │   │
+│  └────────────────────┬────────────────────────────┘   │
+│                       │                                 │
+│                       ↓                                 │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  Database Layer                                 │   │
+│  │  (db.js - SQLite)                              │   │
+│  └────────────────────┬────────────────────────────┘   │
+│                       │                                 │
+│                       ↓                                 │
+│  ┌─────────────────────────────────────────────────┐   │
+│  │  SQLite Database                                │   │
+│  │  (app-database.db)                             │   │
+│  └─────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────┘
+
+
+PATRÓN DE COMUNICACIÓN IPC:
+──────────────────────────────────────────────────────────
+
+// Frontend (React)
+const data = await window.electron.invoke('get-services');
+
+// ↓ IPC Channel ↓
+
+// Backend (Electron Main)
+ipcMain.handle('get-services', async () => {
+  return db.getServices();
+});
+
+// ↓ SQL Query ↓
+
+// Database (SQLite)
+SELECT * FROM services;
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  3️⃣  STACK TECNOLÓGICO RECOMENDADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+FRONTEND:
+──────────────────────────────────────────────────────────────
+✅ React                    → Framework UI
+✅ TypeScript               → Tipado estático
+✅ React Router             → Navegación
+✅ Tailwind CSS v4          → Estilos
+✅ Lucide React             → Íconos
+✅ Recharts                 → Gráficos
+✅ React Hook Form          → Formularios
+✅ date-fns                 → Manejo de fechas
+
+
+BACKEND (ELECTRON):
+──────────────────────────────────────────────────────────────
+✅ Electron                 → Framework desktop
+✅ better-sqlite3           → Base de datos
+✅ electron-builder         → Crear instaladores
+✅ electron-updater         → Actualizaciones automáticas
+
+
+UTILIDADES:
+──────────────────────────────────────────────────────────────
+✅ node-cron                → Tareas programadas (backups)
+✅ exceljs                  → Exportar a Excel
+✅ jspdf                    → Generar PDFs
+✅ date-fns                 → Formateo de fechas
+
+
+DESARROLLO:
+──────────────────────────────────────────────────────────────
+✅ Vite                     → Build tool
+✅ ESLint                   → Linting
+✅ Prettier                 → Formateo de código
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  4️⃣  CHECKLIST DE FUNCIONALIDADES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+FUNCIONALIDADES BÁSICAS:
+──────────────────────────────────────────────────────────────
+[ ] CRUD completo (Crear, Leer, Actualizar, Eliminar)
+[ ] Formularios con validación
+[ ] Búsqueda y filtros
+[ ] Ordenamiento de tablas
+[ ] Paginación
+[ ] Modal de confirmación para eliminar
+[ ] Mensajes de éxito/error (toasts)
+
+
+FUNCIONALIDADES INTERMEDIAS:
+──────────────────────────────────────────────────────────────
+[ ] Autenticación de usuarios
+[ ] Roles y permisos
+[ ] Dashboard con estadísticas
+[ ] Gráficos y visualización de datos
+[ ] Exportación a Excel/CSV
+[ ] Impresión de documentos
+[ ] Modo oscuro/claro
+[ ] Responsive design
+
+
+FUNCIONALIDADES AVANZADAS:
+──────────────────────────────────────────────────────────────
+[ ] Modo offline completo
+[ ] Sincronización de datos
+[ ] Backups automáticos
+[ ] Actualizaciones automáticas
+[ ] Notificaciones del sistema
+[ ] Atajos de teclado
+[ ] Arrastrar y soltar archivos
+[ ] Importación masiva de datos
+[ ] Generación de reportes avanzados
+[ ] Integración con APIs externas
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  5️⃣  MEJORES PRÁCTICAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+CÓDIGO:
+──────────────────────────────────────────────────────────────
+✅ Usar TypeScript para tipado
+✅ Componentes pequeños y reutilizables
+✅ Separar lógica de presentación
+✅ Usar hooks personalizados
+✅ Manejar errores apropiadamente
+✅ Validar datos en frontend Y backend
+✅ Comentar código complejo
+✅ Nombres descriptivos de variables/funciones
+
+
+BASE DE DATOS:
+──────────────────────────────────────────────────────────────
+✅ Usar prepared statements (evitar SQL injection)
+✅ Crear índices para búsquedas frecuentes
+✅ Normalizar datos cuando sea necesario
+✅ Agregar timestamps (created_at, updated_at)
+✅ Usar transacciones para operaciones múltiples
+✅ Hacer backups regulares
+
+
+SEGURIDAD:
+──────────────────────────────────────────────────────────────
+✅ Nunca exponer credenciales en el código
+✅ Hashear contraseñas (bcrypt)
+✅ Validar y sanitizar inputs
+✅ Usar prepared statements
+✅ Implementar rate limiting
+✅ Mantener dependencias actualizadas
+
+
+RENDIMIENTO:
+──────────────────────────────────────────────────────────────
+✅ Lazy loading de componentes
+✅ Virtualización para listas largas
+✅ Debouncing en búsquedas
+✅ Caché de datos frecuentes
+✅ Optimizar imágenes
+✅ Minimizar re-renders
+
+
+UI/UX:
+──────────────────────────────────────────────────────────────
+✅ Feedback inmediato al usuario
+✅ Loading states
+✅ Empty states (sin datos)
+✅ Error states
+✅ Confirmaciones para acciones destructivas
+✅ Accesibilidad (a11y)
+✅ Responsive design
+✅ Consistencia visual
+
+
+ELECTRON:
+──────────────────────────────────────────────────────────────
+✅ Usar contextBridge (seguridad)
+✅ Separar main y renderer processes
+✅ No ejecutar código no confiable
+✅ Usar IPC para comunicación
+✅ Manejar errores del main process
+✅ Configurar CSP (Content Security Policy)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  6️⃣  PLANTILLA DE PROYECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PACKAGE.JSON ESENCIAL:
+──────────────────────────────────────────────────────────────
+
+{
+  "name": "mi-app",
+  "version": "1.0.0",
+  "main": "electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron:dev": "electron .",
+    "electron:build": "npm run build && electron-builder",
+    "dist": "npm run build && electron-builder --mac --win"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^7.1.3",
+    "better-sqlite3": "^11.8.1",
+    "electron-updater": "^6.3.9",
+    "lucide-react": "^0.263.1",
+    "recharts": "^2.5.0",
+    "date-fns": "^2.30.0"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "vite": "^5.0.0",
+    "typescript": "^5.0.0",
+    "tailwindcss": "^4.0.0"
+  },
+  "build": {
+    "appId": "com.tuempresa.miapp",
+    "productName": "MiApp",
+    "files": [
+      "dist/**/*",
+      "electron/**/*",
+      "package.json"
+    ],
+    "mac": {
+      "category": "public.app-category.business",
+      "icon": "build/icons/icon.icns"
+    },
+    "win": {
+      "icon": "build/icons/icon.ico"
+    }
+  }
+}
+
+
+ELECTRON/MAIN.JS BÁSICO:
+──────────────────────────────────────────────────────────────
+
+const { app, BrowserWindow } = require('electron');
+const path = require('path');
+
+let mainWindow;
+
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1200,
+    height: 800,
+    webPreferences: {
+      nodeIntegration: false,
+      contextIsolation: true,
+      preload: path.join(__dirname, 'preload.js')
+    }
+  });
+
+  // En desarrollo
+  if (process.env.NODE_ENV === 'development') {
+    mainWindow.loadURL('http://localhost:5173');
+  } else {
+    // En producción
+    mainWindow.loadFile(path.join(__dirname, '../dist/index.html'));
+  }
+}
+
+app.whenReady().then(() => {
+  createWindow();
+  
+  app.on('activate', () => {
+    if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();
+    }
+  });
+});
+
+app.on('window-all-closed', () => {
+  if (process.platform !== 'darwin') {
+    app.quit();
+  }
+});
+
+
+ELECTRON/PRELOAD.JS BÁSICO:
+──────────────────────────────────────────────────────────────
+
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('electron', {
+  invoke: (channel, ...args) => {
+    const validChannels = [
+      'get-data',
+      'save-data',
+      'delete-data',
+      // Agregar tus canales aquí
+    ];
+    
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, ...args);
+    }
+  }
+});
+
+
+ELECTRON/DB.JS BÁSICO:
+──────────────────────────────────────────────────────────────
+
+const Database = require('better-sqlite3');
+const path = require('path');
+const { app } = require('electron');
+
+const dbPath = path.join(app.getPath('userData'), 'app-database.db');
+const db = new Database(dbPath);
+
+// Crear tablas
+db.exec(`
+  CREATE TABLE IF NOT EXISTS items (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    name TEXT NOT NULL,
+    description TEXT,
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+  )
+`);
+
+// Funciones CRUD
+const dbFunctions = {
+  getAllItems: () => {
+    return db.prepare('SELECT * FROM items ORDER BY created_at DESC').all();
+  },
+  
+  getItemById: (id) => {
+    return db.prepare('SELECT * FROM items WHERE id = ?').get(id);
+  },
+  
+  createItem: (data) => {
+    const stmt = db.prepare('INSERT INTO items (name, description) VALUES (?, ?)');
+    const result = stmt.run(data.name, data.description);
+    return result.lastInsertRowid;
+  },
+  
+  updateItem: (id, data) => {
+    const stmt = db.prepare(`
+      UPDATE items 
+      SET name = ?, description = ?, updated_at = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `);
+    return stmt.run(data.name, data.description, id);
+  },
+  
+  deleteItem: (id) => {
+    const stmt = db.prepare('DELETE FROM items WHERE id = ?');
+    return stmt.run(id);
+  }
+};
+
+module.exports = dbFunctions;
+
+
+ELECTRON/IPC-HANDLERS.JS BÁSICO:
+──────────────────────────────────────────────────────────────
+
+const { ipcMain } = require('electron');
+const db = require('./db');
+
+// Registrar handlers
+ipcMain.handle('get-all-items', async () => {
+  try {
+    return { success: true, data: db.getAllItems() };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('create-item', async (event, data) => {
+  try {
+    const id = db.createItem(data);
+    return { success: true, id };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Agregar más handlers según necesites
+
+
+SRC/APP/UTILS/API.TS BÁSICO:
+──────────────────────────────────────────────────────────────
+
+export const api = {
+  getAllItems: async () => {
+    const result = await window.electron.invoke('get-all-items');
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    return result.data;
+  },
+  
+  createItem: async (data: any) => {
+    const result = await window.electron.invoke('create-item', data);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    return result.id;
+  },
+  
+  // Agregar más funciones según necesites
+};
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  7️⃣  PROBLEMAS COMUNES Y SOLUCIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PROBLEMA: "better-sqlite3 no funciona en Electron"
+──────────────────────────────────────────────────────────────
+SOLUCIÓN:
+npm install --save-dev electron-rebuild
+npx electron-rebuild
+
+
+PROBLEMA: "La app no carga en producción"
+──────────────────────────────────────────────────────────────
+SOLUCIÓN:
+- Verificar que index.html esté en dist/
+- Usar rutas relativas, no absolutas
+- Verificar electron/main.js loadFile()
+
+
+PROBLEMA: "IPC no funciona"
+──────────────────────────────────────────────────────────────
+SOLUCIÓN:
+- Verificar contextBridge en preload.js
+- Registrar handlers en main.js ANTES de crear ventana
+- Verificar nombres de canales (deben coincidir)
+
+
+PROBLEMA: "Base de datos no persiste"
+──────────────────────────────────────────────────────────────
+SOLUCIÓN:
+- Usar app.getPath('userData')
+- No usar rutas relativas
+- Verificar permisos de escritura
+
+
+PROBLEMA: "Actualizaciones no funcionan"
+──────────────────────────────────────────────────────────────
+SOLUCIÓN:
+- Firmar la app (code signing)
+- Configurar publish en electron-builder.json
+- Subir release a GitHub
+
+
+PROBLEMA: "App muy lenta"
+──────────────────────────────────────────────────────────────
+SOLUCIÓN:
+- Usar índices en SQLite
+- Implementar virtualización
+- Lazy loading de componentes
+- Optimizar queries SQL
+
+
+PROBLEMA: "Errores de permisos en Mac"
+──────────────────────────────────────────────────────────────
+SOLUCIÓN:
+- Firmar la app con certificado de desarrollador
+- Notarizar la app
+- O: click derecho → Abrir (primera vez)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  8️⃣  CÓMO REUTILIZAR ESTE CONOCIMIENTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+IMPORTANTE: 
+Como IA, NO tengo memoria entre conversaciones. Cada vez que 
+hablamos, empiezo desde cero sin recordar conversaciones previas.
+
+PERO... puedes hacer esto:
+
+
+OPCIÓN 1: GUARDAR ESTE DOCUMENTO
+──────────────────────────────────────────────────────────────
+
+1. Guarda este archivo en tu computadora
+2. Cuando empieces un nuevo proyecto, compártelo conmigo
+3. Yo leeré el documento y aplicaré el conocimiento
+
+
+OPCIÓN 2: CREAR PROYECTO PLANTILLA
+──────────────────────────────────────────────────────────────
+
+1. Crea un proyecto "plantilla" con la estructura básica
+2. Incluye:
+   - electron/main.js, preload.js, db.js, ipc-handlers.js
+   - src/app/App.tsx, routes.ts, utils/api.ts
+   - package.json configurado
+   - electron-builder.json
+   - Estructura de carpetas completa
+
+3. Para nuevos proyectos:
+   - Duplica la plantilla
+   - Cambia nombre, íconos, colores
+   - Desarrolla funcionalidades específicas
+
+
+OPCIÓN 3: CREAR CHECKLIST PERSONALIZADO
+──────────────────────────────────────────────────────────────
+
+Crea un documento con:
+- [ ] Pasos específicos para TU flujo de trabajo
+- [ ] Comandos que usas frecuentemente
+- [ ] Problemas que has enfrentado y soluciones
+- [ ] Configuraciones específicas de tu entorno
+
+Compártelo al inicio de cada proyecto.
+
+
+OPCIÓN 4: PROMPT INICIAL PARA NUEVOS PROYECTOS
+──────────────────────────────────────────────────────────────
+
+Al empezar un nuevo proyecto, envíame este prompt:
+
+"""
+Voy a desarrollar una aplicación [TIPO DE APP] llamada [NOMBRE].
+Necesito:
+- React + TypeScript + Tailwind
+- Electron + SQLite
+- Sistema de backups
+- Actualizaciones automáticas
+- Instaladores para Mac y Windows
+
+Basándome en esta arquitectura:
+[Pegar estructura que te funciona]
+
+Necesito que me ayudes con:
+[Describir lo que necesitas]
+"""
+
+
+OPCIÓN 5: REPOSITORIO DE REFERENCIA
+──────────────────────────────────────────────────────────────
+
+1. Sube AURA a GitHub (privado)
+2. Cuando empieces nuevo proyecto, comparte el link
+3. Yo puedo ver la estructura y replicarla
+
+
+PARA TU PRÓXIMO PROYECTO, DI:
+──────────────────────────────────────────────────────────────
+
+"Voy a desarrollar [APP] similar a AURA (funeraria). 
+Necesito usar la misma arquitectura:
+- Figma Make → PWA → Electron + SQLite
+- Backups automáticos
+- Actualizaciones automáticas  
+- Instaladores Mac + Windows
+
+Aquí está la documentación de referencia:
+[Comparte este documento]
+
+Y estos son mis archivos de configuración:
+[Comparte package.json, electron-builder.json, etc.]"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📦 RECURSOS ADICIONALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+DOCUMENTACIÓN OFICIAL:
+──────────────────────────────────────────────────────────────
+• Electron: https://www.electronjs.org/docs
+• React: https://react.dev
+• React Router: https://reactrouter.com
+• Tailwind CSS: https://tailwindcss.com
+• better-sqlite3: https://github.com/WiseLibs/better-sqlite3
+• electron-builder: https://www.electron.build
+
+
+HERRAMIENTAS ÚTILES:
+──────────────────────────────────────────────────────────────
+• DB Browser for SQLite: Ver/editar bases de datos
+• Electron Fiddle: Probar código de Electron
+• React DevTools: Debugging de React
+• Postman: Probar APIs
+
+
+COMUNIDADES:
+──────────────────────────────────────────────────────────────
+• Stack Overflow
+• Reddit: r/electronjs, r/reactjs
+• Discord de Electron
+• GitHub Discussions
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 TIMELINE ESTIMADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PROYECTO SIMPLE (1-2 semanas):
+──────────────────────────────────────────────────────────────
+• CRUD básico
+• 2-3 módulos
+• Sin autenticación
+• SQLite básico
+• Instaladores básicos
+
+
+PROYECTO MEDIANO (3-4 semanas):
+──────────────────────────────────────────────────────────────
+• CRUD completo
+• 5-7 módulos
+• Autenticación
+• Dashboard con gráficos
+• Exportación Excel
+• Backups automáticos
+• Actualizaciones automáticas
+
+
+PROYECTO COMPLEJO (5-8 semanas):
+──────────────────────────────────────────────────────────────
+• Múltiples módulos interconectados
+• Sistema de permisos complejo
+• Reportes avanzados
+• Integraciones externas
+• Modo offline robusto
+• Optimizaciones de rendimiento
+• Testing completo
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✅ CHECKLIST FINAL ANTES DE DISTRIBUIR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+[ ] Todas las funcionalidades probadas
+[ ] No hay errores en consola
+[ ] App funciona offline
+[ ] Backups funcionan correctamente
+[ ] Actualizaciones funcionan
+[ ] Instaladores creados para Mac y Windows
+[ ] Instaladores probados en máquinas limpias
+[ ] Íconos correctos
+[ ] Versión actualizada en package.json
+[ ] Documentación de usuario creada
+[ ] Manual de instalación creado
+[ ] Certificados configurados (si aplica)
+[ ] Release notes escritos
+[ ] Canales de soporte establecidos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¡Ahora tienes una metodología completa para desarrollar 
+aplicaciones profesionales! 🚀
+
+Guarda este documento y compártelo conmigo al inicio de 
+cada nuevo proyecto.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

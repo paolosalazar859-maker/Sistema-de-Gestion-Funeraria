@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192" width="192" height="192">
+  <rect width="192" height="192" rx="32" fill="#1a1f2e"/>
+  <!-- Gold decorative line top -->
+  <rect x="32" y="28" width="128" height="2" rx="1" fill="#C9A84C"/>
+  <!-- Letter A - elegant serif style -->
+  <path d="M96 48 L58 144 L70 144 L80 118 L112 118 L122 144 L134 144 Z M84 106 L96 72 L108 106 Z" fill="#ffffff"/>
+  <!-- Gold decorative line bottom -->
+  <rect x="32" y="162" width="128" height="2" rx="1" fill="#C9A84C"/>
+  <!-- Small gold dot accent -->
+  <circle cx="96" cy="156" r="3" fill="#C9A84C"/>
+</svg>

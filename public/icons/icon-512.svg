@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <rect width="512" height="512" rx="80" fill="#1a1f2e"/>
+  <!-- Gold decorative line top -->
+  <rect x="80" y="72" width="352" height="4" rx="2" fill="#C9A84C"/>
+  <!-- Letter A - elegant serif style -->
+  <path d="M256 120 L148 392 L180 392 L210 312 L302 312 L332 392 L364 392 Z M222 280 L256 176 L290 280 Z" fill="#ffffff"/>
+  <!-- Gold decorative line bottom -->
+  <rect x="80" y="436" width="352" height="4" rx="2" fill="#C9A84C"/>
+  <!-- Small gold dot accent -->
+  <circle cx="256" cy="418" r="7" fill="#C9A84C"/>
+  <!-- Subtle tagline area -->
+  <rect x="160" y="408" width="192" height="1" rx="0.5" fill="#C9A84C" opacity="0.4"/>
+</svg>

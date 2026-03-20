@@ -1,0 +1,1487 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║    📚 ARQUITECTURA Y DECISIONES TÉCNICAS DE AURA             ║
+║       (Documento de Referencia Completo)                     ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+Este documento contiene TODAS las decisiones técnicas, 
+configuraciones y código clave del proyecto AURA.
+
+Úsalo como referencia para futuros proyectos similares.
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 RESUMEN DEL PROYECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+NOMBRE: AURA
+TIPO: Aplicación de escritorio para gestión de funeraria
+STACK: React + TypeScript + Tailwind + Electron + SQLite
+
+EVOLUCIÓN:
+1. App web en Figma Make (React + Supabase)
+2. PWA con modo offline (IndexedDB)
+3. App de escritorio (Electron + SQLite)
+4. Sistema de backups automáticos
+5. Sistema de actualizaciones automáticas
+6. Instaladores profesionales (Mac + Windows)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🏗️ ARQUITECTURA COMPLETA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+ESTRUCTURA DE CARPETAS FINAL:
+──────────────────────────────────────────────────────────────
+
+aura/
+├── electron/
+│   ├── main.js                    # Proceso principal Electron
+│   ├── preload.js                 # Bridge IPC seguro
+│   ├── ipc-handlers.js            # Manejadores IPC
+│   ├── db.js                      # Lógica SQLite
+│   └── auto-updater.js            # Actualizaciones
+│
+├── src/
+│   ├── app/
+│   │   ├── App.tsx                # Componente raíz
+│   │   ├── routes.ts              # Rutas React Router
+│   │   │
+│   │   ├── components/            # Componentes reutilizables
+│   │   │   ├── ui/                # Componentes UI base
+│   │   │   ├── layout/            # Layout components
+│   │   │   └── features/          # Feature components
+│   │   │
+│   │   ├── pages/                 # Páginas principales
+│   │   │   ├── Login.tsx
+│   │   │   ├── Dashboard.tsx
+│   │   │   ├── RegistroServicio.tsx
+│   │   │   ├── EstadoCobros.tsx
+│   │   │   └── MiPerfil.tsx
+│   │   │
+│   │   └── utils/                 # Utilidades
+│   │       ├── api.ts             # Wrapper de IPC
+│   │       ├── format.ts          # Formateo
+│   │       └── constants.ts       # Constantes
+│   │
+│   └── styles/
+│       ├── theme.css              # Variables Tailwind
+│       └── fonts.css              # Fuentes
+│
+├── build/
+│   ├── icons/
+│   │   ├── icon.icns              # Mac
+│   │   └── icon.ico               # Windows
+│   │
+│   └── installers/                # Salida de electron-builder
+│       ├── mac/
+│       │   └── AURA-1.0.0.dmg
+│       └── win/
+│           └── AURA-Setup-1.0.0.exe
+│
+├── dist/                          # Build de Vite
+├── package.json
+├── electron-builder.json
+├── vite.config.ts
+└── tsconfig.json
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎨 DISEÑO Y COLORES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PALETA DE COLORES AURA:
+──────────────────────────────────────────────────────────────
+
+Gris oscuro:     #1a1a1a, #2d2d2d
+Azul marino:     #1e3a5f, #2c5282
+Blanco:          #ffffff, #f8f9fa
+Dorado:          #d4af37, #b8941f
+
+Colores de estado:
+Success:         #10b981
+Error:           #ef4444
+Warning:         #f59e0b
+Info:            #3b82f6
+
+
+TIPOGRAFÍA:
+──────────────────────────────────────────────────────────────
+
+Principal: Inter
+Alternativa: System UI
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔧 CONFIGURACIONES CLAVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PACKAGE.JSON:
+──────────────────────────────────────────────────────────────
+
+{
+  "name": "aura-funeraria",
+  "version": "1.0.0",
+  "description": "Sistema de gestión para funerarias",
+  "main": "electron/main.js",
+  "author": "Tu Nombre",
+  "license": "MIT",
+  
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "electron:dev": "electron .",
+    "electron:build": "npm run build && electron-builder",
+    "dist:mac": "npm run build && electron-builder --mac",
+    "dist:win": "npm run build && electron-builder --win",
+    "dist:all": "npm run build && electron-builder --mac --win",
+    "pack:mac": "npm run dist:mac && node scripts/pack-mac.js",
+    "pack:win": "npm run dist:win && node scripts/pack-win.js",
+    "pack:all": "npm run dist:all && node scripts/pack-all.js",
+    "rebuild": "electron-rebuild"
+  },
+  
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "react-router": "^7.1.3",
+    "better-sqlite3": "^11.8.1",
+    "electron-updater": "^6.3.9",
+    "lucide-react": "^0.263.1",
+    "recharts": "^2.5.0",
+    "date-fns": "^2.30.0",
+    "exceljs": "^4.3.0",
+    "node-cron": "^3.0.2"
+  },
+  
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.0.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
+    "electron-rebuild": "^3.2.9",
+    "vite": "^5.0.0",
+    "typescript": "^5.0.0",
+    "tailwindcss": "^4.0.0"
+  }
+}
+
+
+ELECTRON-BUILDER.JSON:
+──────────────────────────────────────────────────────────────
+
+{
+  "appId": "com.aura.funeraria",
+  "productName": "AURA",
+  "directories": {
+    "output": "build/installers"
+  },
+  "files": [
+    "dist/**/*",
+    "electron/**/*",
+    "package.json",
+    "node_modules/better-sqlite3/**/*"
+  ],
+  "extraResources": [
+    {
+      "from": "node_modules/better-sqlite3",
+      "to": "better-sqlite3"
+    }
+  ],
+  "mac": {
+    "category": "public.app-category.business",
+    "icon": "build/icons/icon.icns",
+    "target": [
+      {
+        "target": "dmg",
+        "arch": ["x64", "arm64"]
+      }
+    ],
+    "artifactName": "AURA-${version}-${arch}.${ext}"
+  },
+  "dmg": {
+    "title": "Instalar AURA",
+    "icon": "build/icons/icon.icns",
+    "window": {
+      "width": 600,
+      "height": 400
+    }
+  },
+  "win": {
+    "icon": "build/icons/icon.ico",
+    "target": [
+      {
+        "target": "nsis",
+        "arch": ["x64"]
+      }
+    ],
+    "artifactName": "AURA-Setup-${version}.${ext}"
+  },
+  "nsis": {
+    "oneClick": false,
+    "allowToChangeInstallationDirectory": true,
+    "createDesktopShortcut": true,
+    "createStartMenuShortcut": true,
+    "shortcutName": "AURA"
+  },
+  "publish": {
+    "provider": "github",
+    "owner": "tu-usuario",
+    "repo": "aura"
+  }
+}
+
+
+VITE.CONFIG.TS:
+──────────────────────────────────────────────────────────────
+
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
+
+export default defineConfig({
+  plugins: [react()],
+  base: './',
+  build: {
+    outDir: 'dist',
+    assetsDir: 'assets',
+    rollupOptions: {
+      output: {
+        manualChunks: undefined
+      }
+    }
+  },
+  server: {
+    port: 5173
+  }
+});
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔌 SISTEMA IPC (COMUNICACIÓN FRONTEND-BACKEND)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+ELECTRON/PRELOAD.JS:
+──────────────────────────────────────────────────────────────
+
+const { contextBridge, ipcRenderer } = require('electron');
+
+contextBridge.exposeInMainWorld('electron', {
+  invoke: (channel, ...args) => {
+    // Lista blanca de canales permitidos
+    const validChannels = [
+      // Autenticación
+      'login',
+      'logout',
+      'get-current-user',
+      
+      // Servicios
+      'get-servicios',
+      'get-servicio',
+      'create-servicio',
+      'update-servicio',
+      'delete-servicio',
+      
+      // Clientes
+      'get-clientes',
+      'create-cliente',
+      
+      // Pagos
+      'get-pagos',
+      'create-pago',
+      'update-pago',
+      
+      // Dashboard
+      'get-dashboard-stats',
+      'get-recaudacion-mensual',
+      
+      // Backups
+      'create-backup',
+      'get-backups',
+      'restore-backup',
+      'export-backup',
+      
+      // Usuarios
+      'get-usuarios',
+      'create-usuario',
+      'update-usuario',
+      'delete-usuario',
+      
+      // Configuración
+      'get-config',
+      'update-config',
+      
+      // Sistema
+      'check-for-updates',
+      'get-app-version'
+    ];
+    
+    if (validChannels.includes(channel)) {
+      return ipcRenderer.invoke(channel, ...args);
+    } else {
+      throw new Error(`Canal IPC no válido: ${channel}`);
+    }
+  }
+});
+
+
+ELECTRON/IPC-HANDLERS.JS:
+──────────────────────────────────────────────────────────────
+
+const { ipcMain } = require('electron');
+const db = require('./db');
+
+// Autenticación
+ipcMain.handle('login', async (event, { username, password }) => {
+  try {
+    const user = db.authenticateUser(username, password);
+    if (user) {
+      return { success: true, user };
+    } else {
+      return { success: false, error: 'Credenciales inválidas' };
+    }
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-current-user', async (event, userId) => {
+  try {
+    const user = db.getUserById(userId);
+    return { success: true, user };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Servicios
+ipcMain.handle('get-servicios', async () => {
+  try {
+    const servicios = db.getAllServicios();
+    return { success: true, data: servicios };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('get-servicio', async (event, id) => {
+  try {
+    const servicio = db.getServicioById(id);
+    return { success: true, data: servicio };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('create-servicio', async (event, data) => {
+  try {
+    const id = db.createServicio(data);
+    return { success: true, id };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('update-servicio', async (event, { id, data }) => {
+  try {
+    db.updateServicio(id, data);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+ipcMain.handle('delete-servicio', async (event, id) => {
+  try {
+    db.deleteServicio(id);
+    return { success: true };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// Backups
+ipcMain.handle('create-backup', async () => {
+  try {
+    const backupPath = db.createBackup();
+    return { success: true, path: backupPath };
+  } catch (error) {
+    return { success: false, error: error.message };
+  }
+});
+
+// ... más handlers
+
+
+SRC/APP/UTILS/API.TS:
+──────────────────────────────────────────────────────────────
+
+// Wrapper para llamadas IPC
+const invoke = async (channel: string, ...args: any[]) => {
+  try {
+    const result = await window.electron.invoke(channel, ...args);
+    if (!result.success) {
+      throw new Error(result.error);
+    }
+    return result;
+  } catch (error) {
+    console.error(`Error en ${channel}:`, error);
+    throw error;
+  }
+};
+
+export const api = {
+  // Autenticación
+  login: async (username: string, password: string) => {
+    return invoke('login', { username, password });
+  },
+  
+  getCurrentUser: async (userId: number) => {
+    return invoke('get-current-user', userId);
+  },
+  
+  // Servicios
+  getServicios: async () => {
+    const result = await invoke('get-servicios');
+    return result.data;
+  },
+  
+  getServicio: async (id: number) => {
+    const result = await invoke('get-servicio', id);
+    return result.data;
+  },
+  
+  createServicio: async (data: any) => {
+    const result = await invoke('create-servicio', data);
+    return result.id;
+  },
+  
+  updateServicio: async (id: number, data: any) => {
+    return invoke('update-servicio', { id, data });
+  },
+  
+  deleteServicio: async (id: number) => {
+    return invoke('delete-servicio', id);
+  },
+  
+  // Backups
+  createBackup: async () => {
+    const result = await invoke('create-backup');
+    return result.path;
+  },
+  
+  // ... más funciones
+};
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🗄️ ESTRUCTURA DE BASE DE DATOS (SQLite)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+ESQUEMA COMPLETO:
+──────────────────────────────────────────────────────────────
+
+-- Tabla de usuarios
+CREATE TABLE IF NOT EXISTS usuarios (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  username TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL,
+  nombre TEXT NOT NULL,
+  email TEXT,
+  rol TEXT NOT NULL CHECK(rol IN ('Administrador', 'Oficina')),
+  activo INTEGER DEFAULT 1,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Índices para usuarios
+CREATE INDEX IF NOT EXISTS idx_usuarios_username ON usuarios(username);
+CREATE INDEX IF NOT EXISTS idx_usuarios_rol ON usuarios(rol);
+
+
+-- Tabla de clientes (fallecidos)
+CREATE TABLE IF NOT EXISTS clientes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre_completo TEXT NOT NULL,
+  fecha_nacimiento DATE,
+  fecha_fallecimiento DATE,
+  cedula TEXT,
+  lugar_fallecimiento TEXT,
+  causa_fallecimiento TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX IF NOT EXISTS idx_clientes_nombre ON clientes(nombre_completo);
+
+
+-- Tabla de responsables (familiares)
+CREATE TABLE IF NOT EXISTS responsables (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  nombre_completo TEXT NOT NULL,
+  cedula TEXT,
+  telefono TEXT,
+  email TEXT,
+  direccion TEXT,
+  parentesco TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+
+-- Tabla de servicios
+CREATE TABLE IF NOT EXISTS servicios (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  numero_servicio TEXT UNIQUE NOT NULL,
+  
+  -- Relaciones
+  cliente_id INTEGER NOT NULL,
+  responsable_id INTEGER NOT NULL,
+  usuario_id INTEGER NOT NULL,
+  
+  -- Datos del servicio
+  tipo_servicio TEXT NOT NULL,
+  fecha_servicio DATE NOT NULL,
+  hora_servicio TIME,
+  lugar_velorio TEXT,
+  lugar_sepelio TEXT,
+  
+  -- Datos financieros
+  costo_total REAL NOT NULL,
+  adelanto REAL DEFAULT 0,
+  saldo REAL,
+  forma_pago TEXT,
+  estado_pago TEXT DEFAULT 'Pendiente',
+  
+  -- Detalles
+  observaciones TEXT,
+  estado TEXT DEFAULT 'Activo',
+  
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (cliente_id) REFERENCES clientes(id),
+  FOREIGN KEY (responsable_id) REFERENCES responsables(id),
+  FOREIGN KEY (usuario_id) REFERENCES usuarios(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_servicios_numero ON servicios(numero_servicio);
+CREATE INDEX IF NOT EXISTS idx_servicios_fecha ON servicios(fecha_servicio);
+CREATE INDEX IF NOT EXISTS idx_servicios_estado ON servicios(estado_pago);
+
+
+-- Tabla de pagos/abonos
+CREATE TABLE IF NOT EXISTS pagos (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  servicio_id INTEGER NOT NULL,
+  monto REAL NOT NULL,
+  fecha_pago DATE NOT NULL,
+  metodo_pago TEXT NOT NULL,
+  referencia TEXT,
+  recibido_por INTEGER,
+  observaciones TEXT,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  
+  FOREIGN KEY (servicio_id) REFERENCES servicios(id),
+  FOREIGN KEY (recibido_por) REFERENCES usuarios(id)
+);
+
+CREATE INDEX IF NOT EXISTS idx_pagos_servicio ON pagos(servicio_id);
+CREATE INDEX IF NOT EXISTS idx_pagos_fecha ON pagos(fecha_pago);
+
+
+-- Tabla de configuración
+CREATE TABLE IF NOT EXISTS configuracion (
+  clave TEXT PRIMARY KEY,
+  valor TEXT NOT NULL,
+  updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Configuraciones iniciales
+INSERT OR IGNORE INTO configuracion (clave, valor) VALUES 
+  ('backup_automatico', 'true'),
+  ('frecuencia_backup', 'diaria'),
+  ('mantener_backups', '30');
+
+
+-- Usuario admin inicial
+INSERT OR IGNORE INTO usuarios (username, password, nombre, rol) VALUES 
+  ('admin', 'admin123', 'Administrador', 'Administrador');
+
+
+ELECTRON/DB.JS (FUNCIONES PRINCIPALES):
+──────────────────────────────────────────────────────────────
+
+const Database = require('better-sqlite3');
+const path = require('path');
+const { app } = require('electron');
+const fs = require('fs');
+
+const dbPath = path.join(app.getPath('userData'), 'aura-database.db');
+const db = new Database(dbPath);
+
+// Configuración
+db.pragma('journal_mode = WAL');
+db.pragma('foreign_keys = ON');
+
+// Crear tablas (ejecutar el esquema arriba)
+db.exec(`
+  -- Todo el esquema SQL aquí
+`);
+
+
+// ============================================
+// FUNCIONES DE USUARIOS
+// ============================================
+
+const dbFunctions = {
+  // Autenticación
+  authenticateUser: (username, password) => {
+    return db.prepare(`
+      SELECT id, username, nombre, email, rol 
+      FROM usuarios 
+      WHERE username = ? AND password = ? AND activo = 1
+    `).get(username, password);
+  },
+  
+  getUserById: (id) => {
+    return db.prepare(`
+      SELECT id, username, nombre, email, rol 
+      FROM usuarios 
+      WHERE id = ?
+    `).get(id);
+  },
+  
+  getAllUsuarios: () => {
+    return db.prepare(`
+      SELECT id, username, nombre, email, rol, activo, created_at 
+      FROM usuarios 
+      ORDER BY nombre
+    `).all();
+  },
+  
+  createUsuario: (data) => {
+    const stmt = db.prepare(`
+      INSERT INTO usuarios (username, password, nombre, email, rol) 
+      VALUES (?, ?, ?, ?, ?)
+    `);
+    const result = stmt.run(
+      data.username, 
+      data.password, 
+      data.nombre, 
+      data.email, 
+      data.rol
+    );
+    return result.lastInsertRowid;
+  },
+  
+  
+  // ============================================
+  // FUNCIONES DE SERVICIOS
+  // ============================================
+  
+  getAllServicios: () => {
+    return db.prepare(`
+      SELECT 
+        s.*,
+        c.nombre_completo as cliente_nombre,
+        r.nombre_completo as responsable_nombre,
+        u.nombre as usuario_nombre
+      FROM servicios s
+      LEFT JOIN clientes c ON s.cliente_id = c.id
+      LEFT JOIN responsables r ON s.responsable_id = r.id
+      LEFT JOIN usuarios u ON s.usuario_id = u.id
+      ORDER BY s.fecha_servicio DESC, s.created_at DESC
+    `).all();
+  },
+  
+  getServicioById: (id) => {
+    const servicio = db.prepare(`
+      SELECT 
+        s.*,
+        c.nombre_completo as cliente_nombre,
+        c.fecha_nacimiento,
+        c.fecha_fallecimiento,
+        c.cedula as cliente_cedula,
+        r.nombre_completo as responsable_nombre,
+        r.telefono as responsable_telefono,
+        r.cedula as responsable_cedula,
+        u.nombre as usuario_nombre
+      FROM servicios s
+      LEFT JOIN clientes c ON s.cliente_id = c.id
+      LEFT JOIN responsables r ON s.responsable_id = r.id
+      LEFT JOIN usuarios u ON s.usuario_id = u.id
+      WHERE s.id = ?
+    `).get(id);
+    
+    // Obtener pagos del servicio
+    const pagos = db.prepare(`
+      SELECT p.*, u.nombre as recibido_por_nombre
+      FROM pagos p
+      LEFT JOIN usuarios u ON p.recibido_por = u.id
+      WHERE p.servicio_id = ?
+      ORDER BY p.fecha_pago DESC
+    `).all(id);
+    
+    return { ...servicio, pagos };
+  },
+  
+  createServicio: (data) => {
+    // Usar transacción
+    const transaction = db.transaction(() => {
+      // 1. Crear cliente
+      const clienteStmt = db.prepare(`
+        INSERT INTO clientes (
+          nombre_completo, fecha_nacimiento, fecha_fallecimiento,
+          cedula, lugar_fallecimiento, causa_fallecimiento
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      const clienteResult = clienteStmt.run(
+        data.cliente.nombre_completo,
+        data.cliente.fecha_nacimiento,
+        data.cliente.fecha_fallecimiento,
+        data.cliente.cedula,
+        data.cliente.lugar_fallecimiento,
+        data.cliente.causa_fallecimiento
+      );
+      const clienteId = clienteResult.lastInsertRowid;
+      
+      // 2. Crear responsable
+      const responsableStmt = db.prepare(`
+        INSERT INTO responsables (
+          nombre_completo, cedula, telefono, email, direccion, parentesco
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      const responsableResult = responsableStmt.run(
+        data.responsable.nombre_completo,
+        data.responsable.cedula,
+        data.responsable.telefono,
+        data.responsable.email,
+        data.responsable.direccion,
+        data.responsable.parentesco
+      );
+      const responsableId = responsableResult.lastInsertRowid;
+      
+      // 3. Calcular saldo
+      const saldo = data.costo_total - (data.adelanto || 0);
+      
+      // 4. Crear servicio
+      const servicioStmt = db.prepare(`
+        INSERT INTO servicios (
+          numero_servicio, cliente_id, responsable_id, usuario_id,
+          tipo_servicio, fecha_servicio, hora_servicio,
+          lugar_velorio, lugar_sepelio,
+          costo_total, adelanto, saldo, forma_pago, estado_pago,
+          observaciones
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      
+      const servicioResult = servicioStmt.run(
+        data.numero_servicio,
+        clienteId,
+        responsableId,
+        data.usuario_id,
+        data.tipo_servicio,
+        data.fecha_servicio,
+        data.hora_servicio,
+        data.lugar_velorio,
+        data.lugar_sepelio,
+        data.costo_total,
+        data.adelanto || 0,
+        saldo,
+        data.forma_pago,
+        saldo === 0 ? 'Pagado' : 'Pendiente',
+        data.observaciones
+      );
+      
+      const servicioId = servicioResult.lastInsertRowid;
+      
+      // 5. Si hay adelanto, crear pago
+      if (data.adelanto && data.adelanto > 0) {
+        const pagoStmt = db.prepare(`
+          INSERT INTO pagos (
+            servicio_id, monto, fecha_pago, metodo_pago, 
+            recibido_por, observaciones
+          ) VALUES (?, ?, ?, ?, ?, ?)
+        `);
+        pagoStmt.run(
+          servicioId,
+          data.adelanto,
+          data.fecha_servicio,
+          data.forma_pago,
+          data.usuario_id,
+          'Adelanto inicial'
+        );
+      }
+      
+      return servicioId;
+    });
+    
+    return transaction();
+  },
+  
+  
+  // ============================================
+  // FUNCIONES DE PAGOS
+  // ============================================
+  
+  createPago: (data) => {
+    const transaction = db.transaction(() => {
+      // 1. Crear pago
+      const pagoStmt = db.prepare(`
+        INSERT INTO pagos (
+          servicio_id, monto, fecha_pago, metodo_pago,
+          referencia, recibido_por, observaciones
+        ) VALUES (?, ?, ?, ?, ?, ?, ?)
+      `);
+      pagoStmt.run(
+        data.servicio_id,
+        data.monto,
+        data.fecha_pago,
+        data.metodo_pago,
+        data.referencia,
+        data.recibido_por,
+        data.observaciones
+      );
+      
+      // 2. Actualizar saldo del servicio
+      const servicio = db.prepare('SELECT saldo FROM servicios WHERE id = ?')
+        .get(data.servicio_id);
+      
+      const nuevoSaldo = servicio.saldo - data.monto;
+      const nuevoEstado = nuevoSaldo <= 0 ? 'Pagado' : 'Pendiente';
+      
+      db.prepare(`
+        UPDATE servicios 
+        SET saldo = ?, estado_pago = ?, updated_at = CURRENT_TIMESTAMP 
+        WHERE id = ?
+      `).run(nuevoSaldo, nuevoEstado, data.servicio_id);
+    });
+    
+    transaction();
+  },
+  
+  
+  // ============================================
+  // FUNCIONES DE DASHBOARD
+  // ============================================
+  
+  getDashboardStats: () => {
+    const stats = {};
+    
+    // Total servicios
+    stats.totalServicios = db.prepare('SELECT COUNT(*) as count FROM servicios')
+      .get().count;
+    
+    // Servicios pendientes
+    stats.serviciosPendientes = db.prepare(`
+      SELECT COUNT(*) as count FROM servicios WHERE estado_pago = 'Pendiente'
+    `).get().count;
+    
+    // Total a cobrar
+    stats.totalCobrar = db.prepare(`
+      SELECT COALESCE(SUM(saldo), 0) as total FROM servicios WHERE saldo > 0
+    `).get().total;
+    
+    // Recaudación del mes actual
+    const primerDiaMes = new Date();
+    primerDiaMes.setDate(1);
+    primerDiaMes.setHours(0, 0, 0, 0);
+    
+    stats.recaudacionMes = db.prepare(`
+      SELECT COALESCE(SUM(monto), 0) as total 
+      FROM pagos 
+      WHERE fecha_pago >= date('now', 'start of month')
+    `).get().total;
+    
+    return stats;
+  },
+  
+  getRecaudacionMensual: (year) => {
+    return db.prepare(`
+      SELECT 
+        strftime('%m', fecha_pago) as mes,
+        SUM(monto) as total
+      FROM pagos
+      WHERE strftime('%Y', fecha_pago) = ?
+      GROUP BY mes
+      ORDER BY mes
+    `).all(year.toString());
+  },
+  
+  
+  // ============================================
+  // FUNCIONES DE BACKUPS
+  // ============================================
+  
+  createBackup: () => {
+    const backupDir = path.join(app.getPath('userData'), 'backups');
+    
+    // Crear carpeta si no existe
+    if (!fs.existsSync(backupDir)) {
+      fs.mkdirSync(backupDir, { recursive: true });
+    }
+    
+    // Nombre del backup con fecha
+    const fecha = new Date().toISOString().split('T')[0];
+    const backupPath = path.join(backupDir, `backup-${fecha}.db`);
+    
+    // Copiar base de datos
+    db.backup(backupPath);
+    
+    return backupPath;
+  },
+  
+  getBackups: () => {
+    const backupDir = path.join(app.getPath('userData'), 'backups');
+    
+    if (!fs.existsSync(backupDir)) {
+      return [];
+    }
+    
+    const files = fs.readdirSync(backupDir)
+      .filter(file => file.endsWith('.db'))
+      .map(file => {
+        const filePath = path.join(backupDir, file);
+        const stats = fs.statSync(filePath);
+        return {
+          nombre: file,
+          ruta: filePath,
+          tamano: stats.size,
+          fecha: stats.mtime
+        };
+      })
+      .sort((a, b) => b.fecha - a.fecha);
+    
+    return files;
+  }
+};
+
+module.exports = dbFunctions;
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔄 SISTEMA DE ACTUALIZACIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+ELECTRON/AUTO-UPDATER.JS:
+──────────────────────────────────────────────────────────────
+
+const { autoUpdater } = require('electron-updater');
+const { dialog } = require('electron');
+
+// Configuración
+autoUpdater.autoDownload = false;
+autoUpdater.autoInstallOnAppQuit = true;
+
+// Eventos
+autoUpdater.on('checking-for-update', () => {
+  console.log('Verificando actualizaciones...');
+});
+
+autoUpdater.on('update-available', (info) => {
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Actualización disponible',
+    message: `Hay una nueva versión disponible: ${info.version}`,
+    buttons: ['Descargar', 'Más tarde']
+  }).then(result => {
+    if (result.response === 0) {
+      autoUpdater.downloadUpdate();
+    }
+  });
+});
+
+autoUpdater.on('update-not-available', () => {
+  console.log('La aplicación está actualizada');
+});
+
+autoUpdater.on('download-progress', (progress) => {
+  console.log(`Progreso: ${Math.round(progress.percent)}%`);
+});
+
+autoUpdater.on('update-downloaded', () => {
+  dialog.showMessageBox({
+    type: 'info',
+    title: 'Actualización lista',
+    message: 'La actualización se instalará al cerrar la aplicación',
+    buttons: ['Reiniciar ahora', 'Más tarde']
+  }).then(result => {
+    if (result.response === 0) {
+      autoUpdater.quitAndInstall();
+    }
+  });
+});
+
+autoUpdater.on('error', (error) => {
+  console.error('Error en actualización:', error);
+});
+
+// Verificar cada 4 horas
+setInterval(() => {
+  autoUpdater.checkForUpdates();
+}, 4 * 60 * 60 * 1000);
+
+module.exports = autoUpdater;
+
+
+INTEGRACIÓN EN ELECTRON/MAIN.JS:
+──────────────────────────────────────────────────────────────
+
+const autoUpdater = require('./auto-updater');
+
+app.whenReady().then(() => {
+  createWindow();
+  
+  // Verificar actualizaciones al iniciar (solo en producción)
+  if (!isDev) {
+    setTimeout(() => {
+      autoUpdater.checkForUpdates();
+    }, 3000);
+  }
+});
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📦 SCRIPTS DE EMPAQUETADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+SCRIPTS/PACK-MAC.JS:
+──────────────────────────────────────────────────────────────
+
+const fs = require('fs');
+const path = require('path');
+const archiver = require('archiver');
+
+const sourceDir = 'build/installers/mac';
+const manualFile = 'MANUAL-USUARIO-MAC.txt';
+const outputFile = `AURA-Mac-${getVersion()}.zip`;
+
+// Crear ZIP
+const output = fs.createWriteStream(outputFile);
+const archive = archiver('zip', { zlib: { level: 9 } });
+
+archive.pipe(output);
+
+// Agregar instalador
+const dmgFiles = fs.readdirSync(sourceDir).filter(f => f.endsWith('.dmg'));
+if (dmgFiles.length > 0) {
+  archive.file(path.join(sourceDir, dmgFiles[0]), { 
+    name: dmgFiles[0] 
+  });
+}
+
+// Agregar manual
+if (fs.existsSync(manualFile)) {
+  archive.file(manualFile, { name: manualFile });
+}
+
+archive.finalize();
+
+console.log(`✅ Paquete creado: ${outputFile}`);
+
+function getVersion() {
+  return require('../package.json').version;
+}
+
+
+SCRIPTS/PACK-ALL.JS:
+──────────────────────────────────────────────────────────────
+
+// Ejecuta pack-mac.js y pack-win.js
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎨 COMPONENTES UI CLAVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+SRC/APP/COMPONENTS/UI/BUTTON.TSX:
+──────────────────────────────────────────────────────────────
+
+interface ButtonProps {
+  children: React.ReactNode;
+  variant?: 'primary' | 'secondary' | 'danger';
+  size?: 'sm' | 'md' | 'lg';
+  onClick?: () => void;
+  disabled?: boolean;
+  type?: 'button' | 'submit';
+}
+
+export function Button({ 
+  children, 
+  variant = 'primary', 
+  size = 'md',
+  ...props 
+}: ButtonProps) {
+  const baseClasses = 'rounded font-medium transition-colors';
+  
+  const variantClasses = {
+    primary: 'bg-blue-600 hover:bg-blue-700 text-white',
+    secondary: 'bg-gray-200 hover:bg-gray-300 text-gray-800',
+    danger: 'bg-red-600 hover:bg-red-700 text-white'
+  };
+  
+  const sizeClasses = {
+    sm: 'px-3 py-1.5 text-sm',
+    md: 'px-4 py-2 text-base',
+    lg: 'px-6 py-3 text-lg'
+  };
+  
+  return (
+    <button
+      className={`${baseClasses} ${variantClasses[variant]} ${sizeClasses[size]}`}
+      {...props}
+    >
+      {children}
+    </button>
+  );
+}
+
+
+SRC/APP/COMPONENTS/UI/MODAL.TSX:
+──────────────────────────────────────────────────────────────
+
+interface ModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  title: string;
+  children: React.ReactNode;
+}
+
+export function Modal({ isOpen, onClose, title, children }: ModalProps) {
+  if (!isOpen) return null;
+  
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      {/* Overlay */}
+      <div 
+        className="absolute inset-0 bg-black/50" 
+        onClick={onClose}
+      />
+      
+      {/* Modal */}
+      <div className="relative bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto m-4">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between">
+          <h2 className="text-xl font-semibold">{title}</h2>
+          <button onClick={onClose} className="text-gray-500 hover:text-gray-700">
+            ✕
+          </button>
+        </div>
+        
+        {/* Content */}
+        <div className="p-6">
+          {children}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔑 DECISIONES TÉCNICAS IMPORTANTES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+1. ¿POR QUÉ ELECTRON + SQLITE?
+──────────────────────────────────────────────────────────────
+• Funcionar 100% offline
+• No depender de internet
+• Privacidad total (datos locales)
+• Rendimiento instantáneo
+• Control total sobre los datos
+
+
+2. ¿POR QUÉ REACT ROUTER DATA MODE?
+──────────────────────────────────────────────────────────────
+• Mejor organización de rutas
+• Lazy loading de páginas
+• Manejo de errores centralizado
+• Mejor UX con loaders
+
+
+3. ¿POR QUÉ BETTER-SQLITE3?
+──────────────────────────────────────────────────────────────
+• Más rápido que otras librerías
+• API síncrona (más simple)
+• Robusto y bien mantenido
+• Transacciones fáciles
+
+
+4. ¿POR QUÉ IPC EN LUGAR DE REST API?
+──────────────────────────────────────────────────────────────
+• No necesitamos servidor HTTP
+• IPC es más rápido
+• Más seguro (no hay puerto abierto)
+• Más simple para app desktop
+
+
+5. ¿POR QUÉ CONTEXTBRIDGE?
+──────────────────────────────────────────────────────────────
+• Seguridad (no exponer Node.js al renderer)
+• Buena práctica de Electron
+• Control sobre qué se expone
+
+
+6. ¿POR QUÉ VITE?
+──────────────────────────────────────────────────────────────
+• Más rápido que Webpack
+• Hot Module Replacement (HMR)
+• Configuración simple
+• Build optimizado
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⚠️ PROBLEMAS ENFRENTADOS Y SOLUCIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PROBLEMA: better-sqlite3 no funciona después de build
+──────────────────────────────────────────────────────────────
+CAUSA: Módulo nativo necesita ser recompilado para Electron
+SOLUCIÓN: 
+  npm install --save-dev electron-rebuild
+  npx electron-rebuild
+
+
+PROBLEMA: Rutas no funcionan en producción
+──────────────────────────────────────────────────────────────
+CAUSA: Vite usa rutas absolutas por defecto
+SOLUCIÓN: En vite.config.ts agregar:
+  base: './'
+
+
+PROBLEMA: La app se ve blanca al abrir en producción
+──────────────────────────────────────────────────────────────
+CAUSA: Path incorrecto para cargar index.html
+SOLUCIÓN: En main.js usar:
+  mainWindow.loadFile(path.join(__dirname, '../dist/index.html'))
+
+
+PROBLEMA: IPC handler no responde
+──────────────────────────────────────────────────────────────
+CAUSA: Handler registrado después de crear ventana
+SOLUCIÓN: Registrar handlers ANTES de createWindow()
+
+
+PROBLEMA: Base de datos se reinicia al actualizar
+──────────────────────────────────────────────────────────────
+CAUSA: DB en carpeta de la app (se borra al actualizar)
+SOLUCIÓN: Usar app.getPath('userData')
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📝 COMANDOS ÚTILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+DESARROLLO:
+──────────────────────────────────────────────────────────────
+npm run dev              # Iniciar Vite dev server
+npm run electron:dev     # Iniciar Electron en modo desarrollo
+
+
+BUILD:
+──────────────────────────────────────────────────────────────
+npm run build            # Build de Vite
+npm run electron:build   # Build + crear instalador
+npm run dist:mac         # Crear instalador para Mac
+npm run dist:win         # Crear instalador para Windows
+npm run dist:all         # Crear ambos instaladores
+
+
+EMPAQUETADO:
+──────────────────────────────────────────────────────────────
+npm run pack:mac         # Crear paquete ZIP para Mac
+npm run pack:win         # Crear paquete ZIP para Windows
+npm run pack:all         # Crear ambos paquetes
+
+
+UTILIDADES:
+──────────────────────────────────────────────────────────────
+npm run rebuild          # Recompilar módulos nativos
+npm install             # Instalar dependencias
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 CHECKLIST DE MIGRACIÓN (Supabase → Electron)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+[ ] Descargar proyecto de Figma Make
+[ ] Instalar dependencias de Electron
+[ ] Crear estructura electron/
+[ ] Crear main.js
+[ ] Crear preload.js
+[ ] Crear db.js con esquema SQLite
+[ ] Crear ipc-handlers.js
+[ ] Modificar package.json
+[ ] Crear electron-builder.json
+[ ] Reemplazar llamadas Supabase por IPC
+[ ] Actualizar api.ts para usar IPC
+[ ] Crear íconos
+[ ] Probar en desarrollo
+[ ] Compilar para producción
+[ ] Probar instaladores
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  💡 LECCIONES APRENDIDAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+1. Empezar simple, iterar después
+   → Web app → PWA → Electron
+
+2. Usar transacciones SQL para operaciones relacionadas
+   → Garantiza consistencia de datos
+
+3. Validar tanto en frontend como backend
+   → Doble capa de seguridad
+
+4. Usar prepared statements siempre
+   → Previene SQL injection
+
+5. Hacer backups parte del sistema, no agregarlo después
+   → Los usuarios necesitan backups desde el día 1
+
+6. Probar en máquina limpia antes de distribuir
+   → Evita sorpresas con dependencias faltantes
+
+7. Documentar paso a paso
+   → Los usuarios necesitan manuales claros
+
+8. Usar variables de entorno para configuración
+   → Más flexible y seguro
+
+9. Implementar logging desde el inicio
+   → Facilita debugging en producción
+
+10. Pensar en actualizaciones desde el principio
+    → electron-updater es fácil de integrar
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📊 MÉTRICAS DEL PROYECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+TIEMPO DE DESARROLLO:
+  Web app inicial:        3-5 días
+  PWA conversion:         1-2 días
+  Electron migration:     2-3 días
+  Backups system:         1 día
+  Auto-updates:           1 día
+  Installers setup:       1 día
+  Documentation:          1 día
+  ────────────────────────────────
+  TOTAL:                  10-14 días
+
+
+LÍNEAS DE CÓDIGO (APROXIMADO):
+  Frontend:               ~3000 líneas
+  Electron backend:       ~1500 líneas
+  Configuración:          ~300 líneas
+  ────────────────────────────────
+  TOTAL:                  ~4800 líneas
+
+
+TAMAÑO DE INSTALADORES:
+  Mac (.dmg):             ~150 MB
+  Windows (.exe):         ~120 MB
+
+
+TAMAÑO DE BASE DE DATOS:
+  Vacía:                  ~50 KB
+  Con 1000 servicios:     ~5 MB
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔮 FUTURAS MEJORAS POSIBLES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+1. Sincronización entre múltiples computadoras
+   → Servidor central opcional
+
+2. Aplicación móvil
+   → React Native o Progressive Web App
+
+3. Reportes más avanzados
+   → Más gráficos y estadísticas
+
+4. Integraciones
+   → WhatsApp, Email, SMS
+
+5. Facturación electrónica
+   → Si lo requiere tu país
+
+6. Multi-idioma
+   → i18n
+
+7. Temas personalizables
+   → Dark mode, colores personalizados
+
+8. Módulo de inventario
+   → Control de productos
+
+9. Calendario visual
+   → Vista de servicios programados
+
+10. Sistema de plantillas
+    → Para documentos y comprobantes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎓 CÓMO USAR ESTE DOCUMENTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PARA UN NUEVO PROYECTO SIMILAR:
+
+1. Lee la sección "RESUMEN DEL PROYECTO"
+   → Entiende la evolución y arquitectura
+
+2. Copia la "ESTRUCTURA DE CARPETAS"
+   → Usa la misma organización
+
+3. Usa las "CONFIGURACIONES CLAVE"
+   → package.json, electron-builder.json, etc.
+
+4. Adapta el "ESQUEMA DE BASE DE DATOS"
+   → Modifica según tu dominio
+
+5. Copia el patrón de "COMUNICACIÓN IPC"
+   → preload.js, ipc-handlers.js, api.ts
+
+6. Sigue el "CHECKLIST DE MIGRACIÓN"
+   → Paso a paso hasta producción
+
+
+PARA COMPARTIR CON UN ASISTENTE DE IA:
+
+"Voy a desarrollar una aplicación de [TIPO] llamada [NOMBRE].
+Quiero usar la misma arquitectura que AURA.
+
+Aquí está el documento de referencia completo:
+[Comparte este archivo]
+
+Necesito ayuda con:
+[Describe lo que necesitas]"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Este documento captura TODO el conocimiento técnico de AURA.
+Guárdalo y reutilízalo para futuros proyectos. 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

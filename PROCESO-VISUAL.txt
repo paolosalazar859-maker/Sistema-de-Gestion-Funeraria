@@ -1,0 +1,254 @@
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│         🎯 PROCESO COMPLETO: DE FIGMA MAKE A TU MAC        │
+│                      (INFOGRAFÍA)                           │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+
+              ╔═══════════════════════════════╗
+              ║                               ║
+              ║   📥 DESCARGAR DE FIGMA MAKE  ║
+              ║                               ║
+              ╚═══════════════════════════════╝
+                          │
+                          │ 1. Click menú (⋮)
+                          │ 2. "Download code"
+                          │ 3. Descomprimir ZIP
+                          │
+                          ▼
+              ╔═══════════════════════════════╗
+              ║                               ║
+              ║   📁 CARPETA DEL PROYECTO     ║
+              ║   ~/Desktop/AURA/             ║
+              ║                               ║
+              ╚═══════════════════════════════╝
+                          │
+                          │ Terminal:
+                          │ cd ~/Desktop/AURA
+                          │
+                          ▼
+              ╔═══════════════════════════════╗
+              ║                               ║
+              ║   ✅ VERIFICAR NODE.JS        ║
+              ║   node --version              ║
+              ║                               ║
+              ╚═══════════════════════════════╝
+                          │
+                ┌─────────┴─────────┐
+                │                   │
+                ▼                   ▼
+        ✅ Instalado          ❌ No instalado
+                │                   │
+                │                   │ https://nodejs.org
+                │                   │ Descargar LTS
+                │                   │ Instalar
+                │                   │
+                └─────────┬─────────┘
+                          │
+                          ▼
+              ╔═══════════════════════════════╗
+              ║                               ║
+              ║   📦 INSTALAR DEPENDENCIAS    ║
+              ║   npm install                 ║
+              ║   (Espera 3-5 min)            ║
+              ║                               ║
+              ╚═══════════════════════════════╝
+                          │
+                          │ Descarga e instala
+                          │ todas las librerías
+                          │
+                          ▼
+              ╔═══════════════════════════════╗
+              ║                               ║
+              ║   🔨 CREAR INSTALADORES       ║
+              ║   ./preparar-distribucion-    ║
+              ║   completa.sh                 ║
+              ║   (Espera 10-15 min)          ║
+              ║                               ║
+              ╚═══════════════════════════════╝
+                          │
+                          │
+        ┌─────────────────┼─────────────────┐
+        │                 │                 │
+        ▼                 ▼                 ▼
+    ┌─────────┐      ┌─────────┐      ┌─────────┐
+    │ 🍎 Mac  │      │ 🪟 Win  │      │ 🌍 Both │
+    │  .dmg   │      │  .exe   │      │  Both   │
+    │ ~80 MB  │      │ ~100 MB │      │ ~180 MB │
+    └─────────┘      └─────────┘      └─────────┘
+        │                 │                 │
+        └─────────────────┼─────────────────┘
+                          │
+                          ▼
+              ╔═══════════════════════════════╗
+              ║                               ║
+              ║   📦 PAQUETES EN              ║
+              ║   dist-cliente/               ║
+              ║                               ║
+              ║   ✓ Mac.zip                   ║
+              ║   ✓ Windows.zip               ║
+              ║   ✓ Completo.zip              ║
+              ║                               ║
+              ╚═══════════════════════════════╝
+                          │
+                          │ Para distribuir
+                          │ a clientes
+                          │
+              ┌───────────┴───────────┐
+              │                       │
+              ▼                       ▼
+    ╔═════════════════════╗  ╔═════════════════════╗
+    ║  📤 ENVIAR A        ║  ║  🚀 INSTALAR EN     ║
+    ║     CLIENTES        ║  ║     TU MAC          ║
+    ║                     ║  ║                     ║
+    ║  • Google Drive     ║  ║  1. Abrir DMG       ║
+    ║  • WeTransfer       ║  ║  2. Arrastrar       ║
+    ║  • Dropbox          ║  ║  3. Click derecho   ║
+    ║  • Email            ║  ║     "Abrir"         ║
+    ║  • USB              ║  ║                     ║
+    ╚═════════════════════╝  ╚═════════════════════╝
+                                      │
+                                      │
+                                      ▼
+                          ╔═══════════════════════════════╗
+                          ║                               ║
+                          ║   🔐 LOGIN                    ║
+                          ║   admin / admin123            ║
+                          ║                               ║
+                          ╚═══════════════════════════════╝
+                                      │
+                                      │
+                                      ▼
+                          ╔═══════════════════════════════╗
+                          ║                               ║
+                          ║   🏛️  AURA FUNCIONANDO        ║
+                          ║                               ║
+                          ║   ✅ Dashboard                ║
+                          ║   ✅ Servicios                ║
+                          ║   ✅ Cobros                   ║
+                          ║   ✅ Clientes                 ║
+                          ║   ✅ Backups                  ║
+                          ║                               ║
+                          ╚═══════════════════════════════╝
+                                      │
+                                      │
+                                      ▼
+                          ╔═══════════════════════════════╗
+                          ║                               ║
+                          ║   🎉 ¡LISTO!                  ║
+                          ║   Sistema completo            ║
+                          ║   funcionando                 ║
+                          ║                               ║
+                          ╚═══════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⏱️  TIEMPO POR ETAPA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📥 Descargar de Figma Make        2 min      ████░░░░░░
+📁 Descomprimir y preparar        1 min      ██░░░░░░░░
+✅ Verificar Node.js              10 seg     █░░░░░░░░░
+📦 npm install                    3-5 min    ██████░░░░
+🔨 Crear instaladores             10-15 min  ██████████
+🚀 Instalar en tu Mac             2 min      ████░░░░░░
+🔐 Login y verificar              2 min      ████░░░░░░
+─────────────────────────────────────────────────────────────
+TOTAL:                            20-30 min
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 CHECKLIST VISUAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ANTES DE EMPEZAR:
+┌──────────────────────────────────────────────────────────┐
+│ [ ] Tengo Mac (necesario para crear instalador Mac)     │
+│ [ ] Tengo acceso a Figma Make                           │
+│ [ ] Tengo Node.js instalado (o lo instalaré)            │
+│ [ ] Tengo ~2 GB libres en disco                         │
+│ [ ] Tengo 30 minutos disponibles                        │
+└──────────────────────────────────────────────────────────┘
+
+
+PROCESO:
+┌──────────────────────────────────────────────────────────┐
+│ FASE 1: DESCARGA                                         │
+│ [ ] Descargué código de Figma Make                      │
+│ [ ] Descomprimí el ZIP                                   │
+│ [ ] Renombré carpeta a "AURA"                           │
+│ [ ] Moví a Desktop                                       │
+├──────────────────────────────────────────────────────────┤
+│ FASE 2: PREPARACIÓN                                      │
+│ [ ] Abrí Terminal                                        │
+│ [ ] Ejecuté: cd ~/Desktop/AURA                          │
+│ [ ] Verifiqué con: ls (veo package.json)               │
+│ [ ] Verifiqué Node.js: node --version                   │
+├──────────────────────────────────────────────────────────┤
+│ FASE 3: DEPENDENCIAS                                     │
+│ [ ] Ejecuté: npm install                                │
+│ [ ] Terminó sin errores rojos                           │
+├──────────────────────────────────────────────────────────┤
+│ FASE 4: COMPILACIÓN                                      │
+│ [ ] Ejecuté: chmod +x preparar-distribucion-completa.sh │
+│ [ ] Ejecuté: ./preparar-distribucion-completa.sh        │
+│ [ ] Esperé ~10-15 minutos                               │
+│ [ ] Vi mensaje: "¡PAQUETES DE DISTRIBUCIÓN LISTOS!"     │
+│ [ ] Se abrió carpeta dist-cliente con los ZIP           │
+├──────────────────────────────────────────────────────────┤
+│ FASE 5: INSTALACIÓN                                      │
+│ [ ] Abrí AURA-1.0.0-mac.dmg                             │
+│ [ ] Arrastré AURA a Aplicaciones                        │
+│ [ ] Usé click derecho → "Abrir"                         │
+│ [ ] AURA se abrió correctamente                         │
+├──────────────────────────────────────────────────────────┤
+│ FASE 6: VERIFICACIÓN                                     │
+│ [ ] Login exitoso (admin/admin123)                      │
+│ [ ] Cambié la contraseña                                │
+│ [ ] Dashboard se ve correctamente                       │
+│ [ ] Puedo crear servicios                               │
+│ [ ] Navegación funciona                                 │
+└──────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 OBJETIVOS ALCANZADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Código descargado de Figma Make
+✅ Dependencias instaladas
+✅ Instalador Mac creado (.dmg)
+✅ Instalador Windows creado (.exe)
+✅ AURA instalado en tu Mac
+✅ Sistema funcionando correctamente
+✅ Listo para distribuir a clientes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📚 DOCUMENTACIÓN RELACIONADA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Para más detalles, consulta:
+
+📖 GUIA-PASO-A-PASO-COMPLETA.txt
+   → Guía detallada con troubleshooting
+
+⚡ COMANDOS-RAPIDOS.txt
+   → Solo los comandos para copiar/pegar
+
+📘 GUIA-DISTRIBUCION-MAC-WINDOWS.md
+   → Cómo distribuir a clientes
+
+📄 MANUAL-CLIENTE-MAC.txt
+   → Manual para usuarios finales (Mac)
+
+📄 MANUAL-CLIENTE-WINDOWS.txt
+   → Manual para usuarios finales (Windows)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+© 2026 AURA - Sistema de Gestión Funeraria
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

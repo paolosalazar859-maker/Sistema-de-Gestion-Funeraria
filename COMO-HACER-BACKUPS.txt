@@ -1,0 +1,443 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║    💾 GUÍA COMPLETA: CÓMO HACER BACKUPS EN AURA              ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 3 FORMAS DE HACER BACKUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1️⃣  Desde la app AURA (⭐ RECOMENDADO)
+2️⃣  Backup manual (copiar base de datos)
+3️⃣  Backups automáticos (configurar una vez)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  1️⃣  BACKUP DESDE LA APP AURA (⭐ MÁS FÁCIL)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+PASO 1: Abrir AURA
+──────────────────────────────────────────────────────────────
+• Abre la aplicación AURA en tu Mac
+
+
+PASO 2: Ir a Mi Perfil
+──────────────────────────────────────────────────────────────
+• Click en el ícono de perfil (arriba a la derecha)
+• Selecciona "Mi Perfil"
+
+
+PASO 3: Buscar sección de Backups
+──────────────────────────────────────────────────────────────
+• Desplázate hacia abajo
+• Busca la sección "Backups" o "Copia de Seguridad"
+
+
+PASO 4: Crear backup manual
+──────────────────────────────────────────────────────────────
+• Click en botón "Crear Backup Ahora" o similar
+• O "Descargar Backup"
+
+
+PASO 5: Guardar el archivo
+──────────────────────────────────────────────────────────────
+• Elige dónde guardar el backup
+• Recomendado: Desktop o carpeta específica de backups
+• Nombre: aura-backup-2026-03-07.db
+
+
+✅ ¡Backup creado!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  2️⃣  BACKUP MANUAL (COPIAR BASE DE DATOS)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Este método copia directamente el archivo de base de datos.
+
+
+EN MAC:
+──────────────────────────────────────────────────────────────
+
+OPCIÓN A: Desde Finder
+
+1. Abrir Finder
+
+2. Click en menú "Ir" → "Ir a la carpeta..."
+
+3. Pegar esta ruta:
+   ~/Library/Application Support/AURA
+
+4. Presionar Enter
+
+5. Verás el archivo: aura-database.db
+
+6. Click derecho en aura-database.db → "Duplicar"
+
+7. Renombrar la copia:
+   aura-backup-2026-03-07.db
+
+8. Mover la copia a un lugar seguro:
+   • Desktop
+   • Documentos/Backups-AURA/
+   • USB
+   • Google Drive
+
+
+OPCIÓN B: Desde Terminal
+
+Ejecuta estos comandos:
+
+# Crear carpeta para backups en Desktop
+mkdir -p ~/Desktop/Backups-AURA
+
+# Copiar base de datos con fecha
+cp ~/Library/Application\ Support/AURA/aura-database.db \
+   ~/Desktop/Backups-AURA/aura-backup-$(date +%Y-%m-%d).db
+
+# Ver el backup creado
+ls -lh ~/Desktop/Backups-AURA/
+
+
+✅ Backup creado en: ~/Desktop/Backups-AURA/
+
+
+EN WINDOWS:
+──────────────────────────────────────────────────────────────
+
+1. Presionar: Windows + R
+
+2. Escribir: %APPDATA%\AURA
+
+3. Presionar Enter
+
+4. Verás: aura-database.db
+
+5. Click derecho → "Copiar"
+
+6. Ir a Desktop o carpeta de Backups
+
+7. Click derecho → "Pegar"
+
+8. Renombrar: aura-backup-2026-03-07.db
+
+
+✅ Backup creado!
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  3️⃣  BACKUPS AUTOMÁTICOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+AURA puede crear backups automáticos si lo configuras.
+
+
+CONFIGURAR BACKUPS AUTOMÁTICOS:
+──────────────────────────────────────────────────────────────
+
+1. Abre AURA
+
+2. Ve a "Mi Perfil"
+
+3. Busca "Configuración de Backups"
+
+4. Activa "Backups Automáticos"
+
+5. Configura frecuencia:
+   • Diario
+   • Semanal
+   • Mensual
+
+6. Guardar
+
+
+¿DÓNDE SE GUARDAN LOS BACKUPS AUTOMÁTICOS?
+──────────────────────────────────────────────────────────────
+
+Mac:
+~/Library/Application Support/AURA/backups/
+├── backup-2026-03-07.db
+├── backup-2026-03-06.db
+├── backup-2026-03-05.db
+└── ...
+
+Windows:
+C:\Users\[TuUsuario]\AppData\Roaming\AURA\backups\
+├── backup-2026-03-07.db
+├── backup-2026-03-06.db
+├── backup-2026-03-05.db
+└── ...
+
+
+ACCEDER A BACKUPS AUTOMÁTICOS:
+──────────────────────────────────────────────────────────────
+
+Mac (Terminal):
+open ~/Library/Application\ Support/AURA/backups/
+
+Mac (Finder):
+Ir → Ir a la carpeta → ~/Library/Application Support/AURA/backups
+
+Windows:
+Windows + R → %APPDATA%\AURA\backups
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  💾 ESTRATEGIA DE BACKUPS RECOMENDADA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+BACKUPS LOCALES (Cada día):
+──────────────────────────────────────────────────────────────
+✅ Activa backups automáticos en AURA
+✅ Frecuencia: Diaria
+→ Se guardan en tu computadora
+
+
+BACKUPS EXTERNOS (Cada semana):
+──────────────────────────────────────────────────────────────
+✅ Copia manual a USB cada semana
+→ Protege contra falla de disco duro
+
+
+BACKUPS EN LA NUBE (Cada mes):
+──────────────────────────────────────────────────────────────
+✅ Sube a Google Drive cada mes
+→ Protege contra robo o pérdida de computadora
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📤 SUBIR BACKUP A GOOGLE DRIVE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+1. Crea el backup (método 1 o 2)
+
+2. Ve a https://drive.google.com
+
+3. Crea carpeta "Backups-AURA"
+
+4. Sube el archivo .db
+
+5. ¡Backup en la nube! ☁️
+
+
+⚠️  IMPORTANTE: La base de datos contiene datos sensibles
+    → No compartas la carpeta públicamente
+    → Solo para tu uso personal
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔄 RESTAURAR UN BACKUP
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+¿CUÁNDO RESTAURAR?
+──────────────────────────────────────────────────────────────
+• Perdiste datos
+• Cometiste un error
+• Cambias de computadora
+• Reinstalaste AURA
+
+
+CÓMO RESTAURAR EN MAC:
+──────────────────────────────────────────────────────────────
+
+1. CERRAR AURA (importante!)
+
+2. Abrir Terminal
+
+3. Hacer backup de la base actual (por si acaso):
+   cp ~/Library/Application\ Support/AURA/aura-database.db \
+      ~/Desktop/aura-database-OLD.db
+
+4. Restaurar el backup:
+   cp /ruta/al/backup/aura-backup-2026-03-07.db \
+      ~/Library/Application\ Support/AURA/aura-database.db
+
+5. Abrir AURA
+
+6. Verificar que los datos están correctos
+
+
+EJEMPLO COMPLETO:
+
+# Cerrar AURA primero
+
+# Restaurar desde Desktop
+cp ~/Desktop/Backups-AURA/aura-backup-2026-03-07.db \
+   ~/Library/Application\ Support/AURA/aura-database.db
+
+# Abrir AURA
+open /Applications/AURA.app
+
+
+CÓMO RESTAURAR EN WINDOWS:
+──────────────────────────────────────────────────────────────
+
+1. CERRAR AURA
+
+2. Presionar: Windows + R
+
+3. Escribir: %APPDATA%\AURA
+
+4. Renombrar aura-database.db a aura-database-OLD.db
+
+5. Copiar tu archivo de backup a esta carpeta
+
+6. Renombrar el backup a: aura-database.db
+
+7. Abrir AURA
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 CHECKLIST DE BACKUPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+CONFIGURACIÓN INICIAL:
+[ ] Activé backups automáticos en AURA
+[ ] Configuré frecuencia (diaria recomendada)
+[ ] Creé carpeta "Backups-AURA" en Desktop
+[ ] Creé carpeta "Backups-AURA" en Google Drive
+
+
+RUTINA DIARIA:
+[ ] Backups automáticos activados (AURA los hace solo)
+
+
+RUTINA SEMANAL:
+[ ] Copié base de datos a USB
+[ ] Guardé el USB en lugar seguro
+
+
+RUTINA MENSUAL:
+[ ] Subí backup a Google Drive
+[ ] Verifiqué que el archivo está completo
+[ ] Eliminé backups muy antiguos (más de 6 meses)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  💡 CONSEJOS Y MEJORES PRÁCTICAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+✅ HACER:
+──────────────────────────────────────────────────────────────
+• Backups regulares (mínimo semanales)
+• Guardar en múltiples lugares (local + USB + nube)
+• Nombrar con fecha (aura-backup-2026-03-07.db)
+• Verificar que el backup funciona (restaurarlo de prueba)
+• Eliminar backups muy antiguos (después de 6 meses)
+
+
+❌ NO HACER:
+──────────────────────────────────────────────────────────────
+• Depender solo de un backup
+• Guardar backup en el mismo lugar que la base original
+• Compartir backups (contienen datos sensibles)
+• Olvidar hacer backups por meses
+
+
+⚠️  IMPORTANTE:
+──────────────────────────────────────────────────────────────
+• Siempre CIERRA AURA antes de copiar/restaurar la base
+• El archivo .db contiene TODOS tus datos
+• Si pierdes el .db, pierdes todo
+• Los backups son tu seguro contra pérdidas
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📊 TAMAÑO DE BACKUPS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+Base de datos vacía:           ~50 KB
+Con 10 servicios:              ~100 KB
+Con 100 servicios:             ~500 KB
+Con 1000 servicios:            ~5 MB
+Con 10000 servicios:           ~50 MB
+
+→ Los backups son muy pequeños
+→ Puedes guardar muchos sin ocupar espacio
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 COMANDOS RÁPIDOS (COPIAR/PEGAR)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+CREAR BACKUP (Mac):
+──────────────────────────────────────────────────────────────
+# Crear carpeta de backups
+mkdir -p ~/Desktop/Backups-AURA
+
+# Crear backup con fecha
+cp ~/Library/Application\ Support/AURA/aura-database.db \
+   ~/Desktop/Backups-AURA/aura-backup-$(date +%Y-%m-%d).db
+
+# Ver backups
+ls -lh ~/Desktop/Backups-AURA/
+
+
+VER UBICACIÓN DE BASE DE DATOS (Mac):
+──────────────────────────────────────────────────────────────
+open ~/Library/Application\ Support/AURA/
+
+
+VER BACKUPS AUTOMÁTICOS (Mac):
+──────────────────────────────────────────────────────────────
+open ~/Library/Application\ Support/AURA/backups/
+
+
+RESTAURAR BACKUP (Mac):
+──────────────────────────────────────────────────────────────
+# Cerrar AURA primero!
+
+# Restaurar (ajusta la fecha)
+cp ~/Desktop/Backups-AURA/aura-backup-2026-03-07.db \
+   ~/Library/Application\ Support/AURA/aura-database.db
+
+# Abrir AURA
+open /Applications/AURA.app
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎉 RESUMEN EJECUTIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+OPCIÓN MÁS FÁCIL:
+──────────────────────────────────────────────────────────────
+1. Abre AURA
+2. Mi Perfil → Backups
+3. "Crear Backup Ahora"
+4. Guarda en Desktop
+
+
+OPCIÓN MANUAL:
+──────────────────────────────────────────────────────────────
+Mac:
+cp ~/Library/Application\ Support/AURA/aura-database.db \
+   ~/Desktop/backup-$(date +%Y-%m-%d).db
+
+Windows:
+1. Windows + R
+2. %APPDATA%\AURA
+3. Copiar aura-database.db
+
+
+MEJOR PRÁCTICA:
+──────────────────────────────────────────────────────────────
+• Backups automáticos: Diarios (en AURA)
+• Backup manual: Semanal (a USB)
+• Backup nube: Mensual (a Drive)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¡Protege tus datos con backups regulares! 💾✨
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

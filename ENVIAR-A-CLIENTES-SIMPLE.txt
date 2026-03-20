@@ -1,0 +1,294 @@
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│   📤 ENVIAR AURA A CLIENTES - SUPER SIMPLE                 │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                           ┃
+┃  PASO 1: CREAR INSTALADORES (HACES ESTO 1 SOLA VEZ)      ┃
+┃                                                           ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+En Terminal:
+
+    ./preparar-distribucion-completa.sh
+
+Espera 10-15 minutos ☕
+
+
+RESULTADO → Carpeta: dist-cliente/
+────────────────────────────────────────────────────────────
+
+    📦 AURA-1.0.0-Instalador-Mac.zip          80 MB
+    📦 AURA-1.0.0-Instalador-Windows.zip     100 MB
+    📦 AURA-1.0.0-Instalador-Completo.zip    180 MB
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                           ┃
+┃  PASO 2: DECIDIR QUÉ ARCHIVO ENVIAR                       ┃
+┃                                                           ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+  Cliente tiene        Envía este archivo
+  ═════════════════════════════════════════════════════════
+
+  🍎 Mac             → AURA-1.0.0-Instalador-Mac.zip
+
+  🪟 Windows         → AURA-1.0.0-Instalador-Windows.zip
+
+  ❓ No sé           → AURA-1.0.0-Instalador-Completo.zip
+
+  🏢 Oficina mixta   → AURA-1.0.0-Instalador-Completo.zip
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                           ┃
+┃  PASO 3: SUBIR A GOOGLE DRIVE                             ┃
+┃                                                           ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+1. Ve a: https://drive.google.com
+
+2. Click: "Nuevo" → "Subir archivo"
+
+3. Selecciona el ZIP que vas a enviar
+
+4. Espera que suba (2-5 min)
+
+5. Click derecho en el archivo → "Compartir"
+
+6. Click: "Cambiar" → "Cualquiera con el enlace"
+
+7. Click: "Copiar enlace"
+
+   Se copia algo como:
+   https://drive.google.com/file/d/1A2B3C4D5.../view
+
+
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃                                                           ┃
+┃  PASO 4: ENVIAR AL CLIENTE                                ┃
+┃                                                           ┃
+┗━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+
+
+Por WhatsApp, Email, SMS o Telegram:
+
+────────────────────────────────────────────────────────────
+Hola [Nombre],
+
+Instalador AURA:
+[PEGA EL ENLACE DE DRIVE AQUÍ]
+
+🍎 Si tienes Mac:
+   1. Descomprime
+   2. Abre .dmg
+   3. Arrastra a Aplicaciones
+   4. Click derecho → "Abrir"
+
+🪟 Si tienes Windows:
+   1. Descomprime
+   2. Ejecuta .exe
+   3. Si hay advertencia: "Más información" → "Ejecutar"
+
+Login: admin / admin123
+⚠️ Cambia la contraseña después.
+
+¿Dudas? Llama: [TU_TELÉFONO]
+────────────────────────────────────────────────────────────
+
+
+¡LISTO! 🎉
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📊 EJEMPLO VISUAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+TIENES 3 CLIENTES:
+──────────────────────────────────────────────────────────────
+
+   Cliente A         Cliente B          Cliente C
+   (Mac)            (Windows)          (No sé)
+     🍎                🪟                 ❓
+
+     │                 │                  │
+     │                 │                  │
+     ▼                 ▼                  ▼
+
+  Mac.zip          Windows.zip       Completo.zip
+   80 MB             100 MB             180 MB
+
+     │                 │                  │
+     │                 │                  │
+     ▼                 ▼                  ▼
+
+  Subir a Drive    Subir a Drive     Subir a Drive
+
+     │                 │                  │
+     │                 │                  │
+     ▼                 ▼                  ▼
+
+  Copiar enlace    Copiar enlace     Copiar enlace
+
+     │                 │                  │
+     │                 │                  │
+     ▼                 ▼                  ▼
+
+Enviar WhatsApp  Enviar WhatsApp   Enviar WhatsApp
+
+     │                 │                  │
+     │                 │                  │
+     ▼                 ▼                  ▼
+
+  Cliente instala  Cliente instala   Cliente instala
+      ✅                ✅                 ✅
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⏱️  TIEMPOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+TÚ (una sola vez):
+──────────────────────────────────────────────────────────────
+Crear instaladores:         10-15 min
+Subir archivo a Drive:      2-3 min por archivo
+Copiar enlace:              10 seg
+Enviar mensaje:             1 min
+                            ─────────────
+TOTAL por cliente:          3-4 min
+(después de crear instaladores)
+
+
+CLIENTE:
+──────────────────────────────────────────────────────────────
+Descargar:                  2-3 min
+Instalar (Mac):             2 min
+Instalar (Windows):         3 min
+Login:                      30 seg
+                            ─────────────
+TOTAL:                      5-7 min
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  💡 CONSEJOS RÁPIDOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+✅ Sube los 3 archivos a Drive de una vez
+   → Tendrás enlaces listos
+
+✅ Guarda los enlaces en un archivo de texto
+   → Para copiar/pegar rápido
+
+✅ Usa WeTransfer si no tienes Drive
+   → https://wetransfer.com (gratis, muy fácil)
+
+✅ El paquete Completo sirve para todos
+   → Si no sabes, envía ese
+
+✅ Dentro del ZIP hay instrucciones detalladas
+   → Cliente las puede leer
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 RESUMEN EN 4 PASOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+1. Crea instaladores (1 vez):
+   ./preparar-distribucion-completa.sh
+
+2. Sube ZIP a Drive:
+   drive.google.com → Subir → Compartir
+
+3. Copia enlace:
+   Click derecho → Compartir → Copiar enlace
+
+4. Envía al cliente:
+   WhatsApp/Email con el enlace + instrucciones
+
+
+¡ESO ES TODO! 🎉
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 PLANTILLAS COPY/PASTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+MENSAJE CORTO (WhatsApp):
+──────────────────────────────────────────────────────────────
+Hola! 👋
+
+Instalador AURA:
+[TU_ENLACE]
+
+Descomprime → Instala
+Login: admin / admin123
+
+¿Dudas? 📞 [TU_TELÉFONO]
+──────────────────────────────────────────────────────────────
+
+
+MENSAJE DETALLADO (Email):
+──────────────────────────────────────────────────────────────
+Asunto: Instalador AURA - Sistema de Gestión
+
+Hola [Nombre],
+
+Aquí está el instalador de AURA:
+[TU_ENLACE]
+
+Instalación:
+1. Descarga y descomprime
+2. Sigue las instrucciones del archivo incluido
+3. Login: admin / admin123
+4. Cambia la contraseña
+
+Soporte: [TU_TELÉFONO]
+
+Saludos,
+[Tu Nombre]
+──────────────────────────────────────────────────────────────
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🆘 SI EL CLIENTE TIENE PROBLEMAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+Mac: "No se puede abrir"
+──────────────────────────────────────────────────────────────
+Solución:
+1. Click DERECHO en AURA
+2. Seleccionar "Abrir"
+3. Click "Abrir" en el mensaje
+
+
+Windows: "Windows protegió tu PC"
+──────────────────────────────────────────────────────────────
+Solución:
+1. Click "Más información"
+2. Click "Ejecutar de todas formas"
+
+
+No puede descomprimir
+──────────────────────────────────────────────────────────────
+Solución:
+• Mac: Doble click en el ZIP
+• Windows: Click derecho → "Extraer todo"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Para más detalles: COMO-COMPARTIR-A-CLIENTES.txt
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

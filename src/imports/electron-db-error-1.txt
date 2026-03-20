@@ -1,0 +1,57 @@
+(base) paolosalazar@MacBook-Pro-de-Paolo SistemaFuneraria % npx concurrently "npx vite" "npx wait-on http://localhost:5173 && npx electron electron.js"
+[0] 
+[0]   VITE v6.3.5  ready in 330 ms
+[0] 
+[0]   ➜  Local:   http://localhost:5173/
+[0]   ➜  Network: use --host to expose
+[1] ✅ Módulo de base de datos cargado
+[1] 📁 Inicializando base de datos en: /Users/paolosalazar/Library/Application Support/Electron/aura-database.db
+[1] ❌ Error inicializando base de datos: Error: The module '/Users/paolosalazar/Downloads/SistemaFuneraria/node_modules/better-sqlite3/build/Release/better_sqlite3.node'
+[1] was compiled against a different Node.js version using
+[1] NODE_MODULE_VERSION 137. This version of Node.js requires
+[1] NODE_MODULE_VERSION 132. Please try re-compiling or re-installing
+[1] the module (for instance, using `npm rebuild` or `npm install`).
+[1]     at process.func [as dlopen] (node:electron/js2c/node_init:2:2559)
+[1]     at Module._extensions..node (node:internal/modules/cjs/loader:1667:18)
+[1]     at Object.func [as .node] (node:electron/js2c/node_init:2:2559)
+[1]     at Module.load (node:internal/modules/cjs/loader:1282:32)
+[1]     at Module._load (node:internal/modules/cjs/loader:1103:12)
+[1]     at c._load (node:electron/js2c/node_init:2:16955)
+[1]     at Module.require (node:internal/modules/cjs/loader:1305:19)
+[1]     at require (node:internal/modules/helpers:182:18)
+[1]     at bindings (/Users/paolosalazar/Downloads/SistemaFuneraria/node_modules/bindings/bindings.js:112:48)
+[1]     at new Database (/Users/paolosalazar/Downloads/SistemaFuneraria/node_modules/better-sqlite3/lib/database.js:48:64) {
+[1]   code: 'ERR_DLOPEN_FAILED'
+[1] }
+[1] ❌ Error inicializando base de datos
+[1] 🔧 Modo: DESARROLLO
+[1] 📦 app.isPackaged: false
+[1] 🌐 Cargando desde: http://localhost:5173
+[1] [15974:0307/020250.272888:ERROR:CONSOLE(1)] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[1] [15974:0307/020250.275027:ERROR:CONSOLE(1)] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[0] 
+[0] PWA v1.2.0
+[0] mode      generateSW
+[0] precache  2 entries (0.12 KiB)
+[0] files generated
+[0]   dev-dist/sw.js
+[0]   dev-dist/workbox-237f2c1f.js
+chmod +x dev.sh
+^C[1] /Users/paolosalazar/Downloads/SistemaFuneraria/node_modules/electron/dist/Electron.app/Contents/MacOS/Electron exited with signal SIGINT
+[0] npx vite exited with code SIGINT
+[1] npx wait-on http://localhost:5173 && npx electron electron.js exited with code 1
+(base) paolosalazar@MacBook-Pro-de-Paolo SistemaFuneraria % chmod +x dev.sh
+chmod: dev.sh: No such file or directory
+(base) paolosalazar@MacBook-Pro-de-Paolo SistemaFuneraria % npm run dev
+
+
+> @figma/my-make-file@0.0.1 dev
+> vite
+
+
+  VITE v6.3.5  ready in 283 ms
+
+  ➜  Local:   http://localhost:5173/
+  ➜  Network: use --host to expose
+  ➜  press h + enter to show help
+

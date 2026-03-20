@@ -1,0 +1,80 @@
+Last login: Sat Nov 29 01:00:19 on ttys000
+(base) paolosalazar@MacBook-Pro-de-Paolo ~ % npm run dev
+npm error code ENOENT
+npm error syscall open
+npm error path /Users/paolosalazar/package.json
+npm error errno -2
+npm error enoent Could not read package.json: Error: ENOENT: no such file or directory, open '/Users/paolosalazar/package.json'
+npm error enoent This is related to npm not being able to find a file.
+npm error enoent
+npm error A complete log of this run can be found in: /Users/paolosalazar/.npm/_logs/2026-03-07T04_13_13_781Z-debug-0.log
+(base) paolosalazar@MacBook-Pro-de-Paolo ~ % cd "/Users/paolosalazar/Downloads/Sistema de Gestión Funeraria (1)" && npm run dev
+
+> @figma/my-make-file@0.0.1 dev
+> vite
+
+sh: vite: command not found
+(base) paolosalazar@MacBook-Pro-de-Paolo Sistema de Gestión Funeraria (1) % npm install && node -e "const fs=require('fs');const pkg=JSON.parse(fs.readFileSync('package.json','utf8'));pkg.scripts={build:'vite build',dev:'concurrently \"vite\" \"wait-on http://localhost:5173 && npx electron electron.js\"',electron:'npx electron electron.js',vite:'vite'};fs.writeFileSync('package.json',JSON.stringify(pkg,null,2));console.log('✅ Scripts actualizados correctamente');"
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+npm warn deprecated glob@11.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 563 packages, and audited 564 packages in 1m
+
+121 packages are looking for funding
+  run `npm fund` for details
+
+5 vulnerabilities (1 moderate, 4 high)
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+✅ Scripts actualizados correctamente
+(base) paolosalazar@MacBook-Pro-de-Paolo Sistema de Gestión Funeraria (1) % npm run dev
+
+> @figma/my-make-file@0.0.1 dev
+> concurrently "vite" "wait-on http://localhost:5173 && npx electron electron.js"
+
+sh: concurrently: command not found
+(base) paolosalazar@MacBook-Pro-de-Paolo Sistema de Gestión Funeraria (1) % npm install && npm run dev
+
+added 1 package, removed 1 package, and audited 564 packages in 1s
+
+120 packages are looking for funding
+  run `npm fund` for details
+
+5 vulnerabilities (1 moderate, 4 high)
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> @figma/my-make-file@0.0.1 dev
+> concurrently "vite" "wait-on http://localhost:5173 && npx electron electron.js"
+
+sh: concurrently: command not found
+(base) paolosalazar@MacBook-Pro-de-Paolo Sistema de Gestión Funeraria (1) % rm -rf node_modules package-lock.json && npm install && npm run dev
+
+npm warn deprecated sourcemap-codec@1.4.8: Please use @jridgewell/sourcemap-codec instead
+npm warn deprecated source-map@0.8.0-beta.0: The work that was done in this beta branch won't be included in future versions
+npm warn deprecated glob@11.1.0: Old versions of glob are not supported, and contain widely publicized security vulnerabilities, which have been fixed in the current version. Please update. Support for old versions may be purchased (at exorbitant rates) by contacting i@izs.me
+
+added 563 packages, and audited 564 packages in 27s
+
+121 packages are looking for funding
+  run `npm fund` for details
+
+5 vulnerabilities (1 moderate, 4 high)
+
+To address all issues (including breaking changes), run:
+  npm audit fix --force
+
+Run `npm audit` for details.
+
+> @figma/my-make-file@0.0.1 dev
+> concurrently "vite" "wait-on http://localhost:5173 && npx electron electron.js"
+
+sh: concurrently: command not found
+(base) paolosalazar@MacBook-Pro-de-Paolo Sistema de Gestión Funeraria (1) % 

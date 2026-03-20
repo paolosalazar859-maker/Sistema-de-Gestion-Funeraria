@@ -1,0 +1,460 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║    📤 GUÍA SIMPLE: ENVIAR AURA A TUS CLIENTES                ║
+║         (Mac y Windows)                                       ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📦 PASO 1: CREAR LOS INSTALADORES (UNA SOLA VEZ)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ejecuta esto UNA SOLA VEZ en tu Mac:
+
+    cd ~/Desktop/AURA
+    ./preparar-distribucion-completa.sh
+
+⏱️  Espera 10-15 minutos
+
+
+RESULTADO:
+──────────────────────────────────────────────────────────────
+Se crea la carpeta: dist-cliente/
+
+Con 3 archivos ZIP:
+
+📦 AURA-1.0.0-Instalador-Mac.zip          (~80 MB)
+   ↳ Solo para clientes con Mac
+
+📦 AURA-1.0.0-Instalador-Windows.zip      (~100 MB)
+   ↳ Solo para clientes con Windows
+
+📦 AURA-1.0.0-Instalador-Completo.zip     (~180 MB)
+   ↳ Para ambos (Mac + Windows)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 PASO 2: DECIDIR QUÉ ENVIAR A CADA CLIENTE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+SITUACIÓN A: Cliente tiene Mac 🍎
+──────────────────────────────────────────────────────────────
+Envía:  AURA-1.0.0-Instalador-Mac.zip
+Tamaño: ~80 MB
+
+
+SITUACIÓN B: Cliente tiene Windows 🪟
+──────────────────────────────────────────────────────────────
+Envía:  AURA-1.0.0-Instalador-Windows.zip
+Tamaño: ~100 MB
+
+
+SITUACIÓN C: No sabes qué tiene ❓
+──────────────────────────────────────────────────────────────
+Envía:  AURA-1.0.0-Instalador-Completo.zip
+Tamaño: ~180 MB
+Nota:   Cliente elige cuál usar según su sistema
+
+
+SITUACIÓN D: Oficina con varios sistemas 🏢
+──────────────────────────────────────────────────────────────
+Envía:  AURA-1.0.0-Instalador-Completo.zip
+Tamaño: ~180 MB
+Nota:   Cada persona instala según su computadora
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📤 PASO 3: ELEGIR MÉTODO DE ENVÍO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+OPCIÓN A: GOOGLE DRIVE (⭐ RECOMENDADO)
+──────────────────────────────────────────────────────────────
+
+1. Ve a https://drive.google.com
+
+2. Click en "Nuevo" → "Subir archivo"
+
+3. Selecciona el ZIP que vas a enviar:
+   • Mac.zip (si cliente tiene Mac)
+   • Windows.zip (si cliente tiene Windows)
+   • Completo.zip (si no sabes)
+
+4. Espera a que suba (2-5 minutos)
+
+5. Click derecho en el archivo → "Compartir"
+
+6. Click en "Cambiar" → "Cualquiera con el enlace"
+
+7. Click en "Copiar enlace"
+
+8. Envía el enlace al cliente por:
+   • WhatsApp
+   • Email
+   • SMS
+   • Telegram
+
+✅ Ventajas:
+   • Archivos grandes sin problema
+   • Gratis
+   • Enlace permanente
+   • Clientes lo descargan cuando quieran
+
+
+OPCIÓN B: WETRANSFER (MUY FÁCIL)
+──────────────────────────────────────────────────────────────
+
+1. Ve a https://wetransfer.com
+
+2. Click en "+"
+
+3. Selecciona el archivo ZIP
+
+4. Ingresa el email del cliente
+
+5. (Opcional) Agrega tu email
+
+6. Click en "Transferir"
+
+7. El cliente recibe un email con el link de descarga
+
+✅ Ventajas:
+   • Super simple
+   • No necesitas cuenta
+   • Cliente recibe email automático
+
+⚠️  Desventajas:
+   • Link expira en 7 días
+
+
+OPCIÓN C: DROPBOX
+──────────────────────────────────────────────────────────────
+
+1. Ve a https://dropbox.com
+
+2. Sube el archivo ZIP
+
+3. Click derecho → "Compartir"
+
+4. "Crear enlace"
+
+5. Copia y envía el enlace
+
+
+OPCIÓN D: EMAIL (Solo archivos pequeños)
+──────────────────────────────────────────────────────────────
+
+⚠️  PROBLEMA: La mayoría de emails tienen límite de 25 MB
+
+✅ SOLO funciona si comprimes más el archivo
+
+❌ NO recomendado para AURA (archivos son grandes)
+
+
+OPCIÓN E: USB / PENDRIVE (En persona)
+──────────────────────────────────────────────────────────────
+
+1. Copia el ZIP al USB
+
+2. Entrega al cliente en persona
+
+3. Cliente copia a su computadora
+
+✅ Ventajas:
+   • No necesitas internet
+   • Seguro
+   • Directo
+
+⚠️  Requiere reunión presencial
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📧 PASO 4: ENVIAR CON INSTRUCCIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+PLANTILLA DE MENSAJE: CLIENTE CON MAC 🍎
+──────────────────────────────────────────────────────────────
+
+Hola [Nombre],
+
+Te envío el instalador de AURA para tu Mac.
+
+📥 DESCARGA:
+[PEGA_TU_ENLACE_AQUÍ]
+
+📦 INSTALACIÓN (2 minutos):
+1. Descarga y descomprime el ZIP
+2. Abre AURA-1.0.0-mac.dmg
+3. Arrastra AURA a Aplicaciones
+4. Click DERECHO en AURA → "Abrir"
+   (¡Importante! La primera vez usa click derecho)
+
+🔐 LOGIN:
+Usuario: admin
+Contraseña: admin123
+
+⚠️ Cambia la contraseña después del primer inicio.
+
+📄 Dentro del ZIP hay instrucciones detalladas.
+
+¿Necesitas ayuda? Llámame: [TU_TELÉFONO]
+
+Saludos,
+[Tu Nombre]
+
+
+PLANTILLA DE MENSAJE: CLIENTE CON WINDOWS 🪟
+──────────────────────────────────────────────────────────────
+
+Hola [Nombre],
+
+Te envío el instalador de AURA para tu PC con Windows.
+
+📥 DESCARGA:
+[PEGA_TU_ENLACE_AQUÍ]
+
+📦 INSTALACIÓN (3 minutos):
+1. Descarga y descomprime el ZIP
+2. Doble click en AURA-Setup-1.0.0.exe
+3. Si aparece "Windows protegió tu PC":
+   • Click "Más información"
+   • Click "Ejecutar de todas formas"
+4. Sigue el instalador (Siguiente → Instalar)
+
+🔐 LOGIN:
+Usuario: admin
+Contraseña: admin123
+
+⚠️ Cambia la contraseña después del primer inicio.
+
+📄 Dentro del ZIP hay instrucciones detalladas.
+
+¿Necesitas ayuda? Llámame: [TU_TELÉFONO]
+
+Saludos,
+[Tu Nombre]
+
+
+PLANTILLA DE MENSAJE: NO SABES QUÉ TIENE ❓
+──────────────────────────────────────────────────────────────
+
+Hola [Nombre],
+
+Te envío el instalador de AURA.
+
+📥 DESCARGA:
+[PEGA_TU_ENLACE_AQUÍ]
+
+📦 INSTALACIÓN:
+
+🍎 SI TIENES MAC:
+   1. Abre AURA-1.0.0-mac.dmg
+   2. Arrastra a Aplicaciones
+   3. Click derecho → "Abrir"
+   4. Lee: INSTRUCCIONES-MAC.txt
+
+🪟 SI TIENES WINDOWS:
+   1. Ejecuta AURA-Setup-1.0.0.exe
+   2. Si aparece advertencia:
+      → "Más información" → "Ejecutar de todas formas"
+   3. Sigue el instalador
+   4. Lee: INSTRUCCIONES-WINDOWS.txt
+
+🔐 LOGIN (ambos):
+Usuario: admin
+Contraseña: admin123
+
+⚠️ Cambia la contraseña después del primer inicio.
+
+📄 El archivo LEEME.txt explica qué usar según tu sistema.
+
+¿Necesitas ayuda? Llámame: [TU_TELÉFONO]
+
+Saludos,
+[Tu Nombre]
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✅ EJEMPLO COMPLETO REAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+ESCENARIO:
+Tienes 3 clientes:
+• Cliente A: Tiene Mac
+• Cliente B: Tiene Windows
+• Cliente C: No sabes qué tiene
+
+
+PASO A PASO:
+──────────────────────────────────────────────────────────────
+
+1️⃣  CREAR INSTALADORES (una sola vez):
+   ./preparar-distribucion-completa.sh
+   ⏱️  10-15 minutos
+
+
+2️⃣  SUBIR A GOOGLE DRIVE:
+
+   Para Cliente A (Mac):
+   • Sube: AURA-1.0.0-Instalador-Mac.zip
+   • Obtén enlace: https://drive.google.com/file/xxx-mac
+
+   Para Cliente B (Windows):
+   • Sube: AURA-1.0.0-Instalador-Windows.zip
+   • Obtén enlace: https://drive.google.com/file/xxx-win
+
+   Para Cliente C (Desconocido):
+   • Sube: AURA-1.0.0-Instalador-Completo.zip
+   • Obtén enlace: https://drive.google.com/file/xxx-completo
+
+
+3️⃣  ENVIAR MENSAJES:
+
+   A Cliente A (Mac):
+   ────────────────────────────────────────────────────
+   Hola Juan,
+
+   Instalador AURA para Mac:
+   https://drive.google.com/file/xxx-mac
+
+   Instalación:
+   1. Descomprime
+   2. Abre .dmg
+   3. Arrastra a Aplicaciones
+   4. Click derecho → Abrir
+
+   Login: admin / admin123
+   Cambia la contraseña después.
+
+   ¿Dudas? Llámame: 555-1234
+
+
+   A Cliente B (Windows):
+   ────────────────────────────────────────────────────
+   Hola María,
+
+   Instalador AURA para Windows:
+   https://drive.google.com/file/xxx-win
+
+   Instalación:
+   1. Descomprime
+   2. Ejecuta .exe
+   3. Si dice "Windows protegió tu PC":
+      → Más información → Ejecutar
+
+   Login: admin / admin123
+   Cambia la contraseña después.
+
+   ¿Dudas? Llámame: 555-1234
+
+
+   A Cliente C (Desconocido):
+   ────────────────────────────────────────────────────
+   Hola Pedro,
+
+   Instalador AURA (Mac + Windows):
+   https://drive.google.com/file/xxx-completo
+
+   Dentro hay instrucciones para ambos sistemas.
+   Usa el archivo según tu computadora.
+
+   Login: admin / admin123
+   Cambia la contraseña después.
+
+   ¿Dudas? Llámame: 555-1234
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⏱️  TIEMPOS PARA COMPARTIR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Actividad                         Tiempo
+──────────────────────────────────────────────────────────────
+Crear instaladores (1 vez)        10-15 min
+Subir 1 archivo a Drive           2-3 min
+Subir 3 archivos a Drive          5-7 min
+Crear enlace compartible          30 seg
+Enviar mensaje por WhatsApp       1 min
+──────────────────────────────────────────────────────────────
+TOTAL (3 clientes):               15-25 min
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  💡 CONSEJOS ÚTILES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ Sube los 3 ZIP a Drive de una vez
+   → Tendrás enlaces listos para cualquier cliente
+
+✅ Guarda los enlaces en un documento
+   → No tendrás que buscarlos cada vez
+
+✅ Si tienes muchos clientes, crea una carpeta compartida
+   → Todos acceden a la misma ubicación
+
+✅ Incluye siempre tu teléfono
+   → Para soporte rápido
+
+✅ Menciona que cambien la contraseña
+   → Seguridad básica
+
+✅ Los archivos dentro del ZIP ya tienen instrucciones
+   → Cliente puede seguirlas si no entendió tu mensaje
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 RESUMEN ULTRA-RÁPIDO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Crea instaladores:
+   ./preparar-distribucion-completa.sh
+
+2. Ve a: dist-cliente/
+
+3. Verás 3 archivos ZIP:
+   • Mac.zip (para Mac)
+   • Windows.zip (para Windows)
+   • Completo.zip (para ambos)
+
+4. Sube el ZIP apropiado a Google Drive
+
+5. Comparte el enlace con tu cliente
+
+6. Envía instrucciones simples
+
+¡Listo! 🎉
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+ANTES DE ENVIAR:
+[ ] Creé los instaladores (./preparar-distribucion-completa.sh)
+[ ] Verifiqué que existen los 3 ZIP en dist-cliente/
+[ ] Elegí el ZIP correcto para mi cliente
+[ ] Subí el archivo a Drive/WeTransfer/etc
+[ ] Obtuve el enlace para compartir
+[ ] Preparé mensaje con instrucciones
+[ ] Incluí mis datos de contacto
+[ ] Estoy disponible para soporte
+
+DESPUÉS DE ENVIAR:
+[ ] Cliente confirmó que recibió el enlace
+[ ] Cliente descargó el archivo
+[ ] Cliente instaló AURA
+[ ] Cliente pudo hacer login
+[ ] Cliente cambió la contraseña
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+© 2026 AURA - Sistema de Gestión Funeraria
+
+¡Compartir AURA con tus clientes es fácil! 📤✨
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

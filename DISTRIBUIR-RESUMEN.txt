@@ -1,0 +1,239 @@
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│           🎁 CÓMO COMPARTIR AURA CON TUS CLIENTES           │
+│                     GUÍA ULTRA-SIMPLE                       │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🚀 PASO 1: PREPARAR EL PAQUETE (5-8 minutos)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ejecuta este comando en tu Terminal:
+
+    chmod +x preparar-distribucion.sh
+    ./preparar-distribucion.sh
+
+
+¿Qué hace?
+✓ Compila AURA
+✓ Crea instalador DMG
+✓ Genera instrucciones para el cliente
+✓ Empaqueta todo en un ZIP
+
+
+Resultado:
+📦 Se crea: dist-cliente/AURA-1.0.0-Instalador.zip
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📤 PASO 2: ENVIAR AL CLIENTE (1 minuto)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Opciones:
+
+📧 Email (si es < 25 MB)
+   → Adjunta AURA-1.0.0-Instalador.zip
+
+☁️  Google Drive / Dropbox
+   → Sube el ZIP → Comparte enlace
+
+🔗 WeTransfer (recomendado)
+   → https://wetransfer.com
+   → Sube ZIP → Envía enlace
+
+💾 USB / Disco
+   → Copia el ZIP directamente
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📥 PASO 3: CLIENTE INSTALA (2 minutos)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+El cliente hace:
+
+1️⃣  Descomprimir AURA-1.0.0-Instalador.zip
+
+2️⃣  Doble click en AURA-1.0.0-mac.dmg
+
+3️⃣  Arrastrar AURA a Aplicaciones
+
+4️⃣  Click DERECHO en AURA → "Abrir" (¡importante!)
+
+5️⃣  Login: admin / admin123
+
+
+¡LISTO! ✅
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 CONTENIDO DEL PAQUETE
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+El ZIP que envías incluye:
+
+📦 AURA-1.0.0-mac.dmg
+   → Instalador principal
+
+🤖 instalar-para-cliente.sh
+   → Instalación automática (opcional)
+
+📄 INSTRUCCIONES-INSTALACION.txt
+   → Guía paso a paso
+
+📘 MANUAL-CLIENTE.txt
+   → Manual completo de uso
+
+📝 LEEME.txt
+   → Resumen rápido
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📧 PLANTILLA DE EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Asunto: Instalador AURA - Sistema de Gestión Funeraria
+
+Hola [Nombre],
+
+Adjunto el instalador de AURA.
+
+📦 INSTALACIÓN (2 minutos):
+1. Descomprime el ZIP
+2. Abre AURA-1.0.0-mac.dmg
+3. Arrastra AURA a Aplicaciones
+4. Click derecho en AURA → "Abrir"
+
+🔐 CREDENCIALES:
+Usuario: admin
+Contraseña: admin123
+
+⚠️ Cambia la contraseña después del primer inicio.
+
+📄 Incluye instrucciones detalladas.
+
+¿Necesitas ayuda? Contáctame.
+
+Saludos,
+[Tu Nombre]
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🆘 PROBLEMAS COMUNES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+❌ Cliente: "No se puede abrir"
+
+✅ Solución:
+   → Click DERECHO en AURA → "Abrir"
+   
+   O desde Terminal:
+   xattr -cr /Applications/AURA.app && open /Applications/AURA.app
+
+
+❌ Cliente: "La app está dañada"
+
+✅ Solución:
+   → Preferencias → Seguridad → "Abrir de todos modos"
+
+
+❌ Cliente: "No encuentro Terminal"
+
+✅ Solución:
+   → Finder → Aplicaciones → Utilidades → Terminal
+   → O: Cmd+Espacio → "Terminal"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔄 ACTUALIZACIONES FUTURAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cuando actualices AURA:
+
+1️⃣  Cambiar versión en package.json:
+    "version": "1.1.0"
+
+2️⃣  Regenerar paquete:
+    ./preparar-distribucion.sh
+
+3️⃣  Enviar nueva versión al cliente
+
+✅ Los datos del cliente NO se pierden
+✅ Servicios y configuraciones se mantienen
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  💡 TIPS PROFESIONALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Prueba el instalador antes de enviarlo
+✓ Incluye tu email/teléfono para soporte
+✓ Ofrece ayuda remota con TeamViewer/AnyDesk
+✓ Guarda una copia del paquete para futuras instalaciones
+✓ Documenta qué versión enviaste a cada cliente
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⏱️  TIEMPOS ESTIMADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Preparar paquete:           5-8 minutos
+Subir a Drive/WeTransfer:   1-2 minutos
+Cliente descarga:           1-2 minutos
+Cliente instala:            2-3 minutos
+─────────────────────────────────────
+TOTAL (de inicio a fin):    10-15 minutos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  💰 DISTRIBUCIÓN PROFESIONAL (Opcional)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Actual (GRATIS):
+✓ Funciona perfectamente
+✓ Cliente usa "click derecho → Abrir" (solo una vez)
+✓ Recomendado para 1-10 clientes
+
+Con Firma Apple ($99/año):
+✓ Sin advertencias de seguridad
+✓ Cliente usa doble click normal
+✓ Actualizaciones automáticas
+✓ Recomendado para 10+ clientes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✅ RESUMEN EJECUTIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Para compartir AURA con un cliente:
+
+    ./preparar-distribucion.sh
+    
+    → Envía: dist-cliente/AURA-1.0.0-Instalador.zip
+    
+    ✅ Cliente instala en 2 minutos
+    ✅ Login: admin / admin123
+    ✅ Funciona 100% offline
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🚀 PRÓXIMO PASO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ejecuta ahora:
+
+    chmod +x preparar-distribucion.sh
+    ./preparar-distribucion.sh
+
+
+En 8 minutos tendrás el paquete listo para enviar. 🎉
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+© 2026 AURA - Sistema de Gestión Funeraria
+
+Lee GUIA-DISTRIBUCION-CLIENTES.md para más detalles.
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

@@ -1,0 +1,369 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║           🏛️  AURA - Sistema de Gestión Funeraria           ║
+║        MANUAL DE INSTALACIÓN Y USO - WINDOWS (PC)             ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────┐
+│  📦 INSTALACIÓN EN WINDOWS (4 PASOS SIMPLES)                │
+└─────────────────────────────────────────────────────────────┘
+
+
+📋 REQUISITOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Windows 10 o superior (Windows 11 recomendado)
+✓ 500 MB de espacio libre
+✓ Permisos de administrador
+
+
+🚀 PASO 1: Ejecutar el instalador
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   1. Busca el archivo: AURA-Setup-1.0.0.exe
+   
+   2. Doble click en el archivo
+   
+   3. Si aparece "Windows protegió tu PC":
+      • Click en "Más información"
+      • Click en "Ejecutar de todas formas"
+
+
+📁 PASO 2: Configurar la instalación
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   1. Lee el acuerdo de licencia
+      → Marca "Acepto el acuerdo"
+      → Click en "Siguiente"
+   
+   2. Elige la carpeta de instalación
+      → Puedes dejar la predeterminada: C:\Program Files\AURA
+      → Click en "Siguiente"
+   
+   3. Selecciona las opciones:
+      ☑ Crear acceso directo en el escritorio
+      ☑ Crear acceso directo en el Menú Inicio
+      → Click en "Siguiente"
+   
+   4. Revisa el resumen
+      → Click en "Instalar"
+
+
+⏱️  PASO 3: Esperar la instalación
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   1. Espera mientras se instala (~30 segundos)
+   
+   2. Cuando termine:
+      ☑ Marca "Ejecutar AURA"
+      → Click en "Finalizar"
+
+
+🔐 PASO 4: Login
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Usuario:    admin
+   Contraseña: admin123
+   
+   Click en "Iniciar Sesión"
+   
+   ⚠️  IMPORTANTE: Cambia la contraseña inmediatamente
+       (Ve a Mi Perfil → Cambiar Contraseña)
+
+
+┌─────────────────────────────────────────────────────────────┐
+│  ✅ ¡LISTO! AURA está instalado y funcionando               │
+└─────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🆘 SOLUCIÓN DE PROBLEMAS (Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+❌ Problema: "Windows protegió tu PC"
+
+✅ Solución:
+   1. En la ventana azul, click en "Más información"
+   2. Aparece un botón "Ejecutar de todas formas"
+   3. Click en "Ejecutar de todas formas"
+   4. La instalación continúa normalmente
+
+
+❌ Problema: El antivirus bloquea la instalación
+
+✅ Solución:
+   1. Abre tu antivirus (Windows Defender, Avast, etc.)
+   2. Desactiva la protección temporalmente
+   3. Instala AURA
+   4. Vuelve a activar el antivirus
+   5. Agrega AURA a las excepciones:
+      • Carpeta: C:\Program Files\AURA
+      • Ejecutable: C:\Program Files\AURA\AURA.exe
+
+
+❌ Problema: "No tienes permisos para instalar"
+
+✅ Solución:
+   1. Click derecho en AURA-Setup-1.0.0.exe
+   2. Selecciona "Ejecutar como administrador"
+   3. Ingresa la contraseña de administrador
+   4. Instala normalmente
+
+
+❌ Problema: AURA no abre después de instalar
+
+✅ Solución A:
+   1. Click derecho en el ícono de AURA
+   2. Selecciona "Ejecutar como administrador"
+
+✅ Solución B:
+   1. Desinstala AURA (Panel de Control → Desinstalar programa)
+   2. Reinicia tu PC
+   3. Instala de nuevo con "Ejecutar como administrador"
+
+
+❌ Problema: Olvidé mi contraseña
+
+✅ Solución:
+   Contacta a tu proveedor para restaurar el acceso
+
+
+❌ Problema: Error de "VCRUNTIME140.dll falta"
+
+✅ Solución:
+   1. Descarga Visual C++ Redistributable:
+      https://aka.ms/vs/17/release/vc_redist.x64.exe
+   2. Instala el archivo descargado
+   3. Reinicia tu PC
+   4. Abre AURA de nuevo
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+📖 GUÍA RÁPIDA DE USO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🏠 DASHBOARD
+   • Pantalla principal con estadísticas
+   • Gráficos de recaudación mensual
+   • Indicadores de servicios activos
+
+
+📝 REGISTRO DE SERVICIO
+   • Crear nuevos servicios funerarios
+   • Campos: nombre del difunto, tipo de servicio, montos, etc.
+   • Click en "Registrar Servicio" para guardar
+
+
+💰 ESTADO DE COBROS
+   • Ver todos los servicios registrados
+   • Agregar abonos a servicios pendientes
+   • Generar recibos de pago imprimibles
+   • Filtrar por estado: pendientes, pagados, vencidos
+
+
+👥 CLIENTES
+   • Gestionar información de clientes
+   • Historial de servicios por cliente
+   • Datos de contacto
+
+
+👤 MI PERFIL
+   • Cambiar contraseña (¡hazlo ahora!)
+   • Configurar backups automáticos
+   • Ver información del sistema
+   • Verificar actualizaciones
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+📍 UBICACIÓN DE TUS DATOS (Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Todos tus datos están seguros en tu PC:
+
+Base de datos:
+C:\Users\[TuUsuario]\AppData\Roaming\AURA\aura-database.db
+
+Backups automáticos:
+C:\Users\[TuUsuario]\AppData\Roaming\AURA\backups\
+
+Logs del sistema:
+C:\Users\[TuUsuario]\AppData\Roaming\AURA\logs\main.log
+
+
+Para ver la carpeta de datos:
+1. Presiona: Windows + R
+2. Escribe: %APPDATA%\AURA
+3. Presiona Enter
+
+
+⚠️  IMPORTANTE:
+   • Haz backups regularmente desde "Mi Perfil"
+   • Los backups automáticos se crean si los configuras
+   • Exporta datos a Excel desde cada módulo
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+💡 CONSEJOS ÚTILES (Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Ancla AURA a la barra de tareas para acceso rápido
+✓ Crea un acceso directo en el escritorio durante la instalación
+✓ Cierra AURA desde el menú (Alt+F4) para guardar todo
+✓ Haz backups semanales
+✓ Actualiza AURA cuando esté disponible (se notifica automáticamente)
+✓ Agrega AURA a las excepciones de tu antivirus
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔄 DESINSTALAR AURA (Si es necesario)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Cierra AURA
+
+2. Ve a: Configuración → Aplicaciones → Aplicaciones y características
+
+3. Busca "AURA"
+
+4. Click en AURA → "Desinstalar"
+
+5. Sigue el asistente de desinstalación
+
+6. Para eliminar también los datos:
+   • Presiona: Windows + R
+   • Escribe: %APPDATA%
+   • Busca y elimina la carpeta "AURA"
+
+⚠️  ADVERTENCIA: Esto eliminará TODOS tus datos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔄 ACTUALIZAR AURA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cuando recibas una nueva versión:
+
+OPCIÓN A: Actualización automática (si está configurada)
+   • AURA te notifica cuando hay actualización
+   • Click en "Actualizar ahora"
+   • La app se cierra, actualiza y vuelve a abrir
+
+OPCIÓN B: Actualización manual
+   1. Cierra AURA si está abierto
+   2. Ejecuta el nuevo instalador
+   3. El instalador actualiza automáticamente
+   4. Tus datos se mantienen intactos
+
+✅ Tus datos NO se pierden
+   (Servicios, clientes y configuraciones se mantienen)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🖥️  ATAJOS DE TECLADO (Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ctrl + N    → Nuevo servicio
+Ctrl + S    → Guardar
+Ctrl + P    → Imprimir
+Ctrl + F    → Buscar
+Ctrl + Q    → Cerrar AURA
+F5          → Actualizar datos
+F11         → Pantalla completa
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+📞 SOPORTE TÉCNICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¿Necesitas ayuda?
+
+Contacta a tu proveedor:
+→ Incluye capturas de pantalla del problema
+→ Describe qué estabas haciendo cuando ocurrió el error
+→ Menciona qué versión de Windows tienes
+
+
+Para ver tu versión de Windows:
+• Presiona: Windows + I
+• Ve a: Sistema → Acerca de
+• Busca "Especificaciones de Windows"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+✨ CARACTERÍSTICAS PRINCIPALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Registro completo de servicios funerarios
+✓ Control detallado de cobros y abonos
+✓ Generación de recibos imprimibles
+✓ Dashboard con estadísticas en tiempo real
+✓ Gráficos de recaudación mensual
+✓ Gestión de clientes
+✓ Backups automáticos de datos
+✓ Sistema de actualizaciones integrado
+✓ Funciona 100% offline (sin internet)
+✓ Base de datos local segura (SQLite)
+✓ Exportación a Excel/CSV
+✓ Compatible con Windows 10 y 11
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔒 SEGURIDAD Y PRIVACIDAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Todos los datos se guardan localmente en tu PC
+✓ No se envía información a internet
+✓ Base de datos protegida con SQLite
+✓ Acceso controlado por contraseña
+✓ Backups cifrados disponibles
+✓ Compatible con Windows Defender y otros antivirus
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔧 COMPATIBILIDAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Windows 10 (64-bit)
+✓ Windows 11
+✓ Procesador: Intel/AMD de 64-bit
+✓ RAM: 4 GB mínimo (8 GB recomendado)
+✓ Espacio: 500 MB libres
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+¡Bienvenido a AURA! 🏛️✨
+
+Tu sistema de gestión funeraria profesional para Windows.
+
+
+© 2026 AURA - Sistema de Gestión Funeraria
+Versión 1.0.0 - Windows
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

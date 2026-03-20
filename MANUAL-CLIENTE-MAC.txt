@@ -1,0 +1,305 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║           🏛️  AURA - Sistema de Gestión Funeraria           ║
+║          MANUAL DE INSTALACIÓN Y USO - MAC (macOS)            ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+┌─────────────────────────────────────────────────────────────┐
+│  📦 INSTALACIÓN EN MAC (4 PASOS SIMPLES)                    │
+└─────────────────────────────────────────────────────────────┘
+
+
+📋 REQUISITOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+✓ Mac con macOS 10.13 (High Sierra) o superior
+✓ 500 MB de espacio libre
+✓ Permisos de administrador
+
+
+🚀 PASO 1: Abrir el instalador
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   1. Busca el archivo: AURA-1.0.0-mac.dmg
+   
+   2. Doble click en el archivo
+   
+   3. Se abre una ventana con el ícono de AURA
+
+
+📁 PASO 2: Instalar AURA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   1. Arrastra el ícono de AURA → carpeta "Aplicaciones"
+   
+   2. Espera a que termine de copiar (5-10 segundos)
+   
+   3. Cierra la ventana del instalador
+
+
+🔓 PASO 3: Abrir AURA (¡IMPORTANTE!)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   ⚠️  LA PRIMERA VEZ debes hacer esto:
+   
+   1. Ve a: Finder → Aplicaciones
+   
+   2. Busca el ícono de AURA (dorado)
+   
+   3. Click DERECHO en AURA
+      (NO uses doble click normal)
+   
+   4. Selecciona "Abrir" en el menú
+   
+   5. Aparece un mensaje de seguridad
+      → Click en "Abrir"
+
+
+🔐 PASO 4: Login
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+   Usuario:    admin
+   Contraseña: admin123
+   
+   Click en "Iniciar Sesión"
+   
+   ⚠️  IMPORTANTE: Cambia la contraseña inmediatamente
+       (Ve a Mi Perfil → Cambiar Contraseña)
+
+
+┌─────────────────────────────────────────────────────────────┐
+│  ✅ ¡LISTO! AURA está instalado y funcionando               │
+└─────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🆘 SOLUCIÓN DE PROBLEMAS (Mac)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+❌ Problema: "No se puede abrir porque es de un desarrollador 
+             no identificado"
+
+✅ Solución A (Recomendada):
+   1. Click DERECHO en AURA (en Aplicaciones)
+   2. Selecciona "Abrir"
+   3. Click en "Abrir" en el mensaje
+
+✅ Solución B:
+   1. Ve a: Preferencias del Sistema
+   2. Click en: Seguridad y Privacidad
+   3. Verás un mensaje sobre AURA bloqueada
+   4. Click en: "Abrir de todas formas"
+
+✅ Solución C (Terminal):
+   1. Abre Terminal (Aplicaciones → Utilidades → Terminal)
+   2. Copia y pega este comando:
+      xattr -cr /Applications/AURA.app && open /Applications/AURA.app
+   3. Presiona Enter
+
+
+❌ Problema: AURA no abre / se cierra inmediatamente
+
+✅ Solución:
+   1. Abre Terminal
+   2. Ejecuta: open /Applications/AURA.app
+   3. Si ves errores, cópialos y contáctalos a soporte
+
+
+❌ Problema: "La aplicación AURA está dañada"
+
+✅ Solución:
+   1. Abre Terminal
+   2. Ejecuta: xattr -cr /Applications/AURA.app
+   3. Abre AURA de nuevo
+
+
+❌ Problema: Olvidé mi contraseña
+
+✅ Solución:
+   Contacta a tu proveedor para restaurar el acceso
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+📖 GUÍA RÁPIDA DE USO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🏠 DASHBOARD
+   • Pantalla principal con estadísticas
+   • Gráficos de recaudación mensual
+   • Indicadores de servicios activos
+
+
+📝 REGISTRO DE SERVICIO
+   • Crear nuevos servicios funerarios
+   • Campos: nombre del difunto, tipo de servicio, montos, etc.
+   • Click en "Registrar Servicio" para guardar
+
+
+💰 ESTADO DE COBROS
+   • Ver todos los servicios registrados
+   • Agregar abonos a servicios pendientes
+   • Generar recibos de pago imprimibles
+   • Filtrar por estado: pendientes, pagados, vencidos
+
+
+👥 CLIENTES
+   • Gestionar información de clientes
+   • Historial de servicios por cliente
+   • Datos de contacto
+
+
+👤 MI PERFIL
+   • Cambiar contraseña (¡hazlo ahora!)
+   • Configurar backups automáticos
+   • Ver información del sistema
+   • Verificar actualizaciones
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+📍 UBICACIÓN DE TUS DATOS (Mac)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Todos tus datos están seguros en tu Mac:
+
+Base de datos:
+~/Library/Application Support/AURA/aura-database.db
+
+Backups automáticos:
+~/Library/Application Support/AURA/backups/
+
+Logs del sistema:
+~/Library/Logs/AURA/main.log
+
+
+Para ver la carpeta de datos:
+1. Finder → Ir → Ir a la carpeta...
+2. Escribe: ~/Library/Application Support/AURA
+3. Presiona Enter
+
+
+⚠️  IMPORTANTE:
+   • Haz backups regularmente desde "Mi Perfil"
+   • Los backups automáticos se crean si los configuras
+   • Exporta datos a Excel desde cada módulo
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+💡 CONSEJOS ÚTILES (Mac)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Agrega AURA al Dock para acceso rápido
+✓ Después de la primera apertura, ya no necesitas click derecho
+✓ Cierra AURA desde el menú (Cmd+Q) para guardar todo
+✓ Haz backups semanales
+✓ Actualiza AURA cuando esté disponible (se notifica automáticamente)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔄 DESINSTALAR AURA (Si es necesario)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Cierra AURA
+
+2. Arrastra AURA desde Aplicaciones a la Papelera
+
+3. Para eliminar también los datos:
+   • Finder → Ir → Ir a la carpeta...
+   • Escribe: ~/Library/Application Support/
+   • Arrastra la carpeta "AURA" a la Papelera
+
+⚠️  ADVERTENCIA: Esto eliminará TODOS tus datos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔄 ACTUALIZAR AURA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Cuando recibas una nueva versión:
+
+1. Cierra AURA si está abierto
+
+2. Instala la nueva versión (igual que la primera vez)
+
+3. Tus datos se mantienen automáticamente
+   (No se pierden servicios, clientes ni configuraciones)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+📞 SOPORTE TÉCNICO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¿Necesitas ayuda?
+
+Contacta a tu proveedor:
+→ Incluye capturas de pantalla del problema
+→ Describe qué estabas haciendo cuando ocurrió el error
+→ Menciona qué versión de macOS tienes
+
+
+Para ver tu versión de macOS:
+• Click en el logo de Apple (esquina superior izquierda)
+• "Acerca de este Mac"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+✨ CARACTERÍSTICAS PRINCIPALES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Registro completo de servicios funerarios
+✓ Control detallado de cobros y abonos
+✓ Generación de recibos imprimibles
+✓ Dashboard con estadísticas en tiempo real
+✓ Gráficos de recaudación mensual
+✓ Gestión de clientes
+✓ Backups automáticos de datos
+✓ Sistema de actualizaciones integrado
+✓ Funciona 100% offline (sin internet)
+✓ Base de datos local segura
+✓ Exportación a Excel/CSV
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+🔒 SEGURIDAD Y PRIVACIDAD
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Todos los datos se guardan localmente en tu Mac
+✓ No se envía información a internet
+✓ Base de datos protegida con SQLite
+✓ Acceso controlado por contraseña
+✓ Backups cifrados disponibles
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+¡Bienvenido a AURA! 🏛️✨
+
+Tu sistema de gestión funeraria profesional para Mac.
+
+
+© 2026 AURA - Sistema de Gestión Funeraria
+Versión 1.0.0 - macOS
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

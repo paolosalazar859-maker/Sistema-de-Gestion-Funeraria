@@ -1,0 +1,358 @@
+╔═══════════════════════════════════════════════════════════════╗
+║                                                               ║
+║    ✅ YA DESCARGASTE FIGMA MAKE - SIGUE ESTOS PASOS          ║
+║                                                               ║
+╚═══════════════════════════════════════════════════════════════╝
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📂 PASO 1: UBICAR Y DESCOMPRIMIR EL ARCHIVO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1.1) Busca el archivo descargado (probablemente en ~/Downloads/)
+     • Nombre: algo como "aura-project.zip" o "figma-make-xxx.zip"
+
+1.2) Doble click en el ZIP para descomprimir
+
+1.3) Renombra la carpeta a "AURA" (para que sea más fácil)
+
+1.4) Mueve la carpeta a tu Desktop (escritorio)
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  💻 PASO 2: ABRIR TERMINAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+2.1) Presiona: Cmd + Espacio
+
+2.2) Escribe: Terminal
+
+2.3) Presiona: Enter
+
+✅ Se abre la ventana de Terminal
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📁 PASO 3: IR A LA CARPETA DEL PROYECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+En Terminal, copia y pega este comando:
+
+    cd ~/Desktop/AURA
+
+Presiona: Enter
+
+
+⚠️  SI LA CARPETA ESTÁ EN OTRO LUGAR:
+
+Si pusiste la carpeta en otro lugar, ajusta la ruta:
+
+    cd ~/Downloads/AURA        (si está en Descargas)
+    cd ~/Documents/AURA        (si está en Documentos)
+    cd /ruta/donde/la/pusiste/AURA
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✅ PASO 4: VERIFICAR QUE ESTÁS EN EL LUGAR CORRECTO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ejecuta este comando:
+
+    ls
+
+Deberías ver archivos como:
+• package.json
+• electron.js
+• preparar-distribucion-completa.sh
+• src/
+• dist-cliente/ (tal vez)
+
+✅ Si los ves → ¡Perfecto! Continúa
+❌ Si no los ves → Verifica la ruta en el Paso 3
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔍 PASO 5: VERIFICAR NODE.JS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ejecuta:
+
+    node --version
+
+
+✅ SI VES algo como "v18.x.x" o "v20.x.x":
+   → Perfecto! Continúa al Paso 6
+
+
+❌ SI VE "command not found":
+   → Necesitas instalar Node.js:
+
+   1. Ve a: https://nodejs.org
+   2. Descarga la versión LTS (botón verde)
+   3. Instala el archivo descargado
+   4. Cierra y vuelve a abrir Terminal
+   5. Intenta de nuevo: node --version
+   6. Continúa al Paso 6
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📦 PASO 6: INSTALAR DEPENDENCIAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ejecuta:
+
+    npm install
+
+⏱️  ESPERA: 3-5 minutos
+
+Verás muchos mensajes pasando... ¡Es normal!
+
+Espera hasta que termine y veas algo como:
+"added XXX packages in XXXs"
+
+
+⚠️  SI HAY ERRORES:
+
+Intenta con:
+
+    npm install --legacy-peer-deps
+
+
+✅ CUANDO TERMINE sin errores rojos grandes → Continúa
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔨 PASO 7: CREAR INSTALADORES (Mac + Windows)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+7.1) Dar permisos al script:
+
+    chmod +x preparar-distribucion-completa.sh
+
+
+7.2) Ejecutar el script:
+
+    ./preparar-distribucion-completa.sh
+
+
+7.3) Presiona ENTER cuando te lo pida
+
+
+⏱️  ESPERA: 10-15 minutos ☕
+
+El script hará automáticamente:
+• Compila la aplicación
+• Crea instalador Mac (.dmg)
+• Crea instalador Windows (.exe)
+• Empaqueta todo en 3 ZIPs
+
+
+✅ CUANDO VEA:
+"✅ ¡PAQUETES DE DISTRIBUCIÓN LISTOS!"
+
+→ Se abre automáticamente la carpeta "dist-cliente"
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📦 PASO 8: VERIFICAR LOS INSTALADORES CREADOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Deberías ver en la carpeta "dist-cliente":
+
+✅ AURA-1.0.0-Instalador-Mac.zip          (~80 MB)
+✅ AURA-1.0.0-Instalador-Windows.zip      (~100 MB)
+✅ AURA-1.0.0-Instalador-Completo.zip     (~180 MB)
+
+Y también las carpetas sin comprimir:
+• AURA-Instalador-Mac/
+• AURA-Instalador-Windows/
+• AURA-Instalador-Completo/
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🚀 PASO 9: INSTALAR AURA EN TU MAC
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+OPCIÓN A: INSTALACIÓN AUTOMÁTICA (MÁS FÁCIL) ⭐
+──────────────────────────────────────────────────────────────
+
+En Terminal, ejecuta:
+
+    cd dist-cliente/AURA-Instalador-Mac
+    chmod +x instalar-para-cliente.sh
+    ./instalar-para-cliente.sh
+
+Presiona ENTER cuando te lo pida.
+
+El script instala AURA automáticamente y lo abre.
+
+
+OPCIÓN B: INSTALACIÓN MANUAL
+──────────────────────────────────────────────────────────────
+
+9.1) En Finder, ve a:
+     dist-cliente → AURA-Instalador-Mac
+
+9.2) Doble click en:
+     AURA-1.0.0-mac.dmg
+
+9.3) Arrastra el ícono de AURA → carpeta Aplicaciones
+
+9.4) Cierra la ventana del instalador
+
+9.5) Ve a: Aplicaciones
+
+9.6) ⚠️  IMPORTANTE: Click DERECHO en AURA
+
+9.7) Selecciona: "Abrir"
+
+9.8) Click en: "Abrir" (en el mensaje de seguridad)
+
+✅ AURA se abre
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔐 PASO 10: LOGIN Y CONFIGURACIÓN INICIAL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+10.1) En la pantalla de login, ingresa:
+
+      Usuario:    admin
+      Contraseña: admin123
+
+      Click: "Iniciar Sesión"
+
+
+10.2) ⚠️  IMPORTANTE - Cambiar contraseña:
+
+      • Click en ícono de perfil (arriba derecha)
+      • "Mi Perfil"
+      • "Cambiar Contraseña"
+      • Contraseña actual: admin123
+      • Nueva contraseña: [tu contraseña segura]
+      • Guardar
+
+
+10.3) Probar funcionalidades:
+
+      ✅ Dashboard → Ver estadísticas
+      ✅ Registro de Servicio → Crear servicio de prueba
+      ✅ Estado de Cobros → Ver servicio creado
+      ✅ Navegación → Todas las secciones
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎉 ¡COMPLETADO!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ AURA instalado en tu Mac
+✅ Instaladores creados para distribuir
+✅ Sistema funcionando correctamente
+
+
+AHORA PUEDES:
+──────────────────────────────────────────────────────────────
+
+1. Usar AURA en tu Mac
+
+2. Enviar instaladores a clientes:
+   • Mac.zip → clientes con Mac
+   • Windows.zip → clientes con Windows
+   • Completo.zip → cualquier cliente
+
+3. Ver: COMO-COMPARTIR-A-CLIENTES.txt
+   → Para saber cómo enviar a clientes
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📋 COMANDOS RESUMIDOS (TODO JUNTO)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Después de descomprimir, ejecuta en Terminal:
+
+
+# 1. Ir a la carpeta
+cd ~/Desktop/AURA
+
+# 2. Verificar ubicación
+ls
+
+# 3. Verificar Node.js
+node --version
+
+# 4. Instalar dependencias (espera 3-5 min)
+npm install
+
+# 5. Dar permisos
+chmod +x preparar-distribucion-completa.sh
+
+# 6. Crear instaladores (espera 10-15 min)
+./preparar-distribucion-completa.sh
+
+# 7. Instalar en tu Mac
+cd dist-cliente/AURA-Instalador-Mac
+chmod +x instalar-para-cliente.sh
+./instalar-para-cliente.sh
+
+
+Login: admin / admin123
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🆘 SOLUCIÓN DE PROBLEMAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+❌ "No such file or directory" al hacer cd
+──────────────────────────────────────────────────────────────
+→ La carpeta no está donde crees
+→ Verifica dónde descomprimiste
+→ Ajusta la ruta en el comando cd
+
+
+❌ "command not found: node"
+──────────────────────────────────────────────────────────────
+→ Instala Node.js: https://nodejs.org
+→ Descarga LTS → Instala → Reinicia Terminal
+
+
+❌ Errores en "npm install"
+──────────────────────────────────────────────────────────────
+→ Intenta: npm install --legacy-peer-deps
+→ O: npm cache clean --force
+→ Luego: npm install de nuevo
+
+
+❌ AURA no abre / "La app está dañada"
+──────────────────────────────────────────────────────────────
+→ Ejecuta en Terminal:
+  xattr -cr /Applications/AURA.app
+  open /Applications/AURA.app
+
+
+❌ "preparar-distribucion-completa.sh: Permission denied"
+──────────────────────────────────────────────────────────────
+→ Dale permisos:
+  chmod +x preparar-distribucion-completa.sh
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⏱️  TIEMPO TOTAL ESTIMADO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Ubicar y descomprimir:          1 min
+Abrir Terminal y navegar:       1 min
+npm install:                    3-5 min
+Crear instaladores:             10-15 min
+Instalar en Mac:                2 min
+Configurar y probar:            2 min
+─────────────────────────────────────────────────────────────
+TOTAL:                          20-30 min
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+¡Sigue estos pasos y tendrás AURA funcionando en 30 minutos! 🚀
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━

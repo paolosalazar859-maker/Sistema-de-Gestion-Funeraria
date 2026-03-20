@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="512" height="512">
+  <!-- Full bleed background for maskable icon (safe zone = center 80%) -->
+  <rect width="512" height="512" fill="#1a1f2e"/>
+  <!-- Gold decorative line top (within safe zone) -->
+  <rect x="100" y="110" width="312" height="4" rx="2" fill="#C9A84C"/>
+  <!-- Letter A - centered and padded for safe zone -->
+  <path d="M256 150 L165 370 L192 370 L218 300 L294 300 L320 370 L347 370 Z M228 270 L256 195 L284 270 Z" fill="#ffffff"/>
+  <!-- Gold decorative line bottom (within safe zone) -->
+  <rect x="100" y="400" width="312" height="4" rx="2" fill="#C9A84C"/>
+  <circle cx="256" cy="388" r="6" fill="#C9A84C"/>
+</svg>

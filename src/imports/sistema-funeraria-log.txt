@@ -1,0 +1,91 @@
+(base) paolosalazar@MacBook-Pro-de-Paolo SistemaFuneraria % npm run electron
+
+
+> @figma/my-make-file@1.0.0 electron
+> electron electron.js
+
+✅ Módulo de base de datos cargado
+📁 Inicializando base de datos en: /Users/paolosalazar/Library/Application Support/Electron/aura-database.db
+PRAGMA foreign_keys = ON
+CREATE TABLE IF NOT EXISTS services (
+      id TEXT PRIMARY KEY,
+      service_category TEXT NOT NULL DEFAULT 'Servicio Funerario',
+      engraving_text TEXT,
+      date TEXT NOT NULL,
+      cemetery TEXT NOT NULL,
+      service_type TEXT NOT NULL,
+      service_value REAL NOT NULL,
+      deceased_name TEXT NOT NULL,
+      deceased_rut TEXT NOT NULL,
+      transfer_from TEXT NOT NULL,
+      transfer_cost REAL NOT NULL,
+      contractor_name TEXT NOT NULL,
+      contractor_rut TEXT NOT NULL,
+      contractor_address TEXT NOT NULL,
+      contractor_phone TEXT NOT NULL,
+      contractor_email TEXT NOT NULL,
+      municipal_contribution REAL NOT NULL,
+      mortuary_fee REAL NOT NULL,
+      discount REAL NOT NULL,
+      initial_payment REAL NOT NULL,
+      installments_enabled INTEGER DEFAULT 0,
+      total_installments INTEGER DEFAULT 0,
+      installment_amount REAL DEFAULT 0,
+      paid_installments INTEGER DEFAULT 0,
+      total_service REAL NOT NULL,
+      total_paid REAL NOT NULL,
+      pending_balance REAL NOT NULL,
+      status TEXT NOT NULL,
+      last_payment_date TEXT NOT NULL,
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  
+CREATE TABLE IF NOT EXISTS payments (
+      id TEXT PRIMARY KEY,
+      service_id TEXT NOT NULL,
+      date TEXT NOT NULL,
+      amount REAL NOT NULL,
+      method TEXT NOT NULL,
+      balance REAL NOT NULL,
+      notes TEXT,
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      FOREIGN KEY (service_id) REFERENCES services(id) ON DELETE CASCADE
+    )
+  
+CREATE TABLE IF NOT EXISTS users (
+      id TEXT PRIMARY KEY,
+      username TEXT UNIQUE NOT NULL,
+      email TEXT UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      role TEXT NOT NULL DEFAULT 'Oficina',
+      created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+      last_login TEXT
+    )
+  
+CREATE TABLE IF NOT EXISTS config (
+      key TEXT PRIMARY KEY,
+      value TEXT NOT NULL,
+      updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
+    )
+  
+CREATE INDEX IF NOT EXISTS idx_services_date ON services(date);
+CREATE INDEX IF NOT EXISTS idx_services_status ON services(status);
+CREATE INDEX IF NOT EXISTS idx_services_created_at ON services(created_at);
+CREATE INDEX IF NOT EXISTS idx_payments_service_id ON payments(service_id);
+CREATE INDEX IF NOT EXISTS idx_payments_date ON payments(date);
+✅ Tablas creadas correctamente
+✅ Base de datos SQLite inicializada correctamente
+✅ Base de datos SQLite lista
+SELECT * FROM config WHERE key = 'backup_settings'
+⏸️  Programador de backups deshabilitado
+✅ Sistema de backups automáticos inicializado
+🔧 Modo: DESARROLLO
+📦 app.isPackaged: false
+🌐 Cargando desde: http://localhost:5173
+04:18:31.054 › ⚙️ Configuración de actualizaciones cargada
+04:18:31.058 › ⚠️ Verificación automática deshabilitada en modo desarrollo
+✅ Sistema de actualizaciones automáticas inicializado
+[27300:0307/041833.867976:ERROR:CONSOLE(1)] "Request Autofill.enable failed. {"code":-32601,"message":"'Autofill.enable' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+[27300:0307/041833.868045:ERROR:CONSOLE(1)] "Request Autofill.setAddresses failed. {"code":-32601,"message":"'Autofill.setAddresses' wasn't found"}", source: devtools://devtools/bundled/core/protocol_client/protocol_client.js (1)
+

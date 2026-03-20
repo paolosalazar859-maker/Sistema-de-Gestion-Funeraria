@@ -1,0 +1,293 @@
+┌─────────────────────────────────────────────────────────────┐
+│                                                             │
+│    🎁 DISTRIBUIR AURA - MAC Y WINDOWS (ULTRA-SIMPLE)        │
+│                                                             │
+└─────────────────────────────────────────────────────────────┘
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⚡ UN SOLO COMANDO
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+    chmod +x preparar-distribucion-completa.sh
+    ./preparar-distribucion-completa.sh
+
+
+  ¿Qué hace?
+  ──────────────────────────────────────────────────────────
+  ✓ Compila AURA
+  ✓ Crea instalador para Mac (.dmg)
+  ✓ Crea instalador para Windows (.exe)
+  ✓ Empaqueta en 3 ZIP diferentes
+  ✓ Incluye instrucciones para cada sistema
+
+
+  Tiempo: ~10-15 minutos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📦 RESULTADO: 3 PAQUETES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  1️⃣  AURA-1.0.0-Instalador-Mac.zip
+      • Solo para Mac
+      • Tamaño: ~80 MB
+      • Incluye: DMG + instrucciones
+
+
+  2️⃣  AURA-1.0.0-Instalador-Windows.zip
+      • Solo para Windows
+      • Tamaño: ~100 MB
+      • Incluye: EXE + instrucciones
+
+
+  3️⃣  AURA-1.0.0-Instalador-Completo.zip
+      • Para ambos sistemas
+      • Tamaño: ~180 MB
+      • Incluye: DMG + EXE + instrucciones
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🎯 ¿QUÉ ENVIAR AL CLIENTE?
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  Cliente tiene Mac
+  ──────────────────────────────────────────────────────────
+  → Envía: AURA-1.0.0-Instalador-Mac.zip
+
+
+  Cliente tiene Windows
+  ──────────────────────────────────────────────────────────
+  → Envía: AURA-1.0.0-Instalador-Windows.zip
+
+
+  No sabes qué tiene
+  ──────────────────────────────────────────────────────────
+  → Envía: AURA-1.0.0-Instalador-Completo.zip
+
+
+  Oficina mixta (varios sistemas)
+  ──────────────────────────────────────────────────────────
+  → Envía: AURA-1.0.0-Instalador-Completo.zip
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📤 CÓMO ENVIAR
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  Google Drive (Recomendado)
+  ──────────────────────────────────────────────────────────
+  1. Sube el ZIP
+  2. Comparte enlace
+  3. Envía al cliente
+
+
+  WeTransfer (Fácil)
+  ──────────────────────────────────────────────────────────
+  1. Ve a wetransfer.com
+  2. Sube el ZIP
+  3. Envía por email
+
+
+  Email (Solo < 25 MB)
+  ──────────────────────────────────────────────────────────
+  Adjunta el ZIP directamente
+
+
+  USB / Disco
+  ──────────────────────────────────────────────────────────
+  Copia el ZIP al dispositivo
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🍎 INSTALACIÓN MAC (Cliente)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  1. Descomprimir el ZIP
+
+  2. Doble click en AURA-1.0.0-mac.dmg
+
+  3. Arrastrar AURA → Aplicaciones
+
+  4. Click DERECHO en AURA → "Abrir"
+     (¡IMPORTANTE! Primera vez usa click derecho)
+
+  5. Login: admin / admin123
+
+
+  Tiempo: 2 minutos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🪟 INSTALACIÓN WINDOWS (Cliente)
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  1. Descomprimir el ZIP
+
+  2. Doble click en AURA-Setup-1.0.0.exe
+
+  3. Si aparece "Windows protegió tu PC":
+     • Click "Más información"
+     • Click "Ejecutar de todas formas"
+
+  4. Seguir asistente:
+     Siguiente → Siguiente → Instalar
+
+  5. Login: admin / admin123
+
+
+  Tiempo: 3 minutos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🆘 SOLUCIONES RÁPIDAS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  Mac: "No se puede abrir"
+  ──────────────────────────────────────────────────────────
+  → Click DERECHO en AURA → "Abrir"
+
+  O ejecuta en Terminal:
+  xattr -cr /Applications/AURA.app && open /Applications/AURA.app
+
+
+  Windows: "Windows protegió tu PC"
+  ──────────────────────────────────────────────────────────
+  → Click "Más información" → "Ejecutar de todas formas"
+
+
+  Windows: Antivirus bloquea
+  ──────────────────────────────────────────────────────────
+  → Desactiva temporalmente
+  → Instala AURA
+  → Reactiva y agrega a excepciones
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📧 PLANTILLA DE EMAIL
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  Asunto: Instalador AURA - Sistema de Gestión Funeraria
+
+  Hola [Nombre],
+
+  Adjunto el instalador de AURA.
+
+  🍎 Si tienes Mac:
+     1. Abre AURA-1.0.0-mac.dmg
+     2. Arrastra a Aplicaciones
+     3. Click derecho → "Abrir"
+
+  🪟 Si tienes Windows:
+     1. Ejecuta AURA-Setup-1.0.0.exe
+     2. Si dice "Windows protegió tu PC":
+        Click "Más información" → "Ejecutar de todas formas"
+     3. Sigue el instalador
+
+  🔐 Credenciales:
+     Usuario: admin
+     Contraseña: admin123
+
+  ⚠️ Cambia la contraseña después del primer inicio.
+
+  🔗 Enlace: [TU_ENLACE]
+
+  ¿Problemas? Llámame: [TU_TELEFONO]
+
+  Saludos,
+  [Tu Nombre]
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ⏱️  TIEMPOS
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  Para ti (preparar):
+  ──────────────────────────────────────────────────────────
+  Compilar ambos instaladores:    10-15 minutos
+  Subir a Drive/WeTransfer:       3-5 minutos
+  ────────────────────────────────────────────────────────
+  TOTAL:                          15-20 minutos
+
+
+  Para el cliente (instalar):
+  ──────────────────────────────────────────────────────────
+  Descargar ZIP:                  2-3 minutos
+  Instalar (Mac):                 2 minutos
+  Instalar (Windows):             3 minutos
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  📊 COMPARACIÓN
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+                          Mac              Windows
+  ──────────────────────────────────────────────────────────
+  Archivo                 .dmg             .exe
+  Tamaño                  ~80 MB           ~100 MB
+  Tiempo instalación      2 min            3 min
+  Advertencia sistema     Sí (1ra vez)     Sí (Defender)
+  Requiere admin          No               Sí
+  Ubicación datos         ~/Library        %APPDATA%
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🔄 ACTUALIZACIONES
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  1. Cambiar versión en package.json:
+     "version": "1.1.0"
+
+  2. Regenerar paquetes:
+     ./preparar-distribucion-completa.sh
+
+  3. Enviar nueva versión
+
+  ✅ Los datos del cliente NO se pierden
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  ✅ CHECKLIST
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+  Antes de enviar:
+  ──────────────────────────────────────────────────────────
+  [ ] Ejecuté preparar-distribucion-completa.sh
+  [ ] Se crearon los 3 ZIP
+  [ ] Elegí el paquete correcto
+  [ ] Subí a Drive/WeTransfer
+  [ ] Preparé email con instrucciones
+  [ ] Tengo mi teléfono listo para soporte
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+  🚀 EMPIEZA AHORA
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+
+    chmod +x preparar-distribucion-completa.sh
+    ./preparar-distribucion-completa.sh
+
+
+  En 15 minutos tendrás instaladores listos para
+  Mac y Windows. 🎉
+
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+© 2026 AURA - Sistema de Gestión Funeraria
+
+Para más detalles: GUIA-DISTRIBUCION-MAC-WINDOWS.md
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
