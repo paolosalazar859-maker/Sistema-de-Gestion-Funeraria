@@ -1,5 +1,5 @@
 import { loadServices, computeMonthlyData, recalculateAllStatuses } from "../data/serviceStore";
-import { TrendingUp, AlertTriangle, FileText, Users, DollarSign, ArrowRight } from "lucide-react";
+import { TrendingUp, AlertTriangle, FileText, Users, DollarSign, ArrowRight, ArrowUpRight } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router";
 import {
@@ -105,6 +105,7 @@ export function Dashboard() {
       iconBg: "linear-gradient(135deg, #16a34a, #22c55e)",
       change: "+12.5% este mes",
       changePositive: true,
+      to: "/cobros",
     },
     {
       label: "Deuda Pendiente",
@@ -113,6 +114,7 @@ export function Dashboard() {
       iconBg: "linear-gradient(135deg, #dc2626, #ef4444)",
       change: `${deudaTotal + abonando} cuentas activas`,
       changePositive: false,
+      to: "/cobros",
     },
     {
       label: "Servicios Activos",
@@ -121,6 +123,7 @@ export function Dashboard() {
       iconBg: "linear-gradient(135deg, #1a2f5a, #2563eb)",
       change: `${pagados} completados`,
       changePositive: true,
+      to: "/registro",
     },
     {
       label: "Clientes Totales",
@@ -129,6 +132,7 @@ export function Dashboard() {
       iconBg: "linear-gradient(135deg, #c9a84c, #e8c97a)",
       change: `${abonando} en proceso`,
       changePositive: true,
+      to: "/clientes",
     },
   ];
 
@@ -137,10 +141,11 @@ export function Dashboard() {
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {statCards.map((card, i) => (
-          <div
+          <Link
             key={i}
-            className="rounded-2xl p-5 shadow-sm"
-            style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
+            to={card.to}
+            className="rounded-2xl p-5 shadow-sm block transition-all hover:shadow-md hover:-translate-y-0.5"
+            style={{ background: "#ffffff", border: "1px solid #e5e7eb", textDecoration: "none" }}
           >
             <div className="flex items-start justify-between mb-4">
               <div
@@ -149,13 +154,14 @@ export function Dashboard() {
               >
                 <card.icon size={20} color="white" />
               </div>
+              <ArrowUpRight size={15} style={{ color: "#d1d5db" }} />
             </div>
             <p className="text-xs mb-1" style={{ color: "#6b7280" }}>{card.label}</p>
             <p className="text-xl mb-2" style={{ color: "#0d1b3e", fontWeight: 700 }}>{card.value}</p>
             <p className="text-xs" style={{ color: card.changePositive ? "#16a34a" : "#dc2626" }}>
               {card.change}
             </p>
-          </div>
+          </Link>
         ))}
       </div>
 
@@ -323,10 +329,11 @@ export function Dashboard() {
                 {services.slice(0, 4).map((service) => (
                   <tr
                     key={service.id}
-                    className="transition-colors"
+                    className="transition-colors cursor-pointer"
                     style={{ borderTop: "1px solid #f0f2f5" }}
-                    onMouseEnter={(e) => (e.currentTarget.style.background = "#fafbfc")}
+                    onMouseEnter={(e) => (e.currentTarget.style.background = "#f0f4ff")}
                     onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
+                    onClick={() => window.location.hash = "#/cobros"}
                   >
                     <td className="px-4 py-3">
                       <p className="text-xs" style={{ color: "#0d1b3e", fontWeight: 500 }}>{service.deceasedName.split(" ").slice(0, 2).join(" ")}</p>
