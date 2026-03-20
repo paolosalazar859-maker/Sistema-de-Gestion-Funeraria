@@ -16,8 +16,8 @@ import {
   X,
   Check,
   ShoppingBag,
-  CheckCircle,
   Type,
+  Heart,
 } from "lucide-react";
 import { funeralServiceTypes, productServiceTypes } from "../data/mockData";
 import {
