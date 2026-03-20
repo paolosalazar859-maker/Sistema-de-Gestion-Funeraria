@@ -947,10 +947,12 @@ export function ServiceRegistration() {
 <body>
   <div class="header">
     <div class="brand">
-      <div class="logo-box">
+      <div class="logo-box" ${company.logoBase64 ? 'style="background: transparent;"' : ''}>
+        ${company.logoBase64 ? `<img src="${company.logoBase64}" style="width:100%;height:100%;object-fit:contain;border-radius:10px;" />` : `
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
           <path d="M12 2L4 7v10l8 5 8-5V7L12 2z" fill="white" fill-opacity="0.9"/>
         </svg>
+        `}
       </div>
       <div>
         <div class="brand-name">${company.name}</div>

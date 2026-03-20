@@ -4,6 +4,7 @@ export interface CompanyProfile {
   phone: string;
   email: string;
   address: string;
+  logoBase64?: string;
 }
 
 const DB_KEY = "funeral_company_profile";

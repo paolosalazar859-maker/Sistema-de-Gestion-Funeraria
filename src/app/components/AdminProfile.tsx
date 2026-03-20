@@ -18,6 +18,7 @@ import {
   Download,
   Building2,
   MapPin,
+  Image as ImageIcon,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { DatabaseManager } from "./DatabaseManager";
@@ -57,6 +58,43 @@ export function AdminProfile() {
   const [empresaForm, setEmpresaForm] = useState<CompanyProfile>(loadCompanyProfile());
   const [empresaMsg, setEmpresaMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
   const [savingEmpresa, setSavingEmpresa] = useState(false);
+
+  const handleLogoUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX_WIDTH = 500;
+        const MAX_HEIGHT = 500;
+        let width = img.width;
+        let height = img.height;
+        
+        if (width > height) {
+          if (width > MAX_WIDTH) {
+            height *= MAX_WIDTH / width;
+            width = MAX_WIDTH;
+          }
+        } else {
+          if (height > MAX_HEIGHT) {
+            width *= MAX_HEIGHT / height;
+            height = MAX_HEIGHT;
+          }
+        }
+        
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        ctx?.drawImage(img, 0, 0, width, height);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.7);
+        setEmpresaForm((p) => ({ ...p, logoBase64: dataUrl }));
+      };
+      img.src = event.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleEmpresaSave = () => {
     setSavingEmpresa(true);
@@ -337,6 +375,39 @@ export function AdminProfile() {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="sm:col-span-2 mb-2">
+              <label style={labelStyle}>Logo de la Funeraria</label>
+              <div className="flex items-center gap-4 mt-2">
+                <div 
+                  className="w-16 h-16 rounded-xl overflow-hidden flex items-center justify-center shrink-0 border"
+                  style={{ background: "#f8f9fa", borderColor: "#e5e7eb" }}
+                >
+                  {empresaForm.logoBase64 ? (
+                    <img src={empresaForm.logoBase64} alt="Logo" className="w-full h-full object-contain" />
+                  ) : (
+                    <ImageIcon size={24} style={{ color: "#9ca3af" }} />
+                  )}
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleLogoUpload}
+                    className="block w-full text-sm text-gray-500
+                      file:mr-4 file:py-2 file:px-4
+                      file:rounded-xl file:border-0
+                      file:text-xs file:font-semibold
+                      file:bg-[#f0f2f5] file:text-[#0d1b3e]
+                      hover:file:bg-[#e5e7eb]
+                      transition-all cursor-pointer"
+                  />
+                  <p className="text-xs text-gray-400 mt-2">
+                    Sube una imagen (PNG o JPG). Se redimensionará automáticamente para optimizar carga.
+                  </p>
+                </div>
+              </div>
+            </div>
+
             <div className="sm:col-span-2">
               <label style={labelStyle}>Nombre de la Funeraria</label>
               <div className="relative">

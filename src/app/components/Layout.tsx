@@ -87,13 +87,17 @@ export function Layout({ children }: { children: React.ReactNode }) {
       <div className="px-6 py-6 border-b" style={{ borderColor: "rgba(255,255,255,0.1)" }}>
         <div className="flex items-center gap-3">
           <div
-            className="w-10 h-10 rounded-lg flex items-center justify-center shadow-md"
-            style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)" }}
+            className="w-10 h-10 rounded-lg flex items-center justify-center shadow-md overflow-hidden"
+            style={{ background: company.logoBase64 ? "transparent" : "linear-gradient(135deg, #c9a84c, #e8c97a)" }}
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2L4 7v10l8 5 8-5V7L12 2z" fill="white" fillOpacity="0.9" />
-              <path d="M12 6v12M8 8l4-2 4 2" stroke="rgba(12,27,62,0.6)" strokeWidth="1.5" strokeLinecap="round" />
-            </svg>
+            {company.logoBase64 ? (
+              <img src={company.logoBase64} alt="Company Logo" className="w-full h-full object-contain" />
+            ) : (
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                <path d="M12 2L4 7v10l8 5 8-5V7L12 2z" fill="white" fillOpacity="0.9" />
+                <path d="M12 6v12M8 8l4-2 4 2" stroke="rgba(12,27,62,0.6)" strokeWidth="1.5" strokeLinecap="round" />
+              </svg>
+            )}
           </div>
           <div>
             <p className="text-sm font-semibold truncate max-w-[150px]" style={{ color: "rgba(255,255,255,0.95)", letterSpacing: "0.03em" }}>

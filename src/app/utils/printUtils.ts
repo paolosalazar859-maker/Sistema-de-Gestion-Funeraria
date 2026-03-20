@@ -145,7 +145,7 @@ export function printServiceVoucher(service: FuneralService) {
     <!-- HEADER -->
     <div class="header">
       <div class="brand-logo">
-        <span class="brand-name">${company.name}</span>
+        ${company.logoBase64 ? `<img src="${company.logoBase64}" style="max-height: 48px; max-width: 160px; object-fit: contain; margin-bottom: 4px;" />` : `<span class="brand-name">${company.name}</span>`}
         <span class="brand-sub">${company.subtitle}</span>
       </div>
       <div class="doc-info">
@@ -274,7 +274,7 @@ export function printPaymentReceipt(service: FuneralService, payment: Payment, p
     <!-- HEADER -->
     <div class="header">
       <div class="brand-logo">
-        <span class="brand-name">${company.name}</span>
+        ${company.logoBase64 ? `<img src="${company.logoBase64}" style="max-height: 48px; max-width: 160px; object-fit: contain; margin-bottom: 4px;" />` : `<span class="brand-name">${company.name}</span>`}
         <span class="brand-sub">${company.subtitle}</span>
       </div>
       <div class="doc-info">

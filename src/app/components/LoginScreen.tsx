@@ -83,37 +83,46 @@ export function LoginScreen() {
         {/* Logo */}
         <div className="text-center mb-10">
           <div className="mx-auto mb-5 flex items-center justify-center">
-            <svg
-              width="120"
-              height="120"
-              viewBox="0 0 120 120"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              style={{ filter: "drop-shadow(0 4px 24px rgba(201,168,76,0.4))" }}
-            >
-              <circle cx="60" cy="60" r="58" stroke="url(#goldGrad)" strokeWidth="2" fill="rgba(13,27,62,0.6)" />
-              <circle cx="60" cy="60" r="50" stroke="rgba(201,168,76,0.2)" strokeWidth="1" fill="none" />
-              <text
-                x="60"
-                y="70"
-                textAnchor="middle"
-                fontSize="36"
-                fontWeight="700"
-                fontFamily="Georgia, serif"
-                letterSpacing="4"
-                fill="url(#goldGrad)"
+            {company.logoBase64 ? (
+              <img 
+                src={company.logoBase64} 
+                alt="Company Logo" 
+                className="w-28 h-28 object-contain rounded-2xl"
+                style={{ filter: "drop-shadow(0 4px 24px rgba(201,168,76,0.2))" }}
+              />
+            ) : (
+              <svg
+                width="120"
+                height="120"
+                viewBox="0 0 120 120"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                style={{ filter: "drop-shadow(0 4px 24px rgba(201,168,76,0.4))" }}
               >
-                A
-              </text>
-              <path d="M30 85 Q60 90 90 85" stroke="url(#goldGrad)" strokeWidth="1" fill="none" opacity="0.5" />
-              <defs>
-                <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" stopColor="#c9a84c" />
-                  <stop offset="50%" stopColor="#e8c97a" />
-                  <stop offset="100%" stopColor="#c9a84c" />
-                </linearGradient>
-              </defs>
-            </svg>
+                <circle cx="60" cy="60" r="58" stroke="url(#goldGrad)" strokeWidth="2" fill="rgba(13,27,62,0.6)" />
+                <circle cx="60" cy="60" r="50" stroke="rgba(201,168,76,0.2)" strokeWidth="1" fill="none" />
+                <text
+                  x="60"
+                  y="70"
+                  textAnchor="middle"
+                  fontSize="36"
+                  fontWeight="700"
+                  fontFamily="Georgia, serif"
+                  letterSpacing="4"
+                  fill="url(#goldGrad)"
+                >
+                  {company.name ? company.name.charAt(0).toUpperCase() : "A"}
+                </text>
+                <path d="M30 85 Q60 90 90 85" stroke="url(#goldGrad)" strokeWidth="1" fill="none" opacity="0.5" />
+                <defs>
+                  <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stopColor="#c9a84c" />
+                    <stop offset="50%" stopColor="#e8c97a" />
+                    <stop offset="100%" stopColor="#c9a84c" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            )}
           </div>
           <h1 className="text-2xl" style={{ color: "rgba(201,168,76,0.8)", letterSpacing: "0.1em", fontWeight: 700 }}>
             {company.name}
