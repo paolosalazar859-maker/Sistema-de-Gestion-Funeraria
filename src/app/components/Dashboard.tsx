@@ -133,6 +133,31 @@ export function Dashboard() {
     { name: "Deuda Total", value: deudaTotal, color: "#ef4444", id: "pie-deuda" },
   ], [pagados, abonando, deudaTotal]);
 
+  const revenueBreakdown = useMemo(() => {
+    const breakdown: Record<string, number> = {
+      "Cuota Mortuoria": services.reduce((acc, s) => acc + s.mortuaryFee, 0),
+      "Efectivo": 0,
+      "Transferencia": 0,
+      "Crédito": 0,
+      "Débito": 0,
+    };
+
+    services.forEach(s => {
+      s.payments.forEach(p => {
+        const method = p.method as string;
+        if (method === "Tarjeta") {
+          breakdown["Crédito"] += p.amount; // Mapeo legado
+        } else if (breakdown[method] !== undefined) {
+          breakdown[method] += p.amount;
+        }
+      });
+    });
+
+    return Object.entries(breakdown)
+      .map(([name, value]) => ({ name, value }))
+      .filter(item => item.value > 0);
+  }, [services]);
+
   const statCards = [
     {
       label: "Total Recaudado",
@@ -199,6 +224,52 @@ export function Dashboard() {
             </p>
           </Link>
         ))}
+      </div>
+      
+      {/* Revenue Breakdown Detail */}
+      <div className="rounded-2xl p-6 shadow-sm mb-6" style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}>
+        <div className="flex items-center gap-2 mb-5">
+           <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-green-50 text-green-600">
+             <PieIcon size={18} />
+           </div>
+           <div>
+             <h3 className="text-sm font-bold uppercase tracking-widest text-[#0d1b3e]">
+               Detalle de Recaudación por Medio de Pago
+             </h3>
+             <p className="text-xs text-gray-400">Desglose de ingresos acumulados según el método utilizado</p>
+           </div>
+        </div>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
+          {revenueBreakdown.length === 0 ? (
+            <p className="text-xs text-gray-400 italic py-4">No hay ingresos registrados aún</p>
+          ) : (
+            revenueBreakdown.map((item) => {
+              const methodColors: Record<string, string> = {
+                "Cuota Mortuoria": "#0d1b3e",
+                "Efectivo": "#16a34a",
+                "Transferencia": "#2563eb",
+                "Crédito": "#8b5cf6",
+                "Débito": "#db2777",
+              };
+              const color = methodColors[item.name] || "#6b7280";
+              const percentage = totalRecaudado > 0 ? (item.value / totalRecaudado) * 100 : 0;
+              
+              return (
+                <div key={item.name} className="p-4 rounded-xl border border-gray-100 transition-all hover:border-gray-200 bg-gray-50/30">
+                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">{item.name}</p>
+                  <p className="text-lg font-bold" style={{ color }}>{formatCLP(item.value)}</p>
+                  <div className="mt-2 flex items-center justify-between">
+                     <span className="text-[10px] text-gray-400">{percentage.toFixed(1)}%</span>
+                     <div className="w-16 h-1 bg-gray-100 rounded-full overflow-hidden shadow-inner">
+                        <div className="h-full rounded-full transition-all duration-700" style={{ background: color, width: `${percentage}%` }} />
+                     </div>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
       </div>
 
       {/* Charts Row */}

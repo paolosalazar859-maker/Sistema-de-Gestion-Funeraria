@@ -4,7 +4,7 @@ export interface Payment {
   id: string;
   date: string;
   amount: number;
-  method: "Efectivo" | "Transferencia" | "Cheque" | "Tarjeta";
+  method: "Efectivo" | "Transferencia" | "Cheque" | "Crédito" | "Débito";
   balance: number;
   notes?: string;
 }

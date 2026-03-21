@@ -156,6 +156,7 @@ interface FormData {
   invoice1: string;
   invoice2: string;
   invoice3: string;
+  initialPaymentMethod: "Efectivo" | "Transferencia" | "Cheque" | "Crédito" | "Débito";
 }
 
 const emptyForm: FormData = {
@@ -183,6 +184,7 @@ const emptyForm: FormData = {
   invoice1: "",
   invoice2: "",
   invoice3: "",
+  initialPaymentMethod: "Efectivo",
 };
 
 const SectionHeader = ({
@@ -761,6 +763,9 @@ export function ServiceRegistration() {
           invoice1: srv.invoice1 || "",
           invoice2: srv.invoice2 || "",
           invoice3: srv.invoice3 || "",
+          initialPaymentMethod: (srv.payments && srv.payments.length > 0) 
+            ? srv.payments[0].method 
+            : "Efectivo",
         });
         setCurrentServiceId(srv.id);
         // Si viene por ID de URL, habilitamos edición de inmediato
@@ -851,7 +856,7 @@ export function ServiceRegistration() {
       payments: isEdit && existingService 
         ? existingService.payments 
         : (init > 0
-            ? [{ id: `${id}-P1`, date: today, amount: init, method: "Efectivo" as const, balance: pending, notes: "Abono inicial" }]
+            ? [{ id: `${id}-P1`, date: today, amount: init, method: form.initialPaymentMethod, balance: pending, notes: "Abono inicial" }]
             : []),
       createdAt: isEdit && existingService ? existingService.createdAt : today,
     };
@@ -1715,6 +1720,13 @@ export function ServiceRegistration() {
                   value={form.initialPayment}
                   onChange={set("initialPayment")}
                   placeholder="0"
+                  disabled={!editMode}
+                />
+                <InputField
+                  label="Método Abono Inicial"
+                  value={form.initialPaymentMethod}
+                  onChange={set("initialPaymentMethod")}
+                  options={["Efectivo", "Transferencia", "Cheque", "Crédito", "Débito"]}
                   disabled={!editMode}
                 />
               </div>

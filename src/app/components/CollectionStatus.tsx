@@ -112,7 +112,7 @@ function AddPaymentModal({
       id: `${service.id}-P${service.payments.length + 1}`,
       date,
       amount: amountNum,
-      method: method as "Efectivo" | "Transferencia" | "Cheque" | "Tarjeta",
+      method: method as any,
       balance: Math.max(0, service.pendingBalance - amountNum),
       notes: notes || undefined,
     };
@@ -282,7 +282,7 @@ function AddPaymentModal({
                   onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
                   onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 >
-                  {["Efectivo", "Transferencia", "Cheque", "Tarjeta"].map((m) => (
+                  {["Efectivo", "Transferencia", "Cheque", "Crédito", "Débito"].map((m) => (
                     <option key={m} value={m}>{m}</option>
                   ))}
                 </select>
@@ -371,26 +371,36 @@ function ClientDetail({
   };
 
   const handleDeletePayment = (paymentId: string) => {
-    if (!window.confirm("¿Estás seguro de que deseas eliminar este abono? El saldo se recalculará automáticamente.")) return;
+    const paymentToDelete = service.payments.find(p => p.id === paymentId);
+    if (!paymentToDelete) return;
+
+    if (!window.confirm(`¿Estás seguro de que deseas eliminar el abono de ${formatCLP(paymentToDelete.amount)}? El saldo y las cuotas se recalcularán automáticamente.`)) return;
 
     const updatedPayments = service.payments.filter(p => p.id !== paymentId);
-    const newTotalPaid = updatedPayments.reduce((sum, p) => sum + p.amount, 0);
-    // Incluir otros aportes en el total pagado/abonado si corresponde, pero el balance se basa en totalService - totalPaid - aportes?
-    // Según ServiceRegistration: saldo = totalService - (muni + mort + initial) - discount;
-    // Y payments incluye el abono inicial.
-    // Recalcular saldo pendiente
+    
+    // Si borramos el primer pago y este era el abono inicial (mismo monto), actualizamos el campo initialPayment
+    let newInitialPayment = service.initialPayment;
+    if (paymentId === service.payments[0]?.id && paymentToDelete.amount === service.initialPayment) {
+      newInitialPayment = 0;
+    }
+
     const totalAbonosDirectos = updatedPayments.reduce((sum, p) => sum + p.amount, 0);
     const aportesYOtros = service.municipalContribution + service.mortuaryFee + service.discount;
     const newPendingBalance = Math.max(0, service.totalService - totalAbonosDirectos - aportesYOtros);
     
     // Recalcular cuotas pagadas
-    const baseAmount = service.installments?.baseAmount || 0;
-    const newPaidInstallments = baseAmount > 0 ? Math.floor(totalAbonosDirectos / baseAmount) : 0;
+    // Las cuotas corresponden al saldo después del abono inicial
+    const totalExtraPayments = Math.max(0, totalAbonosDirectos - newInitialPayment);
+    const installmentAmount = (service.installments?.baseAmount || 0) + (service.installments?.surchargeAmount || 0);
+    const newPaidInstallments = installmentAmount > 0 
+      ? Math.floor(totalExtraPayments / installmentAmount) 
+      : 0;
 
     const updatedService: FuneralService = {
       ...service,
+      initialPayment: newInitialPayment,
       payments: updatedPayments,
-      totalPaid: totalAbonosDirectos, // totalPaid en el modelo parece referirse a la suma de abonos
+      totalPaid: totalAbonosDirectos,
       pendingBalance: newPendingBalance,
       status: deriveStatus(totalAbonosDirectos, newPendingBalance),
       installments: service.installments ? {
@@ -400,7 +410,7 @@ function ClientDetail({
     };
 
     persistService(updatedService);
-    onPaymentSaved(updatedService); // Refrescar vista
+    onPaymentSaved(updatedService);
   };
 
   return (

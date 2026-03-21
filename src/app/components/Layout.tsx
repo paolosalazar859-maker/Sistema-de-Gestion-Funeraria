@@ -21,7 +21,7 @@ import { recalculateAllStatuses, loadServices } from "../data/serviceStore";
 import { loadCompanyProfile, CompanyProfile } from "../data/companyStore";
 
 const ALL_NAV = [
-  { path: "/",         label: "Dashboard",           icon: LayoutDashboard, roles: ["admin"] },
+  { path: "/",         label: "Resumen Informativo",   icon: LayoutDashboard, roles: ["admin"] },
   { path: "/registro", label: "Registro de Servicio", icon: FileText,        roles: ["admin", "oficina"] },
   { path: "/cobros",   label: "Estado de Cobros",     icon: CreditCard,      roles: ["admin", "oficina"] },
   { path: "/clientes", label: "Clientes",             icon: Users,           roles: ["admin"] },
@@ -318,11 +318,11 @@ export function Layout({ children }: { children: React.ReactNode }) {
                 <span className="text-xs truncate max-w-[150px] sm:max-w-none" style={{ color: "#9ca3af" }}>{company.subtitle}</span>
                 <ChevronRight size={12} style={{ color: "#9ca3af" }} />
                 <span className="text-xs" style={{ color: "#1a2f5a" }}>
-                  {currentPage?.label || "Dashboard"}
+                  {currentPage?.label || "Resumen Informativo"}
                 </span>
               </div>
               <h1 className="text-base" style={{ color: "#0d1b3e" }}>
-                {currentPage?.label || "Dashboard"}
+                {currentPage?.label || "Resumen Informativo"}
               </h1>
             </div>
           </div>
