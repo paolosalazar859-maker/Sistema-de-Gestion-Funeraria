@@ -16,7 +16,7 @@ import {
   MoreHorizontal
 } from "lucide-react";
 import { Expense } from "../data/mockData";
-import { loadExpenses, persistExpense, deleteExpense, generateExpenseId } from "../data/expenseStore";
+import { loadExpenses, persistExpense, deleteExpense, generateExpenseId, loadCustomCategories, persistCustomCategory } from "../data/expenseStore";
 
 const formatCLP = (value: number) =>
   new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(value);
@@ -47,26 +47,37 @@ export function ExpensesManager({ onBack }: { onBack?: () => void }) {
   const [displayAmount, setDisplayAmount] = useState("");
   const [category, setCategory] = useState(CATEGORIES[4].label);
   const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+  const [customCategories, setCustomCategories] = useState<string[]>([]);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [isOtherSelected, setIsOtherSelected] = useState(false);
 
   useEffect(() => {
     setExpenses(loadExpenses());
+    setCustomCategories(loadCustomCategories());
   }, []);
 
   const handleSave = () => {
     const amountNum = parseInt(amount, 10);
     if (!description || !amountNum) return;
 
+    let finalCategory = category;
+    if (isOtherSelected && newCategoryName.trim()) {
+      finalCategory = newCategoryName.trim();
+      persistCustomCategory(finalCategory);
+    }
+
     const newExpense: Expense = {
       id: generateExpenseId(),
       description,
       amount: amountNum,
-      category,
+      category: finalCategory,
       date,
       createdAt: new Date().toISOString(),
     };
 
     persistExpense(newExpense);
     setExpenses(loadExpenses());
+    setCustomCategories(loadCustomCategories());
     resetForm();
     setShowAddModal(false);
   };
@@ -76,6 +87,8 @@ export function ExpensesManager({ onBack }: { onBack?: () => void }) {
     setAmount("");
     setDisplayAmount("");
     setCategory(CATEGORIES[4].label);
+    setIsOtherSelected(false);
+    setNewCategoryName("");
     setDate(new Date().toISOString().split("T")[0]);
   };
 
@@ -94,11 +107,21 @@ export function ExpensesManager({ onBack }: { onBack?: () => void }) {
 
   const totalFiltered = filtered.reduce((acc, e) => acc + e.amount, 0);
 
-  // Totales por categoría
-  const categoryTotals = CATEGORIES.map(cat => ({
+  // Totales por categoría (incluyendo personalizadas)
+  const allAvailableCategories = [
+    ...CATEGORIES,
+    ...customCategories.map(catName => ({ 
+      label: catName, 
+      icon: Tag, 
+      color: "#8b5cf6", 
+      bg: "#f5f3ff" 
+    }))
+  ];
+
+  const categoryTotals = allAvailableCategories.map(cat => ({
     ...cat,
     total: filtered.filter(e => e.category === cat.label).reduce((sum, e) => sum + e.amount, 0)
-  })).filter(c => c.total > 0 || categoryFilter === c.label || categoryFilter === "Todas");
+  })).filter(c => c.total > 0 || categoryFilter === c.label || (categoryFilter === "Todas" && c.label !== "Otros"));
 
   return (
     <div className="space-y-6">
@@ -215,6 +238,9 @@ export function ExpensesManager({ onBack }: { onBack?: () => void }) {
             <option value="Todas">Todas las categorías</option>
             {CATEGORIES.map((cat) => (
               <option key={cat.label} value={cat.label}>{cat.label}</option>
+            ))}
+            {customCategories.map((cat) => (
+              <option key={cat} value={cat}>{cat}</option>
             ))}
           </select>
         </div>
@@ -368,25 +394,68 @@ export function ExpensesManager({ onBack }: { onBack?: () => void }) {
                         <button
                           key={cat.label}
                           type="button"
-                          onClick={() => setCategory(cat.label)}
+                          onClick={() => {
+                            setCategory(cat.label);
+                            setIsOtherSelected(cat.label === "Otros");
+                          }}
                           className="flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left"
                           style={{ 
-                            borderColor: active ? cat.color : "#f0f2f5",
-                            background: active ? cat.bg : "#fff" 
+                            borderColor: (category === cat.label && !isOtherSelected) || (cat.label === "Otros" && isOtherSelected) ? cat.color : "#f0f2f5",
+                            background: (category === cat.label && !isOtherSelected) || (cat.label === "Otros" && isOtherSelected) ? cat.bg : "#fff" 
                           }}
                         >
                           <div 
                             className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" 
-                            style={{ background: active ? cat.color : "#f9fafb", color: active ? "#fff" : "#9ca3af" }}
+                            style={{ background: (category === cat.label && !isOtherSelected) || (cat.label === "Otros" && isOtherSelected) ? cat.color : "#f9fafb", color: (category === cat.label && !isOtherSelected) || (cat.label === "Otros" && isOtherSelected) ? "#fff" : "#9ca3af" }}
                           >
                             <Icon size={16} />
                           </div>
-                          <span className="text-xs font-semibold truncate" style={{ color: active ? cat.color : "#6b7280" }}>{cat.label}</span>
+                          <span className="text-xs font-semibold truncate" style={{ color: (category === cat.label && !isOtherSelected) || (cat.label === "Otros" && isOtherSelected) ? cat.color : "#6b7280" }}>{cat.label}</span>
                         </button>
                       );
                     })}
+                    
+                    {/* Botones para categorías personalizadas guardadas */}
+                    {customCategories.map((catName) => (
+                      <button
+                        key={catName}
+                        type="button"
+                        onClick={() => {
+                          setCategory(catName);
+                          setIsOtherSelected(false);
+                        }}
+                        className="flex items-center gap-3 p-3 rounded-xl border-2 transition-all text-left"
+                        style={{ 
+                          borderColor: category === catName ? "#8b5cf6" : "#f0f2f5",
+                          background: category === catName ? "#f5f3ff" : "#fff" 
+                        }}
+                      >
+                        <div 
+                          className="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" 
+                          style={{ background: category === catName ? "#8b5cf6" : "#f9fafb", color: category === catName ? "#fff" : "#9ca3af" }}
+                        >
+                          <Tag size={16} />
+                        </div>
+                        <span className="text-xs font-semibold truncate" style={{ color: category === catName ? "#8b5cf6" : "#6b7280" }}>{catName}</span>
+                      </button>
+                    ))}
                   </div>
                 </div>
+
+                {isOtherSelected && (
+                  <div className="sm:col-span-2 animate-in slide-in-from-top-2 duration-200">
+                    <label className="block text-xs font-bold uppercase tracking-wider mb-2" style={{ color: "#9ca3af" }}>Nueva Categoría</label>
+                    <input
+                      type="text"
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      placeholder="Escribe el nombre de la categoría..."
+                      autoFocus
+                      className="w-full px-4 py-3 rounded-2xl text-sm outline-none transition-all"
+                      style={{ border: "2px solid #0d1b3e", background: "#f8fafc" }}
+                    />
+                  </div>
+                )}
               </div>
 
               <div className="pt-4 flex gap-3">

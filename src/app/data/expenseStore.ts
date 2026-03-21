@@ -1,6 +1,7 @@
 import { Expense } from "./mockData";
 
 const EXPENSES_KEY = "funeral_expenses";
+const CUSTOM_CATEGORIES_KEY = "funeral_custom_categories";
 
 // ── Lectura local (síncrona, rápida) ─────────────────────────────────────────
 
@@ -67,4 +68,29 @@ export function computeMonthlyExpenseData(expenses: Expense[]) {
     const total = inMonth.reduce((acc, e) => acc + e.amount, 0);
     return { month: label, total };
   });
+}
+
+// ── Categorías Personalizadas ────────────────────────────────────────────────
+
+export function loadCustomCategories(): string[] {
+  try {
+    const raw = localStorage.getItem(CUSTOM_CATEGORIES_KEY);
+    if (!raw) return [];
+    return JSON.parse(raw) as string[];
+  } catch (err) {
+    console.error("Error cargando categorías personalizadas:", err);
+    return [];
+  }
+}
+
+export function persistCustomCategory(category: string): void {
+  const current = loadCustomCategories();
+  if (!category || current.includes(category)) return;
+  
+  // No guardar categorías fijas si ya están en la UI
+  const protectedCategories = ["Bencina / Traslado", "Servicios Básicos (Luz/Agua)", "Mantenimiento", "Artículos Funerarios", "Otros"];
+  if (protectedCategories.includes(category)) return;
+
+  current.push(category);
+  localStorage.setItem(CUSTOM_CATEGORIES_KEY, JSON.stringify(current));
 }
