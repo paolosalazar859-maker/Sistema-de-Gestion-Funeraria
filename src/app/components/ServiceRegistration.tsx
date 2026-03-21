@@ -798,14 +798,17 @@ export function ServiceRegistration() {
     // Calcular cuotas si están habilitadas
     let installmentsData = undefined;
     if (form.installmentsEnabled && pending > 0) {
-      let surchargeAmount = 0;
-      if (numInstallments > 6) {
-        // Nueva Regla: 3% total sobre el saldo pendiente si son más de 6 cuotas
-        surchargeAmount = Math.ceil(pending * 0.03);
+      let baseAmount = 0;
+      if (numInstallments <= 6) {
+        // Regla: Hasta 6 cuotas es Precio Contado (0 interés)
+        baseAmount = Math.ceil(pending / numInstallments);
+      } else {
+        // Regla: 7 cuotas o más = 3% de interés mensual (Amortización Francesa)
+        const monthlyRate = 0.03;
+        const factor = (monthlyRate * Math.pow(1 + monthlyRate, numInstallments)) / 
+                       (Math.pow(1 + monthlyRate, numInstallments) - 1);
+        baseAmount = Math.ceil(pending * factor);
       }
-      
-      const totalFinanced = pending + surchargeAmount;
-      const baseAmount = Math.ceil(totalFinanced / numInstallments);
 
       installmentsData = {
         enabled: true,
