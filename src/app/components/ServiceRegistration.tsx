@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useMemo } from "react";
+import { useParams, useNavigate } from "react-router";
 import {
   Calendar,
   MapPin,
@@ -687,6 +688,8 @@ function CemeteryAutocomplete({
 // ─────────────────────────────────────────────────────────────────────────────
 
 export function ServiceRegistration() {
+  const { serviceId } = useParams();
+  const navigate = useNavigate();
   const [form, setForm] = useState<FormData>({ ...emptyForm });
   const [saved, setSaved] = useState(false);
   const [editMode, setEditMode] = useState(true);
@@ -694,6 +697,22 @@ export function ServiceRegistration() {
   const [selectedId, setSelectedId] = useState<string>("");
   const [currentServiceId, setCurrentServiceId] = useState<string>("");
   const [services, setServices] = useState(() => loadServices());
+
+  // Efecto para cargar servicio si viene por URL
+  useEffect(() => {
+    if (serviceId) {
+      const srv = loadServices().find((s) => s.id === serviceId);
+      if (srv) {
+        setSelectedId(srv.id);
+      }
+    } else {
+      setForm({ ...emptyForm });
+      setCurrentServiceId("");
+      setSelectedId("");
+      setEditMode(true);
+      setSaved(false);
+    }
+  }, [serviceId]);
 
   const set = (field: keyof FormData) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }));
@@ -744,7 +763,8 @@ export function ServiceRegistration() {
           invoice3: srv.invoice3 || "",
         });
         setCurrentServiceId(srv.id);
-        setEditMode(false);
+        // Si viene por ID de URL, habilitamos edición de inmediato
+        setEditMode(!!serviceId); 
         setSaved(true);
       }
     }
@@ -791,6 +811,13 @@ export function ServiceRegistration() {
       };
     }
 
+    const isEdit = !!currentServiceId;
+    const existingService = isEdit ? services.find(s => s.id === currentServiceId) : null;
+
+    if (installmentsData && existingService?.installments) {
+      installmentsData.paidInstallments = existingService.installments.paidInstallments;
+    }
+
     const service = {
       id,
       serviceCategory: form.serviceCategory,
@@ -821,13 +848,15 @@ export function ServiceRegistration() {
       pendingBalance: pending,
       status: deriveStatus(abonado, pending),
       lastPaymentDate: init > 0 ? today : "-",
-      payments: init > 0
-        ? [{ id: `${id}-P1`, date: today, amount: init, method: "Efectivo" as const, balance: pending, notes: "Abono inicial" }]
-        : [],
-      createdAt: today,
+      payments: isEdit && existingService 
+        ? existingService.payments 
+        : (init > 0
+            ? [{ id: `${id}-P1`, date: today, amount: init, method: "Efectivo" as const, balance: pending, notes: "Abono inicial" }]
+            : []),
+      createdAt: isEdit && existingService ? existingService.createdAt : today,
     };
 
-    persistService(service);
+    persistService(service as any);
     setCurrentServiceId(id);
     setServices(loadServices()); // refresh dropdown list
     setSaved(true);
@@ -1899,7 +1928,7 @@ export function ServiceRegistration() {
                   className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm transition-all shadow-md"
                   style={{ background: "linear-gradient(135deg, #0d1b3e, #1a2f5a)", color: "#c9a84c" }}
                 >
-                  <Save size={15} /> Guardar
+                  <Save size={15} /> {currentServiceId ? "Actualizar Información" : "Guardar"}
                 </button>
               ) : (
                 <>

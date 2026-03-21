@@ -15,7 +15,7 @@ export const router = createHashRouter([
     ErrorBoundary: RouteErrorPage,
     children: [
       { index: true, Component: Dashboard },
-      { path: "registro", Component: ServiceRegistration },
+      { path: "registro/:serviceId?", Component: ServiceRegistration },
       { path: "cobros", Component: CollectionStatus },
       { path: "clientes", Component: Clients },
       { path: "perfil", Component: AdminProfile },

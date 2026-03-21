@@ -1,8 +1,10 @@
 import { useState, useEffect } from "react";
+import { useNavigate } from "react-router";
 import {
   CheckCircle2, Clock, XCircle, AlertCircle, Plus, ArrowLeft,
   CreditCard, TrendingUp, TrendingDown, Search, Filter, Users,
   ChevronUp, ChevronDown, Printer, Download, FileText, FileDown,
+  Edit3, Trash2,
 } from "lucide-react";
 import { FuneralService } from "../data/mockData";
 import { loadServices, persistService, deriveStatus } from "../data/serviceStore";
@@ -352,6 +354,7 @@ function ClientDetail({
   const [showModal, setShowModal] = useState(false);
   const { role } = useUser();
   const isAdmin = role === "admin";
+  const navigate = useNavigate();
   const pct = service.totalService > 0 ? Math.min(100, (service.totalPaid / service.totalService) * 100) : 0;
 
   // Constantes saneadas para el plan de cuotas
@@ -365,6 +368,39 @@ function ClientDetail({
     Transferencia: "#2563eb",
     Cheque: "#7c3aed",
     Tarjeta: "#c9a84c",
+  };
+
+  const handleDeletePayment = (paymentId: string) => {
+    if (!window.confirm("¿Estás seguro de que deseas eliminar este abono? El saldo se recalculará automáticamente.")) return;
+
+    const updatedPayments = service.payments.filter(p => p.id !== paymentId);
+    const newTotalPaid = updatedPayments.reduce((sum, p) => sum + p.amount, 0);
+    // Incluir otros aportes en el total pagado/abonado si corresponde, pero el balance se basa en totalService - totalPaid - aportes?
+    // Según ServiceRegistration: saldo = totalService - (muni + mort + initial) - discount;
+    // Y payments incluye el abono inicial.
+    // Recalcular saldo pendiente
+    const totalAbonosDirectos = updatedPayments.reduce((sum, p) => sum + p.amount, 0);
+    const aportesYOtros = service.municipalContribution + service.mortuaryFee + service.discount;
+    const newPendingBalance = Math.max(0, service.totalService - totalAbonosDirectos - aportesYOtros);
+    
+    // Recalcular cuotas pagadas
+    const baseAmount = service.installments?.baseAmount || 0;
+    const newPaidInstallments = baseAmount > 0 ? Math.floor(totalAbonosDirectos / baseAmount) : 0;
+
+    const updatedService: FuneralService = {
+      ...service,
+      payments: updatedPayments,
+      totalPaid: totalAbonosDirectos, // totalPaid en el modelo parece referirse a la suma de abonos
+      pendingBalance: newPendingBalance,
+      status: deriveStatus(totalAbonosDirectos, newPendingBalance),
+      installments: service.installments ? {
+        ...service.installments,
+        paidInstallments: newPaidInstallments
+      } : undefined
+    };
+
+    persistService(updatedService);
+    onPaymentSaved(updatedService); // Refrescar vista
   };
 
   return (
@@ -401,6 +437,19 @@ function ClientDetail({
           >
             <FileDown size={13} /> Exportar Pagos
           </button>
+          
+          {isAdmin && (
+            <button
+              onClick={() => navigate(`/registro/${service.id}`)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-xl text-xs transition-all border border-blue-100"
+              style={{ background: "#eff6ff", color: "#2563eb" }}
+              onMouseEnter={(e) => { e.currentTarget.style.background = "#dbeafe"; }}
+              onMouseLeave={(e) => { e.currentTarget.style.background = "#eff6ff"; }}
+              title="Editar datos básicos del servicio"
+            >
+              <Edit3 size={13} /> Editar Servicio
+            </button>
+          )}
         </div>
       </div>
 
@@ -611,11 +660,11 @@ function ClientDetail({
             <table className="w-full">
               <thead>
                 <tr style={{ background: "#f8f9fa" }}>
-                  {["#", "Fecha", "Monto Abonado", "Método de Pago", "Saldo Restante", "Notas", ""].map((h) => (
-                    <th key={h} className="px-4 py-3 text-left text-xs" style={{ color: "#6b7280", fontWeight: 600 }}>
-                      {h}
-                    </th>
-                  ))}
+                    {["#", "Fecha", "Monto", "Método", "Saldo Rest.", "Notas", "Recibo", isAdmin && "Acción"].filter(Boolean).map((h) => (
+                      <th key={h as string} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: "#6b7280" }}>
+                        {h}
+                      </th>
+                    ))}
                 </tr>
               </thead>
               <tbody>
@@ -652,16 +701,30 @@ function ClientDetail({
                       {payment.notes || "—"}
                     </td>
                     <td className="px-4 py-3">
-                      <button
-                        onClick={() => printPaymentReceipt(service, payment, idx + 1)}
-                        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs transition-all"
-                        style={{ background: "#f0f2f5", color: "#374151", border: "1px solid #e5e7eb", whiteSpace: "nowrap" }}
-                        onMouseEnter={(e) => { e.currentTarget.style.background = "#0d1b3e"; e.currentTarget.style.color = "#c9a84c"; e.currentTarget.style.borderColor = "#0d1b3e"; }}
-                        onMouseLeave={(e) => { e.currentTarget.style.background = "#f0f2f5"; e.currentTarget.style.color = "#374151"; e.currentTarget.style.borderColor = "#e5e7eb"; }}
-                        title="Imprimir recibo de este abono"
-                      >
-                        <Printer size={11} /> Recibo
-                      </button>
+                      <div className="flex items-center gap-1">
+                        <button
+                          onClick={() => printPaymentReceipt(service, payment, idx + 1)}
+                          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs transition-all"
+                          style={{ background: "#f0f2f5", color: "#374151", border: "1px solid #e5e7eb", whiteSpace: "nowrap" }}
+                          onMouseEnter={(e) => { e.currentTarget.style.background = "#0d1b3e"; e.currentTarget.style.color = "#c9a84c"; e.currentTarget.style.borderColor = "#0d1b3e"; }}
+                          onMouseLeave={(e) => { e.currentTarget.style.background = "#f0f2f5"; e.currentTarget.style.color = "#374151"; e.currentTarget.style.borderColor = "#e5e7eb"; }}
+                          title="Imprimir recibo de este abono"
+                        >
+                          <Printer size={11} />
+                        </button>
+                        {isAdmin && (
+                          <button
+                            onClick={() => handleDeletePayment(payment.id)}
+                            className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs transition-all"
+                            style={{ background: "#fee2e2", color: "#991b1b", border: "1px solid #fecaca" }}
+                            onMouseEnter={(e) => { e.currentTarget.style.background = "#ef4444"; e.currentTarget.style.color = "#ffffff"; }}
+                            onMouseLeave={(e) => { e.currentTarget.style.background = "#fee2e2"; e.currentTarget.style.color = "#991b1b"; }}
+                            title="Eliminar abono"
+                          >
+                            <Trash2 size={11} />
+                          </button>
+                        )}
+                      </div>
                     </td>
                   </tr>
                 ))}
