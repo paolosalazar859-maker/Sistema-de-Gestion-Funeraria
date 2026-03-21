@@ -84,8 +84,8 @@ function AddPaymentModal({
   const paidInstallments = service.installments?.paidInstallments ?? 0;
   const totalInstallments = service.installments?.totalInstallments ?? 0;
   
-  // Calcular el monto de la cuota actual según si ya pasó las 5 de gracia
-  const currentInstallmentAmount = (paidInstallments < 5) ? baseAmount : (baseAmount + surchargeAmount);
+  // Calcular el monto de la cuota actual (base + recargo si aplica)
+  const currentInstallmentAmount = baseAmount + surchargeAmount;
   
   const remainingInstallments = hasInstallments 
     ? (totalInstallments - paidInstallments)
@@ -526,7 +526,7 @@ function ClientDetail({
               <div className="text-center p-3 rounded-xl" style={{ background: "rgba(201,168,76,0.1)" }}>
                 <p className="text-xs mb-1" style={{ color: "#6b7280" }}>Próxima Cuota</p>
                 <p className="text-lg" style={{ color: "#c9a84c", fontWeight: 700 }}>
-                  {formatCLP(paidInstallments < 5 ? baseAmount : (baseAmount + surchargeAmount))}
+                  {formatCLP(baseAmount + surchargeAmount)}
                 </p>
               </div>
             </div>
@@ -558,7 +558,7 @@ function ClientDetail({
                 <div>
                   <p className="text-xs" style={{ color: "#6b7280" }}>Próxima cuota</p>
                   <p className="text-sm" style={{ color: "#0d1b3e", fontWeight: 600 }}>
-                    {formatCLP(paidInstallments < 5 ? baseAmount : (baseAmount + surchargeAmount))}
+                    {formatCLP(baseAmount + surchargeAmount)}
                   </p>
                 </div>
                 <button

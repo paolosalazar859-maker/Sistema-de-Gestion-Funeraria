@@ -773,20 +773,20 @@ export function ServiceRegistration() {
     // Calcular cuotas si están habilitadas
     let installmentsData = undefined;
     if (form.installmentsEnabled && pending > 0) {
-      const baseAmount = Math.ceil(pending / numInstallments);
       let surchargeAmount = 0;
-      
-      if (numInstallments > 5) {
-        // Regla: 3% mensual sobre el total financiado, aplicado después de los 5 meses de gracia
-        // El recargo mensual por cada cuota después de la 5 es: Total * 3%
+      if (numInstallments > 6) {
+        // Nueva Regla: 3% total sobre el saldo pendiente si son más de 6 cuotas
         surchargeAmount = Math.ceil(pending * 0.03);
       }
       
+      const totalFinanced = pending + surchargeAmount;
+      const baseAmount = Math.ceil(totalFinanced / numInstallments);
+
       installmentsData = {
         enabled: true,
         totalInstallments: numInstallments,
         baseAmount: baseAmount,
-        surchargeAmount: surchargeAmount,
+        surchargeAmount: 0, // El interés ya está integrado en la cuota base
         paidInstallments: 0,
       };
     }
@@ -1775,33 +1775,32 @@ export function ServiceRegistration() {
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs" style={{ color: "#6b7280" }}>Cuotas 1 a 5</p>
+                            <p className="text-xs" style={{ color: "#6b7280" }}>Monto por cuota</p>
                             <p className="text-sm" style={{ color: "#16a34a", fontWeight: 700 }}>
                               {(() => {
                                 const n = parseInt(form.numberOfInstallments, 10) || 1;
-                                return formatCLP(Math.ceil(saldo / n));
+                                const interest = n > 6 ? Math.ceil(saldo * 0.03) : 0;
+                                return formatCLP(Math.ceil((saldo + interest) / n));
                               })()}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs" style={{ color: "#6b7280" }}>Cuotas 6 a {form.numberOfInstallments}</p>
-                            <p className="text-sm" style={{ color: "#dc2626", fontWeight: 700 }}>
+                            <p className="text-xs" style={{ color: "#6b7280" }}>Interés aplicado</p>
+                            <p className="text-sm" style={{ color: parseInt(form.numberOfInstallments, 10) > 6 ? "#dc2626" : "#6b7280", fontWeight: 700 }}>
                               {(() => {
                                 const n = parseInt(form.numberOfInstallments, 10) || 1;
-                                const base = Math.ceil(saldo / n);
-                                if (n > 5) return formatCLP(base + Math.ceil(saldo * 0.03));
-                                return "—";
+                                return n > 6 ? formatCLP(Math.ceil(saldo * 0.03)) : "Sin interés";
                               })()}
                             </p>
                           </div>
                         </div>
                         <p className="text-xs mt-2" style={{ color: "#6b7280" }}>
-                          {parseInt(form.numberOfInstallments, 10) > 5 ? (
+                          {parseInt(form.numberOfInstallments, 10) > 6 ? (
                             <span style={{ color: "#dc2626", fontWeight: 600 }}>
-                              ⚠️ Aplicado recargo del 3% mensual desde la cuota 6
+                              ⚠️ Aplicado recargo del 3% por financiamiento sobre 6 cuotas
                             </span>
                           ) : (
-                            <span>💡 Precio contado configurado para {form.numberOfInstallments} cuotas</span>
+                            <span>💡 Precio contado configurado para 6 cuotas o menos</span>
                           )}
                         </p>
                       </div>

@@ -9,6 +9,15 @@ export interface Payment {
   notes?: string;
 }
 
+export interface Expense {
+  id: string;
+  description: string;
+  amount: number;
+  category: string;
+  date: string;
+  createdAt: string;
+}
+
 export interface FuneralService {
   id: string;
   // Categoría y tipo

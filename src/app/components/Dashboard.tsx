@@ -1,5 +1,6 @@
 import { loadServices, computeMonthlyData, recalculateAllStatuses } from "../data/serviceStore";
-import { TrendingUp, AlertTriangle, FileText, Users, DollarSign, ArrowRight, ArrowUpRight } from "lucide-react";
+import { loadExpenses } from "../data/expenseStore";
+import { TrendingUp, AlertTriangle, FileText, Users, DollarSign, ArrowRight, ArrowUpRight, Wallet, PieChart as PieIcon } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router";
 import {
@@ -56,13 +57,45 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 
 export function Dashboard() {
   const [services, setServices] = useState(() => loadServices());
+  const [expenses, setExpenses] = useState(() => loadExpenses());
 
-  // Refresh on every mount (e.g. after navigating back from registration)
+  // Refresh on every mount
   useEffect(() => {
     setServices(loadServices());
+    setExpenses(loadExpenses());
   }, []);
 
-  const monthlyData = computeMonthlyData(services);
+  const monthlyData = useMemo(() => {
+    const servicesData = computeMonthlyData(services);
+    const expensesData = loadExpenses();
+    
+    return servicesData.map(sData => {
+      // Intentar encontrar el mes correspondiente en los gastos
+      // sData.month es la etiqueta (ej. "Mar"), necesitamos el key (ej. "2026-03")
+      // Pero computeMonthlyData ya devuelve los meses en orden.
+      // Vamos a simplificar: computeMonthlyData de services y computeMonthlyExpenseData de expenses
+      // Pero mejor unificarlo aquí para que coincidan exactamente.
+      
+      const now = new Date();
+      const periods: { key: string; label: string }[] = [];
+      for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+        const label = d.toLocaleDateString("es-CL", { month: "short" });
+        periods.push({ key, label: label.charAt(0).toUpperCase() + label.slice(1) });
+      }
+
+      const monthPeriod = periods.find(p => p.label === sData.month);
+      const monthExpenses = expensesData
+        .filter(e => monthPeriod ? e.date.startsWith(monthPeriod.key) : false)
+        .reduce((acc, e) => acc + e.amount, 0);
+
+      return {
+        ...sData,
+        gastos: monthExpenses
+      };
+    });
+  }, [services, expenses]);
 
   // Agregar IDs únicos a los datos mensuales para evitar keys duplicadas en Recharts
   const monthlyDataWithIds = useMemo(() => 
@@ -86,6 +119,9 @@ export function Dashboard() {
 
   const totalRecaudado = services.reduce((s, c) => s + c.totalPaid, 0);
   const totalDeuda = services.reduce((s, c) => s + c.pendingBalance, 0);
+  const totalGastos = expenses.reduce((s, e) => s + e.amount, 0);
+  const utilidadNeta = totalRecaudado - totalGastos;
+
   const pagados = services.filter((c) => c.status === "Pagado").length;
   const abonando = services.filter((c) => c.status === "Abonando").length;
   const deudaTotal = services.filter((c) => c.status === "Deuda Total").length;
@@ -103,36 +139,36 @@ export function Dashboard() {
       value: formatCLP(totalRecaudado),
       icon: TrendingUp,
       iconBg: "linear-gradient(135deg, #16a34a, #22c55e)",
-      change: "+12.5% este mes",
+      change: "Ingresos por pagos",
       changePositive: true,
       to: "/cobros",
     },
     {
-      label: "Deuda Pendiente",
-      value: formatCLP(totalDeuda),
-      icon: AlertTriangle,
+      label: "Total Gastos",
+      value: formatCLP(totalGastos),
+      icon: Wallet,
       iconBg: "linear-gradient(135deg, #dc2626, #ef4444)",
-      change: `${deudaTotal + abonando} cuentas activas`,
+      change: `${expenses.length} egresos registrados`,
       changePositive: false,
-      to: "/cobros",
+      to: "/gastos",
+    },
+    {
+      label: "Utilidad Neta",
+      value: formatCLP(utilidadNeta),
+      icon: DollarSign,
+      iconBg: "linear-gradient(135deg, #0d1b3e, #1a2f5a)",
+      change: "Recaudado - Gastos",
+      changePositive: utilidadNeta >= 0,
+      to: "/",
     },
     {
       label: "Servicios Activos",
       value: totalServicios.toString(),
       icon: FileText,
-      iconBg: "linear-gradient(135deg, #1a2f5a, #2563eb)",
+      iconBg: "linear-gradient(135deg, #c9a84c, #e8c97a)",
       change: `${pagados} completados`,
       changePositive: true,
       to: "/registro",
-    },
-    {
-      label: "Clientes Totales",
-      value: totalServicios.toString(),
-      icon: Users,
-      iconBg: "linear-gradient(135deg, #c9a84c, #e8c97a)",
-      change: `${abonando} en proceso`,
-      changePositive: true,
-      to: "/clientes",
     },
   ];
 
@@ -192,8 +228,9 @@ export function Dashboard() {
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} />
                 <Tooltip content={<CustomTooltip />} />
-                <Area type="monotone" dataKey="recaudado" name="Recaudado" stroke="#1a2f5a" strokeWidth={2.5} fill="#1a2f5a" fillOpacity={0.1} />
-                <Area type="monotone" dataKey="deuda" name="Deuda" stroke="#ef4444" strokeWidth={2} fill="#ef4444" fillOpacity={0.08} />
+                 <Area type="monotone" dataKey="recaudado" name="Recaudado" stroke="#1a2f5a" strokeWidth={2.5} fill="#1a2f5a" fillOpacity={0.1} />
+                <Area type="monotone" dataKey="gastos" name="Gastos" stroke="#dc2626" strokeWidth={2} fill="#dc2626" fillOpacity={0.05} />
+                <Area type="monotone" dataKey="deuda" name="Deuda" stroke="#fbbf24" strokeWidth={2} fill="#fbbf24" fillOpacity={0.05} />
               </AreaChart>
             </ResponsiveContainer>
           )}
