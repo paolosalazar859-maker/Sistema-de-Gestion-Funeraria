@@ -94,6 +94,12 @@ export function ExpensesManager({ onBack }: { onBack?: () => void }) {
 
   const totalFiltered = filtered.reduce((acc, e) => acc + e.amount, 0);
 
+  // Totales por categoría
+  const categoryTotals = CATEGORIES.map(cat => ({
+    ...cat,
+    total: filtered.filter(e => e.category === cat.label).reduce((sum, e) => sum + e.amount, 0)
+  })).filter(c => c.total > 0 || categoryFilter === c.label || categoryFilter === "Todas");
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -120,25 +126,64 @@ export function ExpensesManager({ onBack }: { onBack?: () => void }) {
         </button>
       </div>
 
-      {/* Stats Summary */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="rounded-2xl p-5 shadow-sm" style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-100 text-red-600">
-              <DollarSign size={18} />
+      {/* Stats Summary & Category Breakdown */}
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <div className="lg:col-span-1 space-y-4">
+          <div className="rounded-2xl p-5 shadow-sm" style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-red-100 text-red-600">
+                <DollarSign size={18} />
+              </div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">Total Gastos (Filtrado)</span>
             </div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">Total Gastos (Filtrado)</span>
+            <p className="text-3xl font-bold text-red-600">{formatCLP(totalFiltered)}</p>
           </div>
-          <p className="text-2xl font-bold text-red-600">{formatCLP(totalFiltered)}</p>
+          
+          <div className="rounded-2xl p-5 shadow-sm" style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}>
+            <div className="flex items-center gap-2 mb-3">
+              <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-blue-100 text-blue-600">
+                <Tag size={18} />
+              </div>
+              <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">Items Registrados</span>
+            </div>
+            <p className="text-2xl font-bold" style={{ color: "#0d1b3e" }}>{filtered.length}</p>
+          </div>
         </div>
-        <div className="rounded-2xl p-5 shadow-sm" style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}>
-          <div className="flex items-center gap-2 mb-3">
-            <div className="w-9 h-9 rounded-xl flex items-center justify-center bg-blue-100 text-blue-600">
-              <Tag size={18} />
-            </div>
-            <span className="text-xs font-semibold uppercase tracking-wider text-gray-400">Gastos Registrados</span>
+
+        <div className="lg:col-span-3 rounded-2xl p-6 shadow-sm" style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}>
+          <h3 className="text-sm font-bold mb-4 uppercase tracking-widest flex items-center gap-2" style={{ color: "#0d1b3e" }}>
+            Resumen Detallado por Categoría
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
+            {categoryTotals.length === 0 ? (
+              <p className="text-xs text-gray-400 italic">No hay gastos para mostrar en el resumen</p>
+            ) : (
+              categoryTotals.map((cat) => {
+                const Icon = cat.icon;
+                const percentage = totalFiltered > 0 ? (cat.total / totalFiltered) * 100 : 0;
+                return (
+                  <div key={cat.label} className="p-4 rounded-xl border border-gray-100 transition-all hover:border-gray-200">
+                    <div className="flex items-center justify-between mb-2">
+                       <div className="flex items-center gap-2">
+                          <div className="w-7 h-7 rounded-lg flex items-center justify-center" style={{ background: cat.bg, color: cat.color }}>
+                            <Icon size={14} />
+                          </div>
+                          <span className="text-xs font-bold truncate" style={{ color: "#374151" }}>{cat.label}</span>
+                       </div>
+                       <span className="text-[10px] font-bold px-1.5 py-0.5 rounded bg-gray-50 text-gray-400">{percentage.toFixed(1)}%</span>
+                    </div>
+                    <p className="text-lg font-bold" style={{ color: cat.color }}>{formatCLP(cat.total)}</p>
+                    <div className="w-full h-1.5 bg-gray-100 rounded-full mt-2 overflow-hidden">
+                       <div 
+                         className="h-full rounded-full transition-all duration-500" 
+                         style={{ background: cat.color, width: `${percentage}%` }}
+                       />
+                    </div>
+                  </div>
+                );
+              })
+            )}
           </div>
-          <p className="text-2xl font-bold" style={{ color: "#0d1b3e" }}>{filtered.length}</p>
         </div>
       </div>
 
