@@ -1823,17 +1823,28 @@ export function ServiceRegistration() {
                             <p className="text-sm" style={{ color: "#16a34a", fontWeight: 700 }}>
                               {(() => {
                                 const n = parseInt(form.numberOfInstallments, 10) || 1;
-                                const interest = n > 6 ? Math.ceil(saldo * 0.03) : 0;
-                                return formatCLP(Math.ceil((saldo + interest) / n));
+                                if (n <= 6) return formatCLP(Math.ceil(saldo / n));
+                                
+                                const monthlyRate = 0.03;
+                                const factor = (monthlyRate * Math.pow(1 + monthlyRate, n)) / 
+                                               (Math.pow(1 + monthlyRate, n) - 1);
+                                return formatCLP(Math.ceil(saldo * factor));
                               })()}
                             </p>
                           </div>
                           <div>
-                            <p className="text-xs" style={{ color: "#6b7280" }}>Interés aplicado</p>
+                            <p className="text-xs" style={{ color: "#6b7280" }}>Interés aplicado (Total)</p>
                             <p className="text-sm" style={{ color: parseInt(form.numberOfInstallments, 10) > 6 ? "#dc2626" : "#6b7280", fontWeight: 700 }}>
                               {(() => {
                                 const n = parseInt(form.numberOfInstallments, 10) || 1;
-                                return n > 6 ? formatCLP(Math.ceil(saldo * 0.03)) : "Sin interés";
+                                if (n <= 6) return "Sin interés";
+                                
+                                const monthlyRate = 0.03;
+                                const factor = (monthlyRate * Math.pow(1 + monthlyRate, n)) / 
+                                               (Math.pow(1 + monthlyRate, n) - 1);
+                                const cuota = Math.ceil(saldo * factor);
+                                const total = cuota * n;
+                                return formatCLP(total - saldo);
                               })()}
                             </p>
                           </div>
@@ -1841,7 +1852,7 @@ export function ServiceRegistration() {
                         <p className="text-xs mt-2" style={{ color: "#6b7280" }}>
                           {parseInt(form.numberOfInstallments, 10) > 6 ? (
                             <span style={{ color: "#dc2626", fontWeight: 600 }}>
-                              ⚠️ Aplicado recargo del 3% por financiamiento sobre 6 cuotas
+                              ⚠️ Aplicado recargo del 3% mensual por el plan de cuotas (sobre 6 meses)
                             </span>
                           ) : (
                             <span>💡 Precio contado configurado para 6 cuotas o menos</span>
