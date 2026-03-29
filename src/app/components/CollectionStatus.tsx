@@ -486,7 +486,7 @@ function ClientDetail({
               Fallecido: {service.deceasedName}
             </p>
             <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
-              Servicio {service.id}: {service.date} — {service.serviceType}
+              Servicio {service.id}: {formatDate(service.date)} — {service.serviceType}
             </p>
           </div>
           <button
@@ -1135,7 +1135,7 @@ export function CollectionStatus() {
                   </td>
                   <td className="px-4 py-3">
                     <p className="text-xs" style={{ color: "#374151" }}>{service.deceasedName.split(" ").slice(0, 2).join(" ")}</p>
-                    <p className="text-xs" style={{ color: "#9ca3af" }}>Servicio: {service.date}</p>
+                    <p className="text-xs" style={{ color: "#9ca3af" }}>Servicio: {formatDate(service.date)}</p>
                   </td>
                   <td className="px-4 py-3 text-xs" style={{ color: "#0d1b3e", fontWeight: 500 }}>
                     {formatCLP(service.totalService)}
