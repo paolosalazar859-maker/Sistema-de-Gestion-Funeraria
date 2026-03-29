@@ -4,7 +4,7 @@ export interface Payment {
   id: string;
   date: string;
   amount: number;
-  method: "Efectivo" | "Transferencia" | "Cheque" | "Crédito" | "Débito";
+  method: "Efectivo" | "Transferencia" | "Cheque" | "Tarjeta" | "Crédito" | "Débito";
   balance: number;
   notes?: string;
 }
@@ -20,6 +20,8 @@ export interface Expense {
 
 export interface FuneralService {
   id: string;
+  isDeleted?: boolean;       // Soft delete
+  deletedAt?: string;        // Fecha de eliminación
   // Categoría y tipo
   serviceCategory: string;   // "Servicio Funerario" | "Venta de Artículo"
   engravingText?: string;    // Texto a tallar (solo cuando aplica tallado)
@@ -63,6 +65,7 @@ export interface FuneralService {
   status: PaymentStatus;
   lastPaymentDate: string;
   payments: Payment[];
+  observations?: string;
   createdAt: string;
 }
 

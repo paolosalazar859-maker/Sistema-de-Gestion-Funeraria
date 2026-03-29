@@ -111,7 +111,7 @@
     "files": [
       "dist/**/*",
       "electron.js",
-      "preload.js",
+      "preload.cjs",
       "database.js",
       "backup-manager.js",
       "update-manager.js",
@@ -130,8 +130,7 @@
     },
     "win": {
       "target": [
-        "nsis",
-        "portable"
+        "nsis"
       ],
       "artifactName": "AURA-Setup-${version}.${ext}"
     },

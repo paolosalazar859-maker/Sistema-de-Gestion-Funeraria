@@ -1,0 +1,22 @@
+# Vercel Ignore: Evitar subir instaladores pesados
+node_modules/
+dist/
+dist-cliente/
+release/
+dev-dist/
+.git/
+.vercel/
+*.exe
+*.dmg
+*.zip
+*.deb
+*.rpm
+*.AppImage
+*.db
+supabase/
+crear-instalador-windows.bat
+install.sh
+LIMPIAR-CACHE.sh
+TRASH/
+out/
+build/

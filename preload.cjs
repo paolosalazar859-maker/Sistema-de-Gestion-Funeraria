@@ -1,9 +1,4 @@
-/**
- * Preload Script
- * Expone APIs seguras al proceso de renderizado
- */
-
-import { contextBridge, ipcRenderer } from 'electron';
+const { contextBridge, ipcRenderer } = require('electron');
 
 // Exponer APIs seguras al proceso de renderizado
 contextBridge.exposeInMainWorld('electronAPI', {
@@ -117,5 +112,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
     removeStatusListener: () => {
       ipcRenderer.removeAllListeners('update-status');
     },
-  }
+  },
+
+  // Impresión nativa
+  printHTML: (html) => ipcRenderer.invoke('print-html', html)
 });

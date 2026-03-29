@@ -54,12 +54,12 @@ const parseMoney = (value: string): number => {
 
 const formatDate = (s: string) => {
   if (!s || s === "-") return "—";
-  const d = new Date(s + "T12:00:00");
-  return d.toLocaleDateString("es-CL", {
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  });
+  const parts = s.split("-");
+  if (parts.length === 3) {
+    const [year, month, day] = parts;
+    return `${day}/${month}/${year}`;
+  }
+  return s;
 };
 
 // Aggregate all services that share the same contractorRut into a "client"
@@ -79,7 +79,8 @@ interface Client {
 
 function buildClients(services: FuneralService[]): Client[] {
   const map: Record<string, Client> = {};
-  for (const s of services) {
+  const activeServices = services.filter(s => !s.isDeleted);
+  for (const s of activeServices) {
     const key = s.contractorRut || s.contractorName;
     if (!map[key]) {
       map[key] = {
@@ -989,10 +990,12 @@ export function Clients() {
   const [deleteClientTarget, setDeleteClientTarget] = useState<Client | null>(null);
   const [editClientTarget, setEditClientTarget] = useState<Client | null>(null);
 
-  const reload = () => {
+  const reload = (clearSelection = false) => {
     const svcs = loadServices();
     setAllServices(svcs);
-    if (selectedClient) {
+    if (clearSelection) {
+      setSelectedClient(null);
+    } else if (selectedClient) {
       const updated = buildClients(svcs).find((c) => c.rut === selectedClient.rut);
       if (updated) setSelectedClient(updated);
     }
@@ -1050,8 +1053,8 @@ export function Clients() {
     return (
       <ClientDetail
         client={selectedClient}
-        onBack={() => { setSelectedClient(null); reload(); }}
-        onUpdate={reload}
+        onBack={() => reload(true)}
+        onUpdate={() => reload(false)}
       />
     );
   }
@@ -1190,7 +1193,7 @@ export function Clients() {
                 <tbody>
                   {filtered.map((client) => (
                     <tr
-                      key={client.rut}
+                      key={client.rut || client.name}
                       className="cursor-pointer transition-colors"
                       style={{ borderTop: "1px solid #f0f2f5" }}
                       onClick={() => setSelectedClient(client)}
@@ -1269,9 +1272,9 @@ export function Clients() {
                             className="text-xs px-2.5 py-1.5 rounded-lg transition-all"
                             style={{ background: "#f0f2f5", color: "#1a2f5a" }}
                             onClick={() => setSelectedClient(client)}
-                            title="Ver detalle"
+                            title="Ver ficha del cliente"
                           >
-                            Ver
+                            Ficha
                           </button>
 
                           {/* Editar */}

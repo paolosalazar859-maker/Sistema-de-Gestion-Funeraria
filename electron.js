@@ -5,6 +5,8 @@
 
 import { app, BrowserWindow, Menu, ipcMain, dialog } from 'electron';
 import path from 'path';
+import fs from 'fs';
+import os from 'os';
 import { fileURLToPath } from 'url';
 import BackupManager from './backup-manager.js';
 import UpdateManager from './update-manager.js';
@@ -45,7 +47,7 @@ function createWindow() {
       nodeIntegration: false,
       contextIsolation: true,
       enableRemoteModule: false,
-      preload: path.join(__dirname, 'preload.js')
+      preload: path.join(__dirname, 'preload.cjs')
     },
     show: false, // No mostrar hasta que esté lista
     titleBarStyle: 'default',
@@ -224,15 +226,17 @@ function createMenu(isDev) {
     }
   ];
 
-  // Agregar menú de desarrollo solo en dev mode
-  if (isDev) {
-    template.push({
-      label: 'Desarrollo',
-      submenu: [
-        { role: 'toggleDevTools', label: 'Herramientas de desarrollo' }
-      ]
-    });
-  }
+  // Agregar menú de desarrollo (SIEMPRE disponible para depuración de pantalla blanca)
+  template.push({
+    label: 'Desarrollo',
+    submenu: [
+      { 
+        role: 'toggleDevTools', 
+        label: 'Herramientas de desarrollo',
+        accelerator: process.platform === 'darwin' ? 'Alt+Command+I' : 'Ctrl+Shift+I'
+      }
+    ]
+  });
 
   const menu = Menu.buildFromTemplate(template);
   Menu.setApplicationMenu(menu);
@@ -493,4 +497,80 @@ ipcMain.handle('update:update-config', async (event, config) => {
     return { success: false, error: 'Update manager not available' };
   }
   return updateManager.updateConfig(config);
+});
+
+// ═══════════════════════════════════════════════════════════════════════════
+// IPC HANDLERS - Printing
+// ═══════════════════════════════════════════════════════════════════════════
+
+// Imprimir HTML (Versión Windows 11 con Vista Previa Real)
+ipcMain.handle('print-html', async (event, html) => {
+  console.log('📬 IPC: print-html recibido (Modo Vista Previa)');
+  
+  const tempPath = path.join(os.tmpdir(), `aura-print-${Date.now()}.html`);
+  
+  let fullHtml = html;
+  if (!html.toLowerCase().includes('<!doctype') && !html.toLowerCase().includes('<html')) {
+    fullHtml = `<!DOCTYPE html><html><head><meta charset="UTF-8"/><title>AURA - Impresión</title></head><body>${html}</body></html>`;
+  }
+  
+  try {
+    fs.writeFileSync(tempPath, fullHtml, 'utf8');
+
+    let printWindow = new BrowserWindow({
+      width: 1000,
+      height: 800,
+      show: true, // ¡CRÍTICO! Debe ser visible para que Windows 11 genere la vista previa
+      title: 'AURA - Previsualización de Impresión',
+      webPreferences: {
+        nodeIntegration: false,
+        contextIsolation: true
+      }
+    });
+
+    // Quitar menú de la ventana de impresión
+    printWindow.setMenu(null);
+
+    return new Promise((resolve) => {
+      printWindow.webContents.on('did-finish-load', () => {
+        console.log('✅ Cargado. Disparando diálogo...');
+        
+        setTimeout(() => {
+          if (!printWindow) return;
+          
+          // Ejecutamos la impresión SIN await para no bloquear el proceso principal
+          // y permitimos que la ventana se cierre sola o la cierre el usuario.
+          printWindow.webContents.executeJavaScript(`
+            window.print();
+            setTimeout(() => { window.close(); }, 500);
+          `).catch(err => console.error('Error JS Print:', err));
+
+          // Resolvemos el IPC INMEDIATAMENTE para que la app principal no se bloquee
+          // mientras el usuario elige impresora.
+          console.log('🏁 Diálogo enviado. Liberando IPC.');
+          
+          // Limpieza de archivo temporal diferida
+          setTimeout(() => {
+            try { if (fs.existsSync(tempPath)) fs.unlinkSync(tempPath); } catch (e) {}
+          }, 5000);
+
+          resolve({ success: true });
+        }, 1000);
+      });
+
+      printWindow.webContents.on('did-fail-load', (e, code, desc) => {
+        if (printWindow) printWindow.close();
+        resolve({ success: false, error: desc });
+      });
+
+      printWindow.loadFile(tempPath).catch(err => {
+        if (printWindow) printWindow.close();
+        resolve({ success: false, error: err.message });
+      });
+    });
+
+  } catch (error) {
+    console.error('❌ Error inicial:', error);
+    return { success: false, error: error.message };
+  }
 });

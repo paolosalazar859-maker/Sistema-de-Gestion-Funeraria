@@ -4,7 +4,7 @@ import { useUser, UserRole } from "../context/UserContext";
 import { loadCompanyProfile, CompanyProfile } from "../data/companyStore";
 
 export function LoginScreen() {
-  const { login, verifyAdminPassword } = useUser();
+  const { login, verifyAdminPassword, verifyOfficePassword } = useUser();
   const [selecting, setSelecting] = useState<UserRole | null>(null);
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
@@ -31,18 +31,23 @@ export function LoginScreen() {
   };
 
   const handleSelectOficina = () => {
-    login("oficina");
+    setSelecting("oficina");
+    setPassword("");
+    setError("");
   };
 
-  const handleAdminSubmit = async (e: React.FormEvent) => {
+  const handleLoginSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!password || verifying) return;
+    if (!password || verifying || !selecting) return;
     setVerifying(true);
     setError("");
     try {
-      const valid = await verifyAdminPassword(password);
-      if (valid) {
-        login("admin");
+      const isValid = selecting === "admin" 
+        ? await verifyAdminPassword(password)
+        : await verifyOfficePassword(password);
+        
+      if (isValid) {
+        login(selecting);
       } else {
         setError("Contraseña incorrecta. Inténtalo de nuevo.");
         setPassword("");
@@ -222,8 +227,8 @@ export function LoginScreen() {
               </div>
             </>
           ) : (
-            /* ── Admin password form ── */
-            <form onSubmit={handleAdminSubmit}>
+            /* ── Password form (Admin/Oficina) ── */
+            <form onSubmit={handleLoginSubmit}>
               <div className="flex items-center gap-3 mb-6">
                 <button
                   type="button"
@@ -241,10 +246,12 @@ export function LoginScreen() {
                 </button>
                 <div>
                   <p className="text-sm" style={{ color: "#ffffff", fontWeight: 600 }}>
-                    Acceso Administrador
+                    Acceso {selecting === "admin" ? "Administrador" : "Oficina"}
                   </p>
                   <p className="text-xs" style={{ color: "rgba(255,255,255,0.35)" }}>
-                    Ingresa tu contraseña para continuar
+                    {selecting === "admin" 
+                      ? "Ingresa tu contraseña de administrador" 
+                      : "Ingresa la contraseña de oficina"}
                   </p>
                 </div>
               </div>
@@ -253,9 +260,17 @@ export function LoginScreen() {
               <div className="flex justify-center mb-6">
                 <div
                   className="w-16 h-16 rounded-2xl flex items-center justify-center shadow-lg"
-                  style={{ background: "linear-gradient(135deg, #c9a84c, #e8c97a)" }}
+                  style={{ 
+                    background: selecting === "admin" 
+                      ? "linear-gradient(135deg, #c9a84c, #e8c97a)" 
+                      : "rgba(255,255,255,0.15)" 
+                  }}
                 >
-                  <ShieldCheck size={28} style={{ color: "#0d1b3e" }} />
+                  {selecting === "admin" ? (
+                    <ShieldCheck size={28} style={{ color: "#0d1b3e" }} />
+                  ) : (
+                    <Briefcase size={28} style={{ color: "rgba(255,255,255,0.8)" }} />
+                  )}
                 </div>
               </div>
 
@@ -316,9 +331,9 @@ export function LoginScreen() {
                 className="w-full py-3 rounded-xl text-sm transition-all duration-200 flex items-center justify-center gap-2"
                 style={{
                   background: password.length > 0 && !verifying
-                    ? "linear-gradient(135deg, #c9a84c, #e8c97a)"
-                    : "rgba(201,168,76,0.3)",
-                  color: password.length > 0 && !verifying ? "#0d1b3e" : "rgba(201,168,76,0.5)",
+                    ? (selecting === "admin" ? "linear-gradient(135deg, #c9a84c, #e8c97a)" : "rgba(255,255,255,0.2)")
+                    : "rgba(201,168,76,0.15)",
+                  color: password.length > 0 && !verifying ? (selecting === "admin" ? "#0d1b3e" : "#ffffff") : "rgba(255,255,255,0.2)",
                   fontWeight: 600,
                   cursor: password.length > 0 && !verifying ? "pointer" : "not-allowed",
                 }}

@@ -19,16 +19,30 @@ import {
   Building2,
   MapPin,
   Image as ImageIcon,
+  Trash2,
+  RefreshCcw,
+  Trash,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
-import { DatabaseManager } from "./DatabaseManager";
-import UpdateManagerComponent from "./UpdateManager";
+import React, { Suspense } from "react";
 import { loadCompanyProfile, saveCompanyProfile, CompanyProfile } from "../data/companyStore";
+import { loadServices, restoreService, hardDeleteService } from "../data/serviceStore";
+import { FuneralService } from "../data/mockData";
 
-type Tab = "perfil" | "empresa" | "seguridad" | "database" | "updates";
+// Cargar componentes pesados o con dependencias de Electron de forma diferida
+const DatabaseManager = React.lazy(() => import("./DatabaseManager").then(m => ({ default: m.DatabaseManager })));
+const UpdateManagerComponent = React.lazy(() => import("./UpdateManager"));
+
+type Tab = "perfil" | "empresa" | "seguridad" | "database" | "updates" | "papelera";
 
 export function AdminProfile() {
-  const { adminProfile, updateAdminProfile, changeAdminPassword, profileLoading } = useUser();
+  const { 
+    adminProfile, 
+    updateAdminProfile, 
+    changeAdminPassword, 
+    changeOfficePassword,
+    profileLoading 
+  } = useUser();
   const [activeTab, setActiveTab] = useState<Tab>("perfil");
 
   // ── Profile form state ──────────────────────────────────────────
@@ -145,6 +159,56 @@ export function AdminProfile() {
     }
   };
 
+  // ── Office Password state ────────────────────────────────────────
+  const [officePw, setOfficePw] = useState("");
+  const [showOfficePw, setShowOfficePw] = useState(false);
+  const [officePwMsg, setOfficePwMsg] = useState<{ type: "ok" | "err"; text: string } | null>(null);
+  const [savingOfficePw, setSavingOfficePw] = useState(false);
+
+  const handleOfficePwSave = async () => {
+    if (officePw.length < 4) {
+      setOfficePwMsg({ type: "err", text: "La contraseña debe tener al menos 4 caracteres." });
+      setTimeout(() => setOfficePwMsg(null), 3000);
+      return;
+    }
+    setSavingOfficePw(true);
+    try {
+      const result = await changeOfficePassword(officePw);
+      if (result.ok) {
+        setOfficePwMsg({ type: "ok", text: "Contraseña de oficina actualizada." });
+        setOfficePw("");
+      } else {
+        setOfficePwMsg({ type: "err", text: result.error || "Error al guardar." });
+      }
+    } catch {
+      setOfficePwMsg({ type: "err", text: "Error de conexión." });
+    } finally {
+      setSavingOfficePw(false);
+      setTimeout(() => setOfficePwMsg(null), 3000);
+    }
+  };
+
+  // ── Trash state ────────────────────────────────────────────────
+  const [deletedServices, setDeletedServices] = useState<FuneralService[]>([]);
+  
+  useEffect(() => {
+    if (activeTab === "papelera") {
+      setDeletedServices(loadServices().filter(s => s.isDeleted));
+    }
+  }, [activeTab]);
+
+  const handleRestore = (id: string) => {
+    restoreService(id);
+    setDeletedServices(loadServices().filter(s => s.isDeleted));
+  };
+
+  const handleHardDelete = (id: string) => {
+    if (window.confirm("¿Estás seguro de eliminar este registro PERMANENTEMENTE? Esta acción no se puede deshacer.")) {
+      hardDeleteService(id);
+      setDeletedServices(loadServices().filter(s => s.isDeleted));
+    }
+  };
+
   // ── Helpers ─────────────────────────────────────────────────────
   const inputStyle = (hasError = false) => ({
     background: "#f8f9fb",
@@ -166,6 +230,7 @@ export function AdminProfile() {
     { id: "seguridad", label: "Seguridad", icon: KeyRound },
     { id: "database", label: "Base de datos", icon: Database },
     { id: "updates", label: "Actualizaciones", icon: Download },
+    { id: "papelera", label: "Papelera", icon: Trash2 },
   ];
 
   // Initials avatar
@@ -259,7 +324,6 @@ export function AdminProfile() {
           </p>
 
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            {/* Nombre */}
             <div className="sm:col-span-2">
               <label style={labelStyle}>Nombre completo</label>
               <div className="relative">
@@ -270,13 +334,10 @@ export function AdminProfile() {
                   value={profileForm.name}
                   onChange={(e) => setProfileForm((p) => ({ ...p, name: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
 
-            {/* Email */}
             <div>
               <label style={labelStyle}>Correo electrónico</label>
               <div className="relative">
@@ -287,13 +348,10 @@ export function AdminProfile() {
                   value={profileForm.email}
                   onChange={(e) => setProfileForm((p) => ({ ...p, email: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
 
-            {/* Teléfono */}
             <div>
               <label style={labelStyle}>Teléfono</label>
               <div className="relative">
@@ -304,13 +362,10 @@ export function AdminProfile() {
                   value={profileForm.phone}
                   onChange={(e) => setProfileForm((p) => ({ ...p, phone: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
 
-            {/* Cargo */}
             <div className="sm:col-span-2">
               <label style={labelStyle}>Cargo / Puesto</label>
               <div className="relative">
@@ -321,14 +376,11 @@ export function AdminProfile() {
                   value={profileForm.position}
                   onChange={(e) => setProfileForm((p) => ({ ...p, position: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
           </div>
 
-          {/* Feedback */}
           {profileMsg && (
             <div
               className="flex items-center gap-2 mt-4 px-4 py-2.5 rounded-xl text-sm"
@@ -343,7 +395,6 @@ export function AdminProfile() {
             </div>
           )}
 
-          {/* Save button */}
           <div className="flex justify-end mt-5">
             <button
               onClick={handleProfileSave}
@@ -354,7 +405,6 @@ export function AdminProfile() {
                 color: "#0d1b3e",
                 fontWeight: 600,
                 opacity: savingProfile ? 0.7 : 1,
-                cursor: savingProfile ? "not-allowed" : "pointer",
               }}
             >
               {savingProfile ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
@@ -401,9 +451,6 @@ export function AdminProfile() {
                       hover:file:bg-[#e5e7eb]
                       transition-all cursor-pointer"
                   />
-                  <p className="text-xs text-gray-400 mt-2">
-                    Sube una imagen (PNG o JPG). Se redimensionará automáticamente para optimizar carga.
-                  </p>
                 </div>
               </div>
             </div>
@@ -418,8 +465,6 @@ export function AdminProfile() {
                   value={empresaForm.name}
                   onChange={(e) => setEmpresaForm((p) => ({ ...p, name: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
@@ -434,8 +479,6 @@ export function AdminProfile() {
                   value={empresaForm.subtitle}
                   onChange={(e) => setEmpresaForm((p) => ({ ...p, subtitle: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
@@ -450,8 +493,6 @@ export function AdminProfile() {
                   value={empresaForm.email}
                   onChange={(e) => setEmpresaForm((p) => ({ ...p, email: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
@@ -466,8 +507,6 @@ export function AdminProfile() {
                   value={empresaForm.phone}
                   onChange={(e) => setEmpresaForm((p) => ({ ...p, phone: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
@@ -482,8 +521,6 @@ export function AdminProfile() {
                   value={empresaForm.address}
                   onChange={(e) => setEmpresaForm((p) => ({ ...p, address: e.target.value }))}
                   style={inputStyle()}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
               </div>
             </div>
@@ -512,8 +549,6 @@ export function AdminProfile() {
                 background: "linear-gradient(135deg, #c9a84c, #e8c97a)",
                 color: "#0d1b3e",
                 fontWeight: 600,
-                opacity: savingEmpresa ? 0.7 : 1,
-                cursor: savingEmpresa ? "not-allowed" : "pointer",
               }}
             >
               {savingEmpresa ? <Loader2 size={15} className="animate-spin" /> : <Save size={15} />}
@@ -536,19 +571,7 @@ export function AdminProfile() {
             Para actualizar tu contraseña, ingresa la actual y luego la nueva dos veces.
           </p>
 
-          {/* Info tip */}
-          <div
-            className="flex items-start gap-3 px-4 py-3 rounded-xl mb-5"
-            style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)" }}
-          >
-            <Lock size={14} style={{ color: "#c9a84c", marginTop: "2px", flexShrink: 0 }} />
-            <p className="text-xs" style={{ color: "#a07c28" }}>
-              La nueva contraseña se guardará de forma local en este navegador. Asegúrate de recordarla.
-            </p>
-          </div>
-
           <div className="space-y-4">
-            {/* Contraseña actual */}
             <div>
               <label style={labelStyle}>Contraseña actual</label>
               <div className="relative">
@@ -559,8 +582,6 @@ export function AdminProfile() {
                   value={pwForm.current}
                   onChange={(e) => setPwForm((p) => ({ ...p, current: e.target.value }))}
                   style={{ ...inputStyle(), paddingRight: "42px" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
                 />
                 <button
                   type="button"
@@ -573,7 +594,6 @@ export function AdminProfile() {
               </div>
             </div>
 
-            {/* Nueva contraseña */}
             <div>
               <label style={labelStyle}>Nueva contraseña</label>
               <div className="relative">
@@ -584,8 +604,6 @@ export function AdminProfile() {
                   value={pwForm.next}
                   onChange={(e) => setPwForm((p) => ({ ...p, next: e.target.value }))}
                   style={{ ...inputStyle(pwForm.next.length > 0 && pwForm.next.length < 6), paddingRight: "42px" }}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = pwForm.next.length > 0 && pwForm.next.length < 6 ? "#ef4444" : "#e5e7eb")}
                 />
                 <button
                   type="button"
@@ -596,31 +614,8 @@ export function AdminProfile() {
                   {showPw.next ? <EyeOff size={15} /> : <Eye size={15} />}
                 </button>
               </div>
-              {/* Strength bar */}
-              {pwForm.next.length > 0 && (
-                <div className="mt-1.5 flex items-center gap-2">
-                  <div className="flex gap-1 flex-1">
-                    {[1, 2, 3, 4].map((i) => {
-                      const strength = Math.min(4, Math.floor(pwForm.next.length / 3));
-                      const color =
-                        strength <= 1 ? "#ef4444" : strength === 2 ? "#f59e0b" : strength === 3 ? "#3b82f6" : "#22c55e";
-                      return (
-                        <div
-                          key={i}
-                          className="h-1 flex-1 rounded-full transition-all"
-                          style={{ background: i <= strength ? color : "#e5e7eb" }}
-                        />
-                      );
-                    })}
-                  </div>
-                  <span className="text-xs" style={{ color: "#9ca3af" }}>
-                    {pwForm.next.length < 6 ? "Débil" : pwForm.next.length < 9 ? "Regular" : pwForm.next.length < 12 ? "Fuerte" : "Muy fuerte"}
-                  </span>
-                </div>
-              )}
             </div>
 
-            {/* Confirmar contraseña */}
             <div>
               <label style={labelStyle}>Confirmar nueva contraseña</label>
               <div className="relative">
@@ -634,34 +629,11 @@ export function AdminProfile() {
                     ...inputStyle(!!pwForm.confirm && pwForm.confirm !== pwForm.next),
                     paddingRight: "42px",
                   }}
-                  onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
-                  onBlur={(e) => (e.target.style.borderColor = pwForm.confirm && pwForm.confirm !== pwForm.next ? "#ef4444" : "#e5e7eb")}
                 />
-                <button
-                  type="button"
-                  onClick={() => setShowPw((p) => ({ ...p, confirm: !p.confirm }))}
-                  className="absolute right-3 top-1/2 -translate-y-1/2"
-                  style={{ color: "#9ca3af" }}
-                >
-                  {showPw.confirm ? <EyeOff size={15} /> : <Eye size={15} />}
-                </button>
               </div>
             </div>
           </div>
 
-          {/* Errors */}
-          {pwErrors.length > 0 && (
-            <div className="mt-3 space-y-1">
-              {pwErrors.map((err, i) => (
-                <div key={i} className="flex items-center gap-2 text-xs" style={{ color: "#ef4444" }}>
-                  <AlertCircle size={12} />
-                  {err}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Feedback */}
           {pwMsg && (
             <div
               className="flex items-center gap-2 mt-4 px-4 py-2.5 rounded-xl text-sm"
@@ -676,24 +648,58 @@ export function AdminProfile() {
             </div>
           )}
 
-          {/* Save button */}
           <div className="flex justify-end mt-5">
             <button
               onClick={handlePwSave}
               disabled={!canSavePw || savingPw}
               className="flex items-center gap-2 px-5 py-2.5 rounded-xl text-sm transition-all"
               style={{
-                background: canSavePw && !savingPw
-                  ? "linear-gradient(135deg, #1a2f5a, #2a4a8a)"
-                  : "#e5e7eb",
+                background: canSavePw && !savingPw ? "#0d1b3e" : "#f0f2f5",
                 color: canSavePw && !savingPw ? "#ffffff" : "#9ca3af",
                 fontWeight: 600,
-                cursor: canSavePw && !savingPw ? "pointer" : "not-allowed",
               }}
             >
               {savingPw ? <Loader2 size={15} className="animate-spin" /> : <Lock size={15} />}
               {savingPw ? "Actualizando..." : "Actualizar contraseña"}
             </button>
+          </div>
+
+          <div className="h-px w-full my-8" style={{ background: "#f0f2f5" }} />
+
+          {/* Oficina Password */}
+          <div>
+             <p className="text-sm font-bold" style={{ color: "#0d1b3e" }}>Contraseña de Oficina</p>
+             <p className="text-xs mb-4" style={{ color: "#9ca3af" }}>Cambiar contraseña para el perfil de oficina.</p>
+             <div className="relative">
+                <Lock size={15} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9ca3af" }} />
+                <input
+                  type={showOfficePw ? "text" : "password"}
+                  placeholder="Mínimo 4 caracteres"
+                  value={officePw}
+                  onChange={(e) => setOfficePw(e.target.value)}
+                  style={{ ...inputStyle(), paddingRight: "42px" }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowOfficePw(!showOfficePw)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2"
+                  style={{ color: "#9ca3af" }}
+                >
+                  {showOfficePw ? <EyeOff size={15} /> : <Eye size={15} />}
+                </button>
+             </div>
+             {officePwMsg && <div className="mt-2 text-xs" style={{ color: officePwMsg.type === "ok" ? "#16a34a" : "#dc2626" }}>{officePwMsg.text}</div>}
+             <div className="flex justify-end mt-4">
+               <button
+                  onClick={handleOfficePwSave}
+                  disabled={savingOfficePw || officePw.length < 4}
+                  className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm"
+                  style={{ background: "#0d1b3e", color: "#ffffff" }}
+               >
+                 {savingOfficePw ? <Loader2 size={14} className="animate-spin" /> : <Save size={14} />}
+                 Actualizar Acceso Oficina
+               </button>
+             </div>
           </div>
         </div>
       )}
@@ -704,25 +710,10 @@ export function AdminProfile() {
           className="rounded-2xl p-6 shadow-sm"
           style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
         >
-          <p className="text-sm mb-1" style={{ color: "#0d1b3e", fontWeight: 600 }}>
-            Gestión de Base de Datos
-          </p>
-          <p className="text-xs mb-5" style={{ color: "#9ca3af" }}>
-            Aquí puedes gestionar la base de datos de la aplicación.
-          </p>
-
-          {/* Info tip */}
-          <div
-            className="flex items-start gap-3 px-4 py-3 rounded-xl mb-5"
-            style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)" }}
-          >
-            <Database size={14} style={{ color: "#c9a84c", marginTop: "2px", flexShrink: 0 }} />
-            <p className="text-xs" style={{ color: "#a07c28" }}>
-              Asegúrate de tener una copia de seguridad antes de realizar cambios en la base de datos.
-            </p>
-          </div>
-
-          <DatabaseManager />
+          <p className="text-sm mb-5" style={{ color: "#0d1b3e", fontWeight: 600 }}>Gestión de Datos</p>
+          <Suspense fallback={<div>Cargando...</div>}>
+            <DatabaseManager />
+          </Suspense>
         </div>
       )}
 
@@ -732,25 +723,57 @@ export function AdminProfile() {
           className="rounded-2xl p-6 shadow-sm"
           style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
         >
-          <p className="text-sm mb-1" style={{ color: "#0d1b3e", fontWeight: 600 }}>
-            Actualizaciones de la Aplicación
-          </p>
-          <p className="text-xs mb-5" style={{ color: "#9ca3af" }}>
-            Aquí puedes gestionar las actualizaciones de la aplicación.
-          </p>
+          <p className="text-sm mb-5" style={{ color: "#0d1b3e", fontWeight: 600 }}>Actualizaciones</p>
+          <Suspense fallback={<div>Cargando...</div>}>
+            <UpdateManagerComponent />
+          </Suspense>
+        </div>
+      )}
 
-          {/* Info tip */}
-          <div
-            className="flex items-start gap-3 px-4 py-3 rounded-xl mb-5"
-            style={{ background: "rgba(201,168,76,0.08)", border: "1px solid rgba(201,168,76,0.25)" }}
-          >
-            <Download size={14} style={{ color: "#c9a84c", marginTop: "2px", flexShrink: 0 }} />
-            <p className="text-xs" style={{ color: "#a07c28" }}>
-              Asegúrate de tener una copia de seguridad antes de realizar actualizaciones.
-            </p>
+      {/* ── PAPELERA TAB ─────────────────────────────────────────── */}
+      {activeTab === "papelera" && (
+        <div
+          className="rounded-2xl p-6 shadow-sm"
+          style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
+        >
+          <div className="flex items-center justify-between mb-5">
+            <div>
+              <p className="text-sm font-bold" style={{ color: "#0d1b3e" }}>Papelera de Reciclaje</p>
+              <p className="text-xs" style={{ color: "#9ca3af" }}>Servicios eliminados de forma lógica.</p>
+            </div>
           </div>
 
-          <UpdateManagerComponent />
+          {deletedServices.length === 0 ? (
+            <div className="py-12 text-center text-gray-500">Papelera vacía</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="border-b">
+                    <th className="py-2">ID</th>
+                    <th className="py-2">Contratante</th>
+                    <th className="py-2">Fallecido</th>
+                    <th className="py-2 text-right">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deletedServices.map(s => (
+                    <tr key={s.id} className="border-b last:border-0 hover:bg-gray-50">
+                      <td className="py-3 font-bold">{s.id}</td>
+                      <td>{s.contractorName}</td>
+                      <td>{s.deceasedName}</td>
+                      <td className="text-right">
+                        <div className="flex justify-end gap-2">
+                          <button onClick={() => handleRestore(s.id)} className="text-green-600 hover:scale-110"><RefreshCcw size={14} /></button>
+                          <button onClick={() => handleHardDelete(s.id)} className="text-red-600 hover:scale-110"><Trash size={14} /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       )}
     </div>

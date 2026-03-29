@@ -252,6 +252,36 @@ export function deleteService(id: string): void {
 }
 
 /**
+ * Restaurar un servicio de la papelera
+ */
+export function restoreService(id: string): void {
+  const current = loadServices();
+  const idx = current.findIndex((s) => s.id === id);
+  if (idx >= 0) {
+    const updated = { ...current[idx], isDeleted: false };
+    delete updated.deletedAt;
+    persistService(updated);
+  }
+}
+
+/**
+ * Eliminación permanente de la base de datos
+ */
+export function hardDeleteService(id: string): void {
+  // 1. Eliminar localmente
+  const current = JSON.parse(localStorage.getItem(SERVICES_KEY) || "[]") as FuneralService[];
+  const filtered = current.filter((s) => s.id !== id);
+  localStorage.setItem(SERVICES_KEY, JSON.stringify(filtered));
+
+  // 2. Sincronizar con Supabase (ya existe apiDeleteService)
+  if (navigator.onLine) {
+    apiDeleteService(id).catch(err => console.error("Error en hard delete:", err));
+  }
+  
+  // 3. TODO: Electron/SQLite hard delete
+}
+
+/**
  * Eliminar servicio en Electron (SQLite)
  */
 async function deleteServiceElectron(id: string): Promise<void> {
@@ -263,18 +293,19 @@ async function deleteServiceElectron(id: string): Promise<void> {
       return;
     }
 
-    // Eliminar de SQLite
-    const response = await window.electronAPI.db.deleteService(id);
-    
-    if (response.success) {
-      console.log(`✅ Servicio ${id} eliminado de SQLite`);
-      
-      // También eliminar de localStorage
-      const current = loadServices().filter((s) => s.id !== id);
-      localStorage.setItem(SERVICES_KEY, JSON.stringify(current));
-    } else {
-      console.error(`Error eliminando de SQLite: ${response.error}`);
-      deleteServiceWeb(id);
+    // En SQLite lo tratamos como un Upsert con isDeleted: true
+    const services = loadServices();
+    const srv = services.find(s => s.id === id);
+    if (srv) {
+       const updated = { ...srv, isDeleted: true, deletedAt: new Date().toISOString() };
+       const response = await window.electronAPI.db.upsertService(updated);
+       if (response.success) {
+          console.log(`✅ Servicio ${id} movido a papelera en SQLite`);
+          // Actualizar localStorage
+          const idx = services.findIndex(s => s.id === id);
+          services[idx] = updated;
+          localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
+       }
     }
   } catch (error) {
     console.error('Error en deleteServiceElectron:', error);
@@ -286,20 +317,19 @@ async function deleteServiceElectron(id: string): Promise<void> {
  * Eliminar servicio en web (localStorage + Supabase)
  */
 function deleteServiceWeb(id: string): void {
-  // 1. Elimina localmente de inmediato
-  const current = loadServices().filter((s) => s.id !== id);
-  localStorage.setItem(SERVICES_KEY, JSON.stringify(current));
+  // 1. Marca localmente como eliminado
+  const current = loadServices();
+  const idx = current.findIndex((s) => s.id === id);
+  if (idx >= 0) {
+    current[idx] = { 
+      ...current[idx], 
+      isDeleted: true, 
+      deletedAt: new Date().toISOString() 
+    };
+    localStorage.setItem(SERVICES_KEY, JSON.stringify(current));
 
-  // 2. Sincroniza o encola
-  if (navigator.onLine) {
-    apiDeleteService(id).catch(async (err) => {
-      console.error(`Error eliminando servicio ${id} de Supabase: ${err}`);
-      await enqueueOperation({ id: `del-${id}`, type: "delete", payload: id });
-    });
-  } else {
-    enqueueOperation({ id: `del-${id}`, type: "delete", payload: id }).catch((err) =>
-      console.error(`Error encolando eliminación ${id}: ${err}`)
-    );
+    // 2. Sincroniza con Supabase como un persist (upsert) para que el flag se guarde en la nube
+    persistService(current[idx]); 
   }
 }
 
@@ -347,22 +377,106 @@ export function recalculateAllStatuses(): void {
   }
 }
 
-// ── Estadísticas mensuales ────────────────────────────────────────────────────
+// ── Estadísticas mensuales por Año ──────────────────────────────────────────
 
-export function computeMonthlyData(services: FuneralService[]) {
-  const months: { key: string; label: string }[] = [];
-  const now = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-    const label = d.toLocaleDateString("es-CL", { month: "short" });
-    months.push({ key, label: label.charAt(0).toUpperCase() + label.slice(1) });
-  }
+/**
+ * Obtiene todos los años en los que hay registros (servicios o abonos)
+ * Se asegura de incluir el año actual y cualquier año con actividad histórica.
+ */
+export function getAvailableYears(services: FuneralService[]): number[] {
+  const years = new Set<number>();
+  const now = new Date().getFullYear();
+  years.add(now);
 
-  return months.map(({ key, label }) => {
-    const inMonth = services.filter((s) => s.createdAt?.startsWith(key));
-    const recaudado = inMonth.reduce((acc, s) => acc + s.totalPaid, 0);
-    const deuda = inMonth.reduce((acc, s) => acc + s.pendingBalance, 0);
-    return { month: label, recaudado, deuda };
+  services.forEach(s => {
+    // Fecha de creación o de servicio
+    const sDate = s.date || s.createdAt;
+    if (sDate) {
+      const y = new Date(sDate).getFullYear();
+      if (!isNaN(y)) years.add(y);
+    }
+    // Fechas de pagos
+    s.payments.forEach(p => {
+      if (p.date) {
+        const y = new Date(p.date).getFullYear();
+        if (!isNaN(y)) years.add(y);
+      }
+    });
   });
+
+  return Array.from(years).sort((a, b) => b - a);
+}
+
+/**
+ * Retorna un conjunto de números (1-12) que representan los meses con actividad 
+ * (servicios registrados o pagos recibidos) para un año específico.
+ */
+export function getMonthsWithData(services: FuneralService[], year: number): Set<number> {
+  const months = new Set<number>();
+  
+  services.forEach(s => {
+    // Verificar fecha del servicio
+    const sDate = s.date || s.createdAt;
+    if (sDate && sDate.startsWith(`${year}-`)) {
+      const m = parseInt(sDate.split("-")[1], 10);
+      if (!isNaN(m)) months.add(m);
+    }
+    
+    // Verificar fechas de pagos
+    s.payments.forEach(p => {
+      if (p.date && p.date.startsWith(`${year}-`)) {
+        const m = parseInt(p.date.split("-")[1], 10);
+        if (!isNaN(m)) months.add(m);
+      }
+    });
+  });
+
+  return months;
+}
+
+/**
+ * Calcula recaudación y deuda por mes para un año específico
+ * A diferencia de la versión anterior, esta usa la fecha REAL de cada abono.
+ */
+export function computeMonthlyData(services: FuneralService[], year: number) {
+  const monthsData = Array.from({ length: 12 }, (_, i) => {
+    const monthIndex = i + 1;
+    const monthKey = `${year}-${String(monthIndex).padStart(2, "0")}`;
+    const d = new Date(year, i, 1);
+    const label = d.toLocaleDateString("es-CL", { month: "short" });
+    
+    return { 
+      key: monthKey,
+      month: label.charAt(0).toUpperCase() + label.slice(1), 
+      recaudado: 0, 
+      deuda: 0 
+    };
+  });
+
+  services.forEach(service => {
+    // 1. Recaudación: Sumar abonos realizados en este año/mes
+    service.payments.forEach(payment => {
+      if (payment.date && payment.date.startsWith(`${year}-`)) {
+        const monthPart = payment.date.split("-")[1];
+        const monthIdx = parseInt(monthPart, 10) - 1;
+        if (monthIdx >= 0 && monthIdx < 12) {
+          monthsData[monthIdx].recaudado += payment.amount;
+        }
+      }
+    });
+
+    // 2. Deuda: Atribuir la deuda pendiente al mes de creación del servicio 
+    // (o al mes del servicio) si corresponde al año seleccionado.
+    // Esto es una simplificación, pero es lo más lógico para proyecciones.
+    const serviceDate = service.date || service.createdAt;
+    if (serviceDate && serviceDate.startsWith(`${year}-`)) {
+      const monthPart = serviceDate.split("-")[1];
+      const monthIdx = parseInt(monthPart, 10) - 1;
+      if (monthIdx >= 0 && monthIdx < 12) {
+        monthsData[monthIdx].deuda += service.pendingBalance;
+      }
+    }
+  });
+
+  return monthsData;
 }

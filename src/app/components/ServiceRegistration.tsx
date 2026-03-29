@@ -20,6 +20,7 @@ import {
   Type,
   Heart,
 } from "lucide-react";
+import { openPrint } from "../utils/printUtils";
 import { funeralServiceTypes, productServiceTypes } from "../data/mockData";
 import {
   loadServices,
@@ -156,7 +157,9 @@ interface FormData {
   invoice1: string;
   invoice2: string;
   invoice3: string;
-  initialPaymentMethod: "Efectivo" | "Transferencia" | "Cheque" | "Crédito" | "Débito";
+  observations: string;
+  paymentNotes: string;
+  initialPaymentMethod: "Efectivo" | "Transferencia" | "Cheque" | "Tarjeta" | "Crédito" | "Débito";
 }
 
 const emptyForm: FormData = {
@@ -184,6 +187,8 @@ const emptyForm: FormData = {
   invoice1: "",
   invoice2: "",
   invoice3: "",
+  observations: "",
+  paymentNotes: "",
   initialPaymentMethod: "Efectivo",
 };
 
@@ -694,11 +699,17 @@ export function ServiceRegistration() {
   const navigate = useNavigate();
   const [form, setForm] = useState<FormData>({ ...emptyForm });
   const [saved, setSaved] = useState(false);
+  const [selectedId, setSelectedId] = useState("");
+  const [sortServicesBy, setSortServicesBy] = useState<"recent" | "oldest" | "name">("recent");
   const [editMode, setEditMode] = useState(true);
   const [showVoucher, setShowVoucher] = useState(false);
-  const [selectedId, setSelectedId] = useState<string>("");
   const [currentServiceId, setCurrentServiceId] = useState<string>("");
-  const [services, setServices] = useState(() => loadServices());
+  const [services, setServices] = useState(() => loadServices().filter(s => !s.isDeleted));
+  const [isAdmin, setIsAdmin] = useState(false);
+
+  useEffect(() => {
+    setIsAdmin(localStorage.getItem("adminSession") === "true");
+  }, []);
 
   // Efecto para cargar servicio si viene por URL
   useEffect(() => {
@@ -758,18 +769,18 @@ export function ServiceRegistration() {
           mortuaryFee: srv.mortuaryFee.toString(),
           discount: srv.discount.toString(),
           initialPayment: srv.initialPayment.toString(),
-          installmentsEnabled: srv.installments?.enabled || false,
-          numberOfInstallments: srv.installments?.totalInstallments.toString() || "3",
           invoice1: srv.invoice1 || "",
           invoice2: srv.invoice2 || "",
           invoice3: srv.invoice3 || "",
-          initialPaymentMethod: (srv.payments && srv.payments.length > 0) 
-            ? srv.payments[0].method 
-            : "Efectivo",
+          observations: srv.observations || "",
+          paymentNotes: srv.payments[0]?.notes || "",
+          initialPaymentMethod: (srv.payments[0]?.method as any) || "Efectivo",
+          installmentsEnabled: srv.installments?.enabled || false,
+          numberOfInstallments: srv.installments?.totalInstallments.toString() || "3",
         });
         setCurrentServiceId(srv.id);
         // Si viene por ID de URL, habilitamos edición de inmediato
-        setEditMode(!!serviceId); 
+        setEditMode(!!serviceId);
         setSaved(true);
       }
     }
@@ -805,7 +816,7 @@ export function ServiceRegistration() {
       } else {
         // Regla: 7 cuotas o más = 3% de interés mensual (Amortización Francesa)
         const monthlyRate = 0.03;
-        const factor = (monthlyRate * Math.pow(1 + monthlyRate, numInstallments)) / 
+        const factor = (monthlyRate * Math.pow(1 + monthlyRate, numInstallments)) /
                        (Math.pow(1 + monthlyRate, numInstallments) - 1);
         baseAmount = Math.ceil(pending * factor);
       }
@@ -850,16 +861,17 @@ export function ServiceRegistration() {
       invoice1: form.invoice1,
       invoice2: form.invoice2,
       invoice3: form.invoice3,
+      observations: form.observations,
       installments: installmentsData,
       totalService: total,
       totalPaid: abonado,
       pendingBalance: pending,
       status: deriveStatus(abonado, pending),
       lastPaymentDate: init > 0 ? today : "-",
-      payments: isEdit && existingService 
-        ? existingService.payments 
+      payments: isEdit && existingService
+        ? existingService.payments
         : (init > 0
-            ? [{ id: `${id}-P1`, date: today, amount: init, method: form.initialPaymentMethod, balance: pending, notes: "Abono inicial" }]
+            ? [{ id: `${id}-P1`, date: today, amount: init, method: form.initialPaymentMethod, balance: pending, notes: form.paymentNotes || "Abono inicial" }]
             : []),
       createdAt: isEdit && existingService ? existingService.createdAt : today,
     };
@@ -869,6 +881,12 @@ export function ServiceRegistration() {
     setServices(loadServices()); // refresh dropdown list
     setSaved(true);
     setEditMode(false);
+
+    // Auto-reset after a short delay so the user can see the "Saved" message or just reset immediately
+    // The user requested: "que se elimine para poder registrar uno nuevo automáticamente"
+    setTimeout(() => {
+      handleNew();
+    }, 1500);
   };
 
   const handleEdit = () => {
@@ -911,6 +929,8 @@ export function ServiceRegistration() {
       day: "2-digit", month: "long", year: "numeric",
     });
 
+    const company = loadCompanyProfile();
+
     const purchasedRows: [string, string][] = [];
     if (form.serviceCategory) purchasedRows.push(["Categoría", form.serviceCategory]);
     if (form.serviceType)     purchasedRows.push(["Tipo de Servicio", form.serviceType]);
@@ -932,145 +952,82 @@ export function ServiceRegistration() {
     if (mortuary > 0)  abonoRows.push(["Cuota Mortuoria", formatCLP(mortuary), false]);
     if (totalAbono > 0) abonoRows.push(["Total Abonado", formatCLP(totalAbono), true]);
 
-    const rowHtml = (label: string, value: string, bold = false) => `
-      <tr>
-        <td style="padding:8px 10px;color:${bold ? "#0d1b3e" : "#6b7280"};font-size:12px;border-bottom:1px solid #f0f2f5;font-weight:${bold ? "600" : "400"};">${label}</td>
-        <td style="padding:8px 10px;text-align:right;font-size:${bold ? "13" : "12"}px;border-bottom:1px solid #f0f2f5;font-weight:${bold ? "700" : "400"};color:${bold ? "#0d1b3e" : "#374151"};">${value}</td>
-      </tr>`;
-
     const saldoFinal = Math.max(0, saldo);
     const saldoColor = saldoFinal > 0 ? "#dc2626" : "#16a34a";
     const saldoBg    = saldoFinal > 0 ? "#fee2e2" : "#dcfce7";
-    const saldoLabelColor = saldoFinal > 0 ? "#991b1b" : "#166534";
+    const saldoLabelTxtColor = saldoFinal > 0 ? "#991b1b" : "#166534";
 
-    const company = loadCompanyProfile();
-
-    const html = `<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8"/>
-  <title>Ficha de Servicio – ${company.name}</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
-    * { margin:0; padding:0; box-sizing:border-box; }
-    body { font-family:'Inter',sans-serif; background:#fff; color:#0d1b3e; padding:32px 40px; font-size:13px; -webkit-print-color-adjust:exact; print-color-adjust:exact; }
-    .header { display:flex; justify-content:space-between; align-items:flex-start; padding-bottom:16px; border-bottom:2px solid #0d1b3e; margin-bottom:22px; }
-    .brand { display:flex; align-items:center; gap:12px; }
-    .logo-box { width:44px; height:44px; border-radius:10px; background:linear-gradient(135deg,#0d1b3e,#1a2f5a); display:flex; align-items:center; justify-content:center; }
-    .brand-name { font-size:20px; font-weight:800; color:#0d1b3e; letter-spacing:-0.02em; }
-    .brand-sub  { font-size:10px; color:#9ca3af; letter-spacing:0.1em; margin-top:1px; }
-    .emit-info  { text-align:right; }
-    .emit-label { font-size:9px; color:#9ca3af; letter-spacing:0.1em; text-transform:uppercase; }
-    .emit-value { font-size:12px; color:#374151; margin-top:3px; font-weight:500; }
-    .ficha-tag  { display:inline-block; background:#f0f2f5; color:#374151; font-size:9px; font-weight:700; padding:3px 10px; border-radius:999px; letter-spacing:0.08em; margin-bottom:6px; }
-    .section { margin-bottom:20px; }
-    .section-title { font-size:9px; font-weight:700; letter-spacing:0.14em; color:#c9a84c; text-transform:uppercase; margin-bottom:10px; }
-    table { width:100%; border-collapse:collapse; }
-    .service-grid { display:grid; grid-template-columns:1fr 1fr; gap:8px; }
-    .service-item { background:#f8f9fa; border-radius:8px; padding:9px 12px; }
-    .service-item .lbl { font-size:9px; color:#9ca3af; margin-bottom:3px; text-transform:uppercase; letter-spacing:0.06em; }
-    .service-item .val { font-size:12px; color:#0d1b3e; font-weight:600; }
-    .date-box { background:#f8f9fa; border-radius:10px; padding:12px 16px; display:inline-flex; align-items:center; gap:12px; }
-    .date-label { font-size:9px; color:#9ca3af; text-transform:uppercase; letter-spacing:0.08em; margin-bottom:3px; }
-    .date-val   { font-size:16px; font-weight:700; color:#0d1b3e; }
-    .total-section { padding-top:8px; display:flex; justify-content:space-between; align-items:center; }
-    .saldo-box { margin-top:10px; padding:11px 14px; border-radius:9px; display:flex; justify-content:space-between; align-items:center; }
-    .footer { margin-top:36px; border-top:1px solid #e5e7eb; padding-top:20px; display:grid; grid-template-columns:1fr 1fr; gap:50px; }
-    .sign-line { border-top:1px solid #374151; padding-top:6px; font-size:9px; color:#9ca3af; text-align:center; margin-top:32px; letter-spacing:0.06em; text-transform:uppercase; }
-    .foot-note { text-align:center; font-size:9px; color:#c9a84c; margin-top:22px; letter-spacing:0.06em; }
-    @media print { body { padding:18px 24px; } }
-  </style>
-</head>
-<body>
-  <div class="header">
-    <div class="brand">
-      <div class="logo-box" ${company.logoBase64 ? 'style="background: transparent;"' : ''}>
-        ${company.logoBase64 ? `<img src="${company.logoBase64}" style="width:100%;height:100%;object-fit:contain;border-radius:10px;" />` : `
-        <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-          <path d="M12 2L4 7v10l8 5 8-5V7L12 2z" fill="white" fill-opacity="0.9"/>
-        </svg>
-        `}
+    const htmlContent = `
+    <div style="font-family: 'Inter', sans-serif; padding: 20px; color: #1a2f5a;">
+      <div style="border-bottom: 2px solid #0d1b3e; padding-bottom: 20px; margin-bottom: 30px; display: flex; justify-content: space-between; align-items: flex-start;">
+        <div>
+          <div style="font-size: 24px; font-weight: 800; color: #0d1b3e;">${company.name}</div>
+          <div style="font-size: 10px; color: #6b7280;">SISTEMA DE GESTIÓN FUNERARIA</div>
+        </div>
+        <div style="text-align: right;">
+          <div style="font-size: 14px; font-weight: 700; color: #c9a84c; text-transform: uppercase;">Ficha de Servicio</div>
+          <div style="font-size: 11px; color: #9ca3af; margin-top: 4px;">Emisión: ${emissionDate}</div>
+        </div>
       </div>
-      <div>
-        <div class="brand-name">${company.name}</div>
-        <div class="brand-sub">${company.subtitle.toUpperCase()}</div>
-      </div>
-    </div>
-    <div class="emit-info">
-      <div class="ficha-tag">FICHA DE SERVICIO${currentServiceId ? " · " + currentServiceId : ""}</div>
-      <div class="emit-label">Fecha de emisión</div>
-      <div class="emit-value">${emissionDate}</div>
-    </div>
-  </div>
 
-  <div class="section">
-    <div class="section-title">Fecha del Servicio</div>
-    <div class="date-box">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#c9a84c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-        <rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/>
-      </svg>
-      <div>
-        <div class="date-label">Fecha</div>
-        <div class="date-val">${dateFormatted}</div>
+      <div style="margin-bottom: 25px;">
+        <div style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #f0f2f5; padding-bottom: 5px;">Información del Fallecido</div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">Nombre Completo</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${form.deceasedName || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">RUT</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${form.deceasedRut || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">Fecha del Servicio</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${dateFormatted}</td></tr>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <div style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #f0f2f5; padding-bottom: 5px;">Datos del Contratante</div>
+        <table style="width: 100%; border-collapse: collapse;">
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">Nombre</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${form.contractorName || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">RUT</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${form.contractorRut || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">Teléfono</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${form.contractorPhone || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">Correo</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${form.contractorEmail || "—"}</td></tr>
+          <tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">Dirección</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${form.contractorAddress || "—"}</td></tr>
+        </table>
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <div style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #f0f2f5; padding-bottom: 5px;">Detalle del Servicio</div>
+        <table style="width: 100%; border-collapse: collapse;">
+          ${purchasedRows.map(([l, v]) => `<tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">${l}</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${v}</td></tr>`).join("")}
+        </table>
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <div style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #f0f2f5; padding-bottom: 5px;">Resumen Financiero</div>
+        <table style="width: 100%; border-collapse: collapse;">
+          ${valueRows.map(([l, v]) => `<tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #6b7280; width: 151px;">${l}</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: #0d1b3e; font-weight: 500; text-align: right;">${v}</td></tr>`).join("")}
+        </table>
+      </div>
+
+      <div style="margin-bottom: 25px;">
+        <div style="font-size: 11px; font-weight: 700; color: #9ca3af; text-transform: uppercase; margin-bottom: 10px; border-bottom: 1px solid #f0f2f5; padding-bottom: 5px;">Abonos y Saldo Pendiente</div>
+        <table style="width: 100%; border-collapse: collapse;">
+          ${abonoRows.map(([l, v, b]) => `<tr><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: ${b ? "#0d1b3e" : "#6b7280"}; font-weight: ${b ? "600" : "400"}; width: 151px;">${l}</td><td style="padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 12px; color: ${b ? "#0d1b3e" : "#374151"}; font-weight: ${b ? "700" : "400"}; text-align: right;">${v}</td></tr>`).join("")}
+        </table>
+        <div style="margin-top: 20px; padding: 15px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; background: ${saldoBg};">
+          <span style="font-weight: 600; font-size: 13px; color: ${saldoLabelTxtColor};">Saldo Pendiente</span>
+          <span style="font-weight: 800; font-size: 17px; color: ${saldoColor};">${formatCLP(saldoFinal)}</span>
+        </div>
+      </div>
+
+      <div style="margin-top: 50px; display: grid; grid-template-columns: 1fr 1fr; gap: 40px;">
+        <div>
+          <div style="border-top: 1.5px solid #0d1b3e; margin-top: 51px; padding-top: 10px; text-align: center; font-size: 11px; font-weight: 600;">Firma del Contratante</div>
+          <div style="text-align: center; font-size: 11px; color: #374151; margin-top: 5px; font-weight: 500;">${form.contractorName || ""}</div>
+        </div>
+        <div>
+          <div style="border-top: 1.5px solid #0d1b3e; margin-top: 51px; padding-top: 10px; text-align: center; font-size: 11px; font-weight: 600;">Firma Responsable ${company.name}</div>
+        </div>
       </div>
     </div>
-  </div>
+    `;
 
-  <div class="section">
-    <div class="section-title">Detalle del Servicio / Artículo Contratado</div>
-    <div class="service-grid">
-      ${purchasedRows.map(([lbl, val]) => `
-        <div class="service-item">
-          <div class="lbl">${lbl}</div>
-          <div class="val">${val || "—"}</div>
-        </div>`).join("")}
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Detalle del Valor</div>
-    <table>
-      ${valueRows.map(([l, v]) => rowHtml(l, v)).join("")}
-    </table>
-    <div class="total-section">
-      <span style="font-size:13px;font-weight:700;color:#0d1b3e;">TOTAL SERVICIO</span>
-      <span style="font-size:17px;font-weight:800;color:#0d1b3e;">${formatCLP(totalService)}</span>
-    </div>
-  </div>
-
-  <div class="section">
-    <div class="section-title">Abonos y Saldo Pendiente</div>
-    <table>
-      ${abonoRows.map(([l, v, b]) => rowHtml(l, v, b)).join("")}
-    </table>
-    <div class="saldo-box" style="background:${saldoBg};">
-      <span style="font-weight:600;font-size:13px;color:${saldoLabelColor};">Saldo Pendiente</span>
-      <span style="font-weight:800;font-size:17px;color:${saldoColor};">${formatCLP(saldoFinal)}</span>
-    </div>
-  </div>
-
-  <div class="footer">
-    <div>
-      <div class="sign-line">Firma del Contratante</div>
-      <div style="text-align:center;font-size:11px;color:#374151;margin-top:5px;font-weight:500;">${form.contractorName || ""}</div>
-      <div style="text-align:center;font-size:10px;color:#9ca3af;">RUT: ${form.contractorRut || "____________________"}</div>
-    </div>
-    <div>
-      <div class="sign-line">Firma Responsable ${company.name}</div>
-    </div>
-  </div>
-
-  <div class="foot-note">${company.subtitle} · Documento de uso interno</div>
-
-  <script>window.onload = function(){ window.print(); }<\/script>
-</body>
-</html>`;
-
-    const win = window.open("", "_blank", "width=720,height=960");
-    if (win) {
-      win.document.write(html);
-      win.document.close();
-    }
+    openPrint(htmlContent, `Ficha ${form.deceasedName || "Servicio"}`);
   };
   // ────────────────────────────────────────────────────────────────────────────
 
@@ -1086,6 +1043,7 @@ export function ServiceRegistration() {
         </button>
 
         <div
+          id="printable-voucher"
           className="rounded-2xl shadow-lg overflow-hidden"
           style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
         >
@@ -1213,7 +1171,12 @@ export function ServiceRegistration() {
               Este documento es un comprobante oficial del servicio prestado.
             </p>
             <button
-              onClick={() => window.print()}
+              onClick={() => {
+                const voucherElement = document.getElementById('printable-voucher');
+                if (voucherElement) {
+                   openPrint(voucherElement.innerHTML, "Comprobante de Pago");
+                }
+              }}
               className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm transition-all"
               style={{ background: "#0d1b3e", color: "#c9a84c" }}
             >
@@ -1227,10 +1190,19 @@ export function ServiceRegistration() {
 
   return (
     <div className="max-w-5xl mx-auto space-y-4">
-      {/* Top Bar */}
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-        <div>
-          <p className="text-xs" style={{ color: "#9ca3af" }}>Nuevo servicio o editar existente</p>
+        <div className="flex items-center gap-2">
+          <p className="text-xs" style={{ color: "#9ca3af" }}>Buscar Servicio Registrado</p>
+          <select
+            value={sortServicesBy}
+            onChange={(e) => setSortServicesBy(e.target.value as any)}
+            className="text-[10px] font-semibold uppercase tracking-wider px-2 py-1 rounded-lg border-none bg-gray-100"
+            style={{ color: "#6b7280" }}
+          >
+            <option value="recent">Recientes</option>
+            <option value="oldest">Antiguos</option>
+            <option value="name">A-Z</option>
+          </select>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           <select
@@ -1242,11 +1214,17 @@ export function ServiceRegistration() {
             onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
           >
             <option value="">Cargar servicio existente...</option>
-            {services.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.id} — {s.deceasedName?.split(" ").slice(0, 2).join(" ") || s.serviceType}
-              </option>
-            ))}
+            {[...services]
+              .sort((a, b) => {
+                if (sortServicesBy === "recent") return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+                if (sortServicesBy === "oldest") return new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime();
+                return (a.contractorName || "").toLowerCase().localeCompare((b.contractorName || "").toLowerCase());
+              })
+              .map((s) => (
+                <option key={s.id} value={s.id}>
+                  {s.id} — {s.deceasedName?.split(" ").slice(0, 2).join(" ") || s.serviceType}
+                </option>
+              ))}
           </select>
           <button
             onClick={handleNew}
@@ -1351,53 +1329,68 @@ export function ServiceRegistration() {
             ⚠ Selecciona una categoría para continuar
           </p>
         )}
+        {form.serviceCategory && !isAdmin && (
+          <p className="mt-3 text-xs" style={{ color: "#c9a84c" }}>
+            ℹ Perfil Oficina: Solo puedes editar datos del contratante y fallecido.
+          </p>
+        )}
       </div>
 
       {/* ── Resto del formulario (solo si hay categoría) ── */}
       {form.serviceCategory && (
         <>
-          {/* Section 1: Datos del Servicio */}
+          {/* Section 3: Datos del Contratante */}
           <div
             className="rounded-2xl p-5 shadow-sm"
             style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
           >
             <SectionHeader
-              icon={Calendar}
-              title="Datos del Servicio"
-              subtitle={isProduct ? "Artículo, precio y ubicación" : "Información general del servicio funerario"}
-              color="#1a2f5a"
+              icon={Building2}
+              title="Datos del Contratante"
+              subtitle="Responsable del contrato y pago del servicio"
+              color="#c9a84c"
             />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-              <InputField
-                label="Fecha"
-                type="date"
-                value={form.date}
-                onChange={set("date")}
-                disabled={!editMode}
-              />
-              <div className="lg:col-span-1">
-                <CemeteryAutocomplete
-                  value={form.cemetery}
-                  onChange={set("cemetery")}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="lg:col-span-2">
+                <ClientAutocomplete
+                  value={form.contractorName}
+                  onChange={set("contractorName")}
+                  onSelectClient={handleSelectClient}
                   disabled={!editMode}
                 />
               </div>
-              <div className="lg:col-span-1">
+              <RutInput
+                label="RUT Contratante"
+                value={form.contractorRut}
+                onChange={set("contractorRut")}
+                disabled={!editMode}
+              />
+              <div className="lg:col-span-3">
                 <InputField
-                  label={isProduct ? "Artículo" : "Tipo de Servicio"}
-                  value={form.serviceType}
-                  onChange={set("serviceType")}
+                  label="Dirección"
+                  value={form.contractorAddress}
+                  onChange={set("contractorAddress")}
+                  placeholder="Calle, número, comuna, ciudad"
                   disabled={!editMode}
-                  options={currentTypeOptions}
                 />
               </div>
-              <MoneyInput
-                label={isProduct ? "Precio ($)" : "Valor del Servicio ($)"}
-                value={form.serviceValue}
-                onChange={set("serviceValue")}
-                placeholder="0"
+              <InputField
+                label="Teléfono de Contacto"
+                value={form.contractorPhone}
+                onChange={set("contractorPhone")}
+                placeholder="+56 9 1234 5678"
                 disabled={!editMode}
               />
+              <div className="lg:col-span-2">
+                <InputField
+                  label="Correo Electrónico"
+                  type="email"
+                  value={form.contractorEmail}
+                  onChange={set("contractorEmail")}
+                  placeholder="correo@ejemplo.com"
+                  disabled={!editMode}
+                />
+              </div>
             </div>
           </div>
 
@@ -1599,7 +1592,7 @@ export function ServiceRegistration() {
                       value={form.invoice1}
                       onChange={set("invoice1")}
                       placeholder="0001"
-                      disabled={!editMode}
+                      disabled={!editMode || !isAdmin}
                     />
                   </div>
                   <div className="lg:col-span-1">
@@ -1608,7 +1601,7 @@ export function ServiceRegistration() {
                       value={form.invoice2}
                       onChange={set("invoice2")}
                       placeholder="0002"
-                      disabled={!editMode}
+                      disabled={!editMode || !isAdmin}
                     />
                   </div>
                   <div className="lg:col-span-1">
@@ -1617,7 +1610,7 @@ export function ServiceRegistration() {
                       value={form.invoice3}
                       onChange={set("invoice3")}
                       placeholder="0003"
-                      disabled={!editMode}
+                      disabled={!editMode || !isAdmin}
                     />
                   </div>
                 </div>
@@ -1625,58 +1618,48 @@ export function ServiceRegistration() {
             )}
           </div>
 
-          {/* Section 3: Datos del Contratante */}
+          {/* Section 1: Datos del Servicio */}
           <div
             className="rounded-2xl p-5 shadow-sm"
             style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
           >
             <SectionHeader
-              icon={Building2}
-              title="Datos del Contratante"
-              subtitle="Responsable del contrato y pago del servicio"
-              color="#c9a84c"
+              icon={Calendar}
+              title="Datos del Servicio"
+              subtitle={isProduct ? "Artículo, precio y ubicación" : "Información general del servicio funerario"}
+              color="#1a2f5a"
             />
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="lg:col-span-2">
-                <ClientAutocomplete
-                  value={form.contractorName}
-                  onChange={set("contractorName")}
-                  onSelectClient={handleSelectClient}
-                  disabled={!editMode}
-                />
-              </div>
-              <RutInput
-                label="RUT Contratante"
-                value={form.contractorRut}
-                onChange={set("contractorRut")}
-                disabled={!editMode}
-              />
-              <div className="lg:col-span-3">
-                <InputField
-                  label="Dirección"
-                  value={form.contractorAddress}
-                  onChange={set("contractorAddress")}
-                  placeholder="Calle, número, comuna, ciudad"
-                  disabled={!editMode}
-                />
-              </div>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
               <InputField
-                label="Teléfono de Contacto"
-                value={form.contractorPhone}
-                onChange={set("contractorPhone")}
-                placeholder="+56 9 1234 5678"
-                disabled={!editMode}
+                label="Fecha"
+                type="date"
+                value={form.date}
+                onChange={set("date")}
+                disabled={!editMode || !isAdmin}
               />
-              <div className="lg:col-span-2">
-                <InputField
-                  label="Correo Electrónico"
-                  type="email"
-                  value={form.contractorEmail}
-                  onChange={set("contractorEmail")}
-                  placeholder="correo@ejemplo.com"
-                  disabled={!editMode}
+              <div className="lg:col-span-1">
+                <CemeteryAutocomplete
+                  value={form.cemetery}
+                  onChange={set("cemetery")}
+                  disabled={!editMode || !isAdmin}
                 />
               </div>
+              <div className="lg:col-span-1">
+                <InputField
+                  label={isProduct ? "Artículo" : "Tipo de Servicio"}
+                  value={form.serviceType}
+                  onChange={set("serviceType")}
+                  disabled={!editMode || !isAdmin}
+                  options={currentTypeOptions}
+                />
+              </div>
+              <MoneyInput
+                label={isProduct ? "Precio ($)" : "Valor del Servicio ($)"}
+                value={form.serviceValue}
+                onChange={set("serviceValue")}
+                placeholder="0"
+                disabled={!editMode}
+              />
             </div>
           </div>
 
@@ -1700,14 +1683,14 @@ export function ServiceRegistration() {
                       value={form.municipalContribution}
                       onChange={set("municipalContribution")}
                       placeholder="0"
-                      disabled={!editMode}
+                      disabled={!editMode || !isAdmin}
                     />
                     <MoneyInput
                       label="Cuota Mortuoria ($)"
                       value={form.mortuaryFee}
                       onChange={set("mortuaryFee")}
                       placeholder="0"
-                      disabled={!editMode}
+                      disabled={!editMode || !isAdmin}
                     />
                   </>
                 )}
@@ -1716,22 +1699,31 @@ export function ServiceRegistration() {
                   value={form.discount}
                   onChange={set("discount")}
                   placeholder="0"
-                  disabled={!editMode}
+                  disabled={!editMode || !isAdmin}
                 />
                 <MoneyInput
                   label="Pie / Abono Inicial ($)"
                   value={form.initialPayment}
                   onChange={set("initialPayment")}
                   placeholder="0"
-                  disabled={!editMode}
+                  disabled={!editMode || !isAdmin}
                 />
                 <InputField
                   label="Método Abono Inicial"
                   value={form.initialPaymentMethod}
                   onChange={set("initialPaymentMethod")}
-                  options={["Efectivo", "Transferencia", "Cheque", "Crédito", "Débito"]}
-                  disabled={!editMode}
+                  options={["Efectivo", "Transferencia", "Cheque", "Tarjeta", "Crédito", "Débito"]}
+                  disabled={!editMode || !isAdmin}
                 />
+                <div className="sm:col-span-2">
+                  <InputField
+                    label="Observaciones del Pago"
+                    value={form.paymentNotes}
+                    onChange={set("paymentNotes")}
+                    placeholder="Ej: Pago con cheque N° 123, abono parcial, etc."
+                    disabled={!editMode || !isAdmin}
+                  />
+                </div>
               </div>
 
               {/* Opciones de Cuotas */}
@@ -1759,14 +1751,15 @@ export function ServiceRegistration() {
                     <label className="flex items-center gap-3 cursor-pointer p-3 rounded-xl transition-all" 
                       style={{ 
                         background: form.installmentsEnabled ? "rgba(201,168,76,0.08)" : "#fafbfc",
-                        border: `1.5px solid ${form.installmentsEnabled ? "rgba(201,168,76,0.3)" : "#e5e7eb"}` 
+                        border: `1.5px solid ${form.installmentsEnabled ? "rgba(201,168,76,0.3)" : "#e5e7eb"}`,
+                        opacity: (!editMode || !isAdmin) ? 0.6 : 1
                       }}
                     >
                       <input
                         type="checkbox"
                         checked={form.installmentsEnabled}
                         onChange={(e) => setForm((prev) => ({ ...prev, installmentsEnabled: e.target.checked }))}
-                        disabled={!editMode}
+                        disabled={!editMode || !isAdmin}
                         className="w-5 h-5 rounded-md"
                         style={{ accentColor: "#c9a84c" }}
                       />
@@ -1789,7 +1782,7 @@ export function ServiceRegistration() {
                       value={form.numberOfInstallments}
                       onChange={set("numberOfInstallments")}
                       placeholder="3"
-                      disabled={!editMode}
+                      disabled={!editMode || !isAdmin}
                     />
                   )}
                 </div>
@@ -1939,6 +1932,37 @@ export function ServiceRegistration() {
                   {formatCLP(Math.max(0, saldo))}
                 </p>
               </div>
+            </div>
+          </div>
+
+          {/* Section 4: Observaciones Internas */}
+          <div
+            className="rounded-2xl p-5 shadow-sm"
+            style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
+          >
+            <SectionHeader
+              icon={FileText}
+              title="Observaciones Internas"
+              subtitle="Notas adicionales que NO aparecerán en la ficha impresa"
+              color="#6b7280"
+            />
+            <div className="relative">
+              <textarea
+                value={form.observations}
+                onChange={(e) => set("observations")(e.target.value)}
+                disabled={!editMode || !isAdmin}
+                rows={3}
+                placeholder="Ingresa notas u observaciones internas aquí..."
+                className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all"
+                style={{
+                  border: "1.5px solid #e5e7eb",
+                  color: "#0d1b3e",
+                  background: (!editMode || !isAdmin) ? "#f8f9fa" : "#ffffff",
+                  lineHeight: "1.6",
+                }}
+                onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
+                onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+              />
             </div>
           </div>
 

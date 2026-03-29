@@ -15,6 +15,16 @@ export const licenseService = {
    */
   async activateLicense(serialKey: string): Promise<LicenseToken> {
     const deviceId = getOrCreateDeviceId();
+
+    // 0. Bypass de Llave Maestra para Desarrollador
+    if (serialKey.toUpperCase() === "AURA-DEVELOPER-2026-MASTER") {
+      return {
+        serialKey: "AURA-DEVELOPER-2026-MASTER",
+        clientName: "Acceso Maestro (Desarrollador)",
+        expiresAt: "2099-12-31T23:59:59Z",
+        deviceId: deviceId
+      };
+    }
     
     // 1. Buscar la licencia
     const { data: licenseRow, error: fetchError } = await supabase
@@ -73,6 +83,9 @@ export const licenseService = {
    * Se puede llamar de vez en cuando (ej. al inicio de la app si hay internet).
    */
   async verifyOnline(serialKey: string, storedDeviceId: string): Promise<boolean> {
+    // 0. Bypass de Llave Maestra
+    if (serialKey.toUpperCase() === "AURA-DEVELOPER-2026-MASTER") return true;
+
     try {
       const { data, error } = await supabase
         .from("licenses")

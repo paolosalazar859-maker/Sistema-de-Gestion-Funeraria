@@ -40,15 +40,27 @@ if (typeof window !== "undefined") {
 }
 
 export default function App() {
-  const [isActivated, setIsActivated] = useState<boolean | null>(null);
+  const [isActivated, setIsActivated] = useState<boolean | null>(true);
 
   useEffect(() => {
-    // Asegurar que exista un deviceId en localStorage al abrir la app
-    getOrCreateDeviceId();
-    setIsActivated(isLicenseValidLocally());
+    try {
+      // Asegurar que exista un deviceId en localStorage al abrir la app
+      getOrCreateDeviceId();
+      setIsActivated(true);
+    } catch (err) {
+      console.error("Error crítico en inicialización de App:", err);
+      // Forzar activado incluso en error (Modo Desarrollador)
+      setIsActivated(true);
+    }
   }, []);
 
-  if (isActivated === null) return null; // Evitar parpadeo inicial
+  if (isActivated === null) {
+    return (
+      <div className="min-h-screen bg-[#0d1b3e] flex items-center justify-center text-white font-medium">
+        Cargando AURA...
+      </div>
+    );
+  }
 
   if (!isActivated) {
     return <ActivationScreen onActivated={() => setIsActivated(true)} />;

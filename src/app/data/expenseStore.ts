@@ -50,24 +50,33 @@ export function generateExpenseId(): string {
   return `EXP-${String(max + 1).padStart(3, "0")}`;
 }
 
-// ── Estadísticas mensuales de gastos ──────────────────────────────────────────
+// ── Estadísticas mensuales de gastos por Año ──────────────────────────────────
 
-export function computeMonthlyExpenseData(expenses: Expense[]) {
-  const months: { key: string; label: string }[] = [];
-  const now = new Date();
-  for (let i = 5; i >= 0; i--) {
-    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-    const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
+export function computeMonthlyExpenseData(expenses: Expense[], year: number) {
+  const monthsData = Array.from({ length: 12 }, (_, i) => {
+    const monthIndex = i + 1;
+    const monthKey = `${year}-${String(monthIndex).padStart(2, "0")}`;
+    const d = new Date(year, i, 1);
     const label = d.toLocaleDateString("es-CL", { month: "short" });
-    months.push({ key, label: label.charAt(0).toUpperCase() + label.slice(1) });
-  }
-
-  return months.map(({ key, label }) => {
-    // Filtrar gastos por mes (basado en el campo 'date' del gasto, no 'createdAt')
-    const inMonth = expenses.filter((e) => e.date.startsWith(key));
-    const total = inMonth.reduce((acc, e) => acc + e.amount, 0);
-    return { month: label, total };
+    
+    return { 
+      key: monthKey,
+      month: label.charAt(0).toUpperCase() + label.slice(1), 
+      total: 0 
+    };
   });
+
+  expenses.forEach(expense => {
+    if (expense.date && expense.date.startsWith(`${year}-`)) {
+      const monthPart = expense.date.split("-")[1];
+      const monthIdx = parseInt(monthPart, 10) - 1;
+      if (monthIdx >= 0 && monthIdx < 12) {
+        monthsData[monthIdx].total += expense.amount;
+      }
+    }
+  });
+
+  return monthsData;
 }
 
 // ── Categorías Personalizadas ────────────────────────────────────────────────

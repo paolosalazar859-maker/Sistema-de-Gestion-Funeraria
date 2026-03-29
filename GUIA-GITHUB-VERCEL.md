@@ -172,11 +172,11 @@ Para obtener las credenciales de Supabase:
 #### 6. Tu app está en línea!
 Tendrás una URL como:
 ```
-https://aura-funeraria.vercel.app
+https://sistema-funeraria-v2.vercel.app
 ```
 o
 ```
-https://aura-funeraria-tu-usuario.vercel.app
+https://sistema-funeraria-v2.vercel.app
 ```
 
 ### Método 2: Usando Vercel CLI

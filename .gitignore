@@ -35,3 +35,8 @@ dist-ssr/
 
 # Vercel
 .vercel
+.env*.local
+dist-cliente/
+*.exe
+*.dmg
+*.zip

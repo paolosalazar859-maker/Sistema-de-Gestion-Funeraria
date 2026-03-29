@@ -476,12 +476,12 @@ function ClientDetail({
               </span>
               <StatusBadge status={service.status} />
             </div>
-            <h2 style={{ color: "#ffffff" }}>{service.deceasedName}</h2>
+            <h2 style={{ color: "#ffffff" }}>{service.contractorName}</h2>
             <p className="text-sm mt-0.5" style={{ color: "rgba(255,255,255,0.6)" }}>
-              Contratante: {service.contractorName}
+              Fallecido: {service.deceasedName}
             </p>
             <p className="text-xs mt-0.5" style={{ color: "rgba(255,255,255,0.4)" }}>
-              Servicio: {service.date} — {service.serviceType}
+              Servicio {service.id}: {service.date} — {service.serviceType}
             </p>
           </div>
           <button
@@ -522,8 +522,10 @@ function ClientDetail({
           ...(service.municipalContribution > 0 ? [{ label: "Aporte Municipal", value: formatCLP(service.municipalContribution), icon: CreditCard, color: "#16a34a", bg: "#dcfce7" }] : []),
           ...(service.mortuaryFee > 0 ? [{ label: "Cuota Mortuoria", value: formatCLP(service.mortuaryFee), icon: CreditCard, color: "#16a34a", bg: "#dcfce7" }] : []),
           ...(service.discount > 0 ? [{ label: "Descuento", value: formatCLP(service.discount), icon: TrendingDown, color: "#dc2626", bg: "#fee2e2" }] : []),
-          { label: "Total Abonado", value: formatCLP(service.totalPaid), icon: TrendingUp, color: "#16a34a", bg: "#dcfce7" },
-          { label: "Saldo Pendiente", value: formatCLP(service.pendingBalance), icon: TrendingDown, color: service.pendingBalance > 0 ? "#dc2626" : "#16a34a", bg: service.pendingBalance > 0 ? "#fee2e2" : "#dcfce7" },
+          ...(isAdmin ? [
+            { label: "Total Abonado", value: formatCLP(service.totalPaid), icon: TrendingUp, color: "#16a34a", bg: "#dcfce7" },
+            { label: "Saldo Pendiente", value: formatCLP(service.pendingBalance), icon: TrendingDown, color: service.pendingBalance > 0 ? "#dc2626" : "#16a34a", bg: service.pendingBalance > 0 ? "#fee2e2" : "#dcfce7" }
+          ] : []),
         ].map((item) => (
           <div
             key={item.label}
@@ -670,7 +672,7 @@ function ClientDetail({
             <table className="w-full">
               <thead>
                 <tr style={{ background: "#f8f9fa" }}>
-                    {["#", "Fecha", "Monto", "Método", "Saldo Rest.", "Notas", "Recibo", isAdmin && "Acción"].filter(Boolean).map((h) => (
+                    {["#", "Fecha", "Monto", "Método", isAdmin && "Saldo Rest.", "Notas", "Recibo", isAdmin && "Acción"].filter(Boolean).map((h) => (
                       <th key={h as string} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: "#6b7280" }}>
                         {h}
                       </th>
@@ -704,9 +706,11 @@ function ClientDetail({
                         {payment.method}
                       </span>
                     </td>
-                    <td className="px-4 py-3 text-xs" style={{ color: payment.balance > 0 ? "#dc2626" : "#16a34a", fontWeight: 600 }}>
-                      {formatCLP(payment.balance)}
-                    </td>
+                    {isAdmin && (
+                      <td className="px-4 py-3 text-xs" style={{ color: payment.balance > 0 ? "#dc2626" : "#16a34a", fontWeight: 600 }}>
+                        {formatCLP(payment.balance)}
+                      </td>
+                    )}
                     <td className="px-4 py-3 text-xs" style={{ color: "#9ca3af" }}>
                       {payment.notes || "—"}
                     </td>
@@ -836,16 +840,18 @@ function ClientDetail({
 }
 
 export function CollectionStatus() {
-  const [services, setServices] = useState<FuneralService[]>([]);
   const [selectedService, setSelectedService] = useState<FuneralService | null>(null);
   const [search, setSearch] = useState("");
+  const [currentServiceId, setCurrentServiceId] = useState<string>("");
+  const [services, setServices] = useState(() => loadServices().filter(s => !s.isDeleted));
+  const [isAdmin, setIsAdmin] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
   const [sortField, setSortField] = useState<string>("date");
   const [sortAsc, setSortAsc] = useState(false);
 
   // Load from localStorage on mount
   useEffect(() => {
-    setServices(loadServices());
+    setServices(loadServices().filter(s => !s.isDeleted));
   }, []);
 
   const handleServiceUpdated = (updated: FuneralService) => {
@@ -876,6 +882,7 @@ export function CollectionStatus() {
       if (sortField === "date") { va = a.date; vb = b.date; }
       else if (sortField === "total") { va = a.totalService; vb = b.totalService; }
       else if (sortField === "balance") { va = a.pendingBalance; vb = b.pendingBalance; }
+      else if (sortField === "contractor") { va = a.contractorName.toLowerCase(); vb = b.contractorName.toLowerCase(); }
       else { va = a.status; vb = b.status; }
       if (va < vb) return sortAsc ? -1 : 1;
       if (va > vb) return sortAsc ? 1 : -1;
@@ -953,7 +960,7 @@ export function CollectionStatus() {
             <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: "#9ca3af" }} />
             <input
               type="text"
-              placeholder="Buscar por nombre, RUT o código..."
+              placeholder="Buscar por contratante, RUT o código..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
               className="w-full pl-9 pr-4 py-2.5 rounded-xl text-sm outline-none"
@@ -998,6 +1005,28 @@ export function CollectionStatus() {
               </button>
             ))}
           </div>
+
+          <div className="flex items-center gap-2 sm:border-l sm:pl-3" style={{ borderColor: "#e5e7eb" }}>
+            <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-50">
+              <ChevronDown size={14} style={{ color: "#9ca3af" }} />
+            </div>
+            <select
+              value={`${sortField}-${sortAsc}`}
+              onChange={(e) => {
+                const [field, asc] = e.target.value.split("-");
+                setSortField(field);
+                setSortAsc(asc === "true");
+              }}
+              className="bg-transparent text-xs font-semibold outline-none cursor-pointer pr-2 py-1"
+              style={{ color: "#0d1b3e" }}
+            >
+              <option value="date-false">Más recientes</option>
+              <option value="date-true">Más antiguos</option>
+              <option value="contractor-true">Abecedario (A-Z)</option>
+              <option value="contractor-false">Abecedario (Z-A)</option>
+              <option value="balance-false">Mayor Deuda</option>
+            </select>
+          </div>
         </div>
       </div>
 
@@ -1034,8 +1063,8 @@ export function CollectionStatus() {
               <tr style={{ background: "#f8f9fa" }}>
                 {[
                   { label: "Código", field: "" },
-                  { label: "Fallecido", field: "" },
                   { label: "Contratante", field: "" },
+                  { label: "Fallecido", field: "" },
                   { label: "Total Serv.", field: "total" },
                   { label: "Total Abon.", field: "" },
                   { label: "Cuota Mort.", field: "" },
@@ -1074,14 +1103,14 @@ export function CollectionStatus() {
                     </span>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-xs" style={{ color: "#0d1b3e", fontWeight: 500 }}>
-                      {service.deceasedName.split(" ").slice(0, 3).join(" ")}
+                    <p className="text-xs" style={{ color: "#0d1b3e", fontWeight: 600 }}>
+                      {service.contractorName.split(" ").slice(0, 3).join(" ")}
                     </p>
-                    <p className="text-xs" style={{ color: "#9ca3af" }}>{service.date}</p>
+                    <p className="text-xs" style={{ color: "#9ca3af" }}>{service.contractorRut}</p>
                   </td>
                   <td className="px-4 py-3">
-                    <p className="text-xs" style={{ color: "#374151" }}>{service.contractorName.split(" ").slice(0, 2).join(" ")}</p>
-                    <p className="text-xs" style={{ color: "#9ca3af" }}>{service.contractorRut}</p>
+                    <p className="text-xs" style={{ color: "#374151" }}>{service.deceasedName.split(" ").slice(0, 2).join(" ")}</p>
+                    <p className="text-xs" style={{ color: "#9ca3af" }}>Servicio: {service.date}</p>
                   </td>
                   <td className="px-4 py-3 text-xs" style={{ color: "#0d1b3e", fontWeight: 500 }}>
                     {formatCLP(service.totalService)}

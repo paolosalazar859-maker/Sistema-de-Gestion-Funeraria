@@ -19,11 +19,14 @@ interface UserContextValue {
   updateAdminProfile: (data: Partial<AdminProfile>) => Promise<void>;
   changeAdminPassword: (current: string, next: string) => Promise<{ ok: boolean; error?: string }>;
   verifyAdminPassword: (password: string) => Promise<boolean>;
+  verifyOfficePassword: (password: string) => Promise<boolean>;
+  changeOfficePassword: (next: string) => Promise<{ ok: boolean; error?: string }>;
 }
 
 const SESSION_KEY = "funeral_user_role";
 // Clave para caché offline de contraseña (hash simple)
 const PWD_CACHE_KEY = "funeral_admin_pwd_hash";
+const PWD_OFFICE_CACHE_KEY = "funeral_office_pwd_hash";
 // Clave para caché offline del perfil
 const PROFILE_CACHE_KEY = "funeral_admin_profile_cache";
 
@@ -90,6 +93,8 @@ const UserContext = createContext<UserContextValue>({
   updateAdminProfile: async () => {},
   changeAdminPassword: async () => ({ ok: false }),
   verifyAdminPassword: async () => false,
+  verifyOfficePassword: async () => false,
+  changeOfficePassword: async () => ({ ok: false }),
 });
 
 export function UserProvider({ children }: { children: ReactNode }) {
@@ -208,6 +213,31 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const verifyOfficePassword = async (password: string): Promise<boolean> => {
+    const cachedHash = localStorage.getItem(PWD_OFFICE_CACHE_KEY);
+    // Default password '1234' hash if none exists
+    if (!cachedHash) {
+      const defaultHash = await hashPassword("1234");
+      const currentHash = await hashPassword(password);
+      return currentHash === defaultHash;
+    }
+    const hash = await hashPassword(password);
+    return hash === cachedHash;
+  };
+
+  const changeOfficePassword = async (next: string): Promise<{ ok: boolean; error?: string }> => {
+    if (role !== "admin") {
+      return { ok: false, error: "Solo el administrador puede cambiar esta contraseña." };
+    }
+    try {
+      const hash = await hashPassword(next);
+      localStorage.setItem(PWD_OFFICE_CACHE_KEY, hash);
+      return { ok: true };
+    } catch (err) {
+      return { ok: false, error: `Error al guardar: ${err}` };
+    }
+  };
+
   return (
     <UserContext.Provider
       value={{
@@ -219,6 +249,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
         updateAdminProfile,
         changeAdminPassword,
         verifyAdminPassword,
+        verifyOfficePassword,
+        changeOfficePassword,
       }}
     >
       {children}

@@ -86,16 +86,61 @@ const BASE_STYLE = `
   </style>
 `;
 
-function openPrint(html: string, title: string) {
+export function openPrint(html: string, title: string) {
+  console.log(`🖨️ Iniciando proceso de impresión: "${title}"`);
+
+  // 1. Intentar usar la API nativa de Electron si está disponible
+  if ((window as any).electronAPI?.printHTML) {
+    console.log("🖥️ Utilizando API nativa de Electron para impresión");
+    // Envolver el HTML con el estilo base antes de enviar al proceso principal
+    const completeHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>${title}</title>${BASE_STYLE}</head><body>${html}</body></html>`;
+    
+    (window as any).electronAPI.printHTML(completeHtml).then((result: any) => {
+      if (result && !result.success && result.error) {
+        console.error("❌ Error en impresión nativa:", result.error);
+        alert(`Error al imprimir: ${result.error}. Intentando método alternativo...`);
+        // Si falla la nativa, intentamos el fallback
+        performBrowserPrint(completeHtml, title);
+      } else {
+        console.log("✅ Impresión nativa enviada con éxito");
+      }
+    }).catch((err: any) => {
+      console.error("❌ Excepción en impresión nativa:", err);
+      performBrowserPrint(html, title);
+    });
+    return;
+  }
+
+  // 2. Fallback: Abrir ventana nueva (comportamiento original / modo web)
+  console.warn("🌐 API de Electron no detectada. Usando impresión de navegador.");
+  const completeHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>${title}</title>${BASE_STYLE}</head><body>${html}</body></html>`;
+  performBrowserPrint(completeHtml, title);
+}
+
+/**
+ * Método de impresión estándar del navegador como fallback
+ */
+function performBrowserPrint(html: string, title: string) {
   const win = window.open("", "_blank", "width=900,height=800");
-  if (!win) return;
-  win.document.write(`<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>${title}</title>${BASE_STYLE}</head><body>${html}</body></html>`);
+  if (!win) {
+    alert("No se pudo abrir la ventana de impresión. Por favor, asegúrate de que los pop-ups estén permitidos.");
+    return;
+  }
+  
+  // Asegurarnos de que el HTML sea un documento completo
+  const fullHtml = html.toLowerCase().includes('<!doctype') 
+    ? html 
+    : `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>${title}</title>${BASE_STYLE}</head><body>${html}</body></html>`;
+
+  win.document.write(fullHtml);
   win.document.close();
+  
   win.onload = () => {
     setTimeout(() => {
       win.focus();
       win.print();
-    }, 400);
+      // En modo navegador, no cerramos automáticamente para que el usuario pueda ver si algo falló
+    }, 500);
   };
 }
 

@@ -1,6 +1,6 @@
-import { loadServices, computeMonthlyData, recalculateAllStatuses } from "../data/serviceStore";
+import { loadServices, computeMonthlyData, getAvailableYears, getMonthsWithData } from "../data/serviceStore";
 import { loadExpenses } from "../data/expenseStore";
-import { TrendingUp, AlertTriangle, FileText, Users, DollarSign, ArrowRight, ArrowUpRight, Wallet, PieChart as PieIcon } from "lucide-react";
+import { TrendingUp, FileText, DollarSign, ArrowRight, ArrowUpRight, Wallet, PieChart as PieIcon, Calendar, Lock } from "lucide-react";
 import { useState, useEffect, useMemo } from "react";
 import { Link } from "react-router";
 import {
@@ -39,6 +39,8 @@ const StatusBadge = ({ status }: { status: string }) => {
   );
 };
 
+import { useUser } from "../context/UserContext";
+
 const CustomTooltip = ({ active, payload, label }: any) => {
   if (active && payload && payload.length) {
     return (
@@ -56,56 +58,102 @@ const CustomTooltip = ({ active, payload, label }: any) => {
 };
 
 export function Dashboard() {
-  const [services, setServices] = useState(() => loadServices());
+  const { role } = useUser();
+  const isAdmin = role === "admin";
+  const [services, setServices] = useState(() => loadServices().filter(s => !s.isDeleted));
   const [expenses, setExpenses] = useState(() => loadExpenses());
+  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number | "all">("all");
+
+  const availableYears = useMemo(() => getAvailableYears(services), [services]);
+  
+  // Meses con datos para el año seleccionado
+  const activeMonths = useMemo(() => getMonthsWithData(services, selectedYear), [services, selectedYear]);
+
+  // Auto-selección inicial: Buscar el año/mes más reciente con datos
+  useEffect(() => {
+    if (services.length > 0) {
+      const years = getAvailableYears(services);
+      if (years.length > 0) {
+        const latestYear = years[0]; // Están ordenados desc
+        setSelectedYear(latestYear);
+        
+        const monthsWithData = getMonthsWithData(services, latestYear);
+        if (monthsWithData.size > 0) {
+          const latestMonth = Math.max(...Array.from(monthsWithData));
+          setSelectedMonth(latestMonth);
+        } else {
+          setSelectedMonth("all");
+        }
+      }
+    }
+  }, [services.length === 0]); // Solo al cargar por primera vez
+  
+  const months = [
+    { value: "all", label: "Todos los meses" },
+    { value: 1, label: "Enero" },
+    { value: 2, label: "Febrero" },
+    { value: 3, label: "Marzo" },
+    { value: 4, label: "Abril" },
+    { value: 5, label: "Mayo" },
+    { value: 6, label: "Junio" },
+    { value: 7, label: "Julio" },
+    { value: 8, label: "Agosto" },
+    { value: 9, label: "Septiembre" },
+    { value: 10, label: "Octubre" },
+    { value: 11, label: "Noviembre" },
+    { value: 12, label: "Diciembre" },
+  ];
 
   // Refresh on every mount
   useEffect(() => {
-    setServices(loadServices());
+    setServices(loadServices().filter(s => !s.isDeleted));
     setExpenses(loadExpenses());
   }, []);
 
-  const monthlyData = useMemo(() => {
-    const servicesData = computeMonthlyData(services);
-    const expensesData = loadExpenses();
+  const { monthlyDataWithIds, filteredTotals } = useMemo(() => {
+    const sData = computeMonthlyData(services, selectedYear);
+    const expData = expenses.filter(e => e.date?.startsWith(`${selectedYear}-`));
     
-    return servicesData.map(sData => {
-      // Intentar encontrar el mes correspondiente en los gastos
-      // sData.month es la etiqueta (ej. "Mar"), necesitamos el key (ej. "2026-03")
-      // Pero computeMonthlyData ya devuelve los meses en orden.
-      // Vamos a simplificar: computeMonthlyData de services y computeMonthlyExpenseData de expenses
-      // Pero mejor unificarlo aquí para que coincidan exactamente.
-      
-      const now = new Date();
-      const periods: { key: string; label: string }[] = [];
-      for (let i = 5; i >= 0; i--) {
-        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-        const label = d.toLocaleDateString("es-CL", { month: "short" });
-        periods.push({ key, label: label.charAt(0).toUpperCase() + label.slice(1) });
-      }
-
-      const monthPeriod = periods.find(p => p.label === sData.month);
-      const monthExpenses = expensesData
-        .filter(e => monthPeriod ? e.date.startsWith(monthPeriod.key) : false)
+    const combined = sData.map((monthData, idx) => {
+      const monthExpenses = expData
+        .filter(e => e.date.startsWith(monthData.key))
         .reduce((acc, e) => acc + e.amount, 0);
 
       return {
-        ...sData,
-        gastos: monthExpenses
+        ...monthData,
+        gastos: monthExpenses,
+        id: `month-${monthData.month}-${idx}`,
+        uniqueKey: `data-${idx}-${selectedYear}`
       };
     });
-  }, [services, expenses]);
 
-  // Agregar IDs únicos a los datos mensuales para evitar keys duplicadas en Recharts
-  const monthlyDataWithIds = useMemo(() => 
-    monthlyData.map((data, idx) => ({
-      ...data,
-      id: `month-${data.month}-${idx}-${data.recaudado}-${data.deuda}`,
-      uniqueKey: `data-${idx}-${Date.now()}`,
-    })),
-    [monthlyData]
-  );
+    const yearRecaudado = combined.reduce((acc, m) => acc + m.recaudado, 0);
+    const yearDeuda = combined.reduce((acc, m) => acc + m.deuda, 0);
+    const yearGastos = combined.reduce((acc, m) => acc + m.gastos, 0);
+
+    const monthRecaudado = selectedMonth === "all" 
+      ? yearRecaudado 
+      : (combined[Number(selectedMonth) - 1]?.recaudado || 0);
+    const monthDeuda = selectedMonth === "all" 
+      ? yearDeuda 
+      : (combined[Number(selectedMonth) - 1]?.deuda || 0);
+    const monthGastos = selectedMonth === "all" 
+      ? yearGastos 
+      : (combined[Number(selectedMonth) - 1]?.gastos || 0);
+
+    return { 
+      monthlyDataWithIds: combined,
+      filteredTotals: {
+        recaudado: monthRecaudado,
+        deuda: monthDeuda,
+        gastos: monthGastos,
+        utilidad: monthRecaudado - monthGastos
+      }
+    };
+  }, [services, expenses, selectedYear, selectedMonth]);
+
+// IDs únicos para los gráficos (generados una sola vez)
 
   // IDs únicos para los gráficos (generados una sola vez)
   const chartIds = useMemo(() => {
@@ -117,25 +165,24 @@ export function Dashboard() {
     };
   }, []);
 
-  const totalRecaudado = services.reduce((s, c) => s + c.totalPaid, 0);
-  const totalDeuda = services.reduce((s, c) => s + c.pendingBalance, 0);
-  const totalGastos = expenses.reduce((s, e) => s + e.amount, 0);
-  const utilidadNeta = totalRecaudado - totalGastos;
-
-  const pagados = services.filter((c) => c.status === "Pagado").length;
-  const abonando = services.filter((c) => c.status === "Abonando").length;
-  const deudaTotal = services.filter((c) => c.status === "Deuda Total").length;
-  const totalServicios = services.length;
+  const periodPrefix = selectedMonth === "all" ? `${selectedYear}-` : `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-`;
+  
+  const totalServicios = services.filter(s => (s.date || s.createdAt || "").startsWith(periodPrefix)).length;
+  const pagados = services.filter((s) => s.status === "Pagado" && (s.date || s.createdAt || "").startsWith(periodPrefix)).length;
+  const abonando = services.filter((s) => s.status === "Abonando" && (s.date || s.createdAt || "").startsWith(periodPrefix)).length;
+  const deudaTotalCount = services.filter((s) => s.status === "Deuda Total" && (s.date || s.createdAt || "").startsWith(periodPrefix)).length;
 
   const pieData = useMemo(() => [
     { name: "Pagado", value: pagados, color: "#22c55e", id: "pie-pagado" },
     { name: "Abonando", value: abonando, color: "#eab308", id: "pie-abonando" },
-    { name: "Deuda Total", value: deudaTotal, color: "#ef4444", id: "pie-deuda" },
-  ], [pagados, abonando, deudaTotal]);
+    { name: "Deuda Total", value: deudaTotalCount, color: "#ef4444", id: "pie-deuda" },
+  ], [pagados, abonando, deudaTotalCount]);
 
   const revenueBreakdown = useMemo(() => {
     const breakdown: Record<string, number> = {
-      "Cuota Mortuoria": services.reduce((acc, s) => acc + s.mortuaryFee, 0),
+      "Cuota Mortuoria": services
+        .filter(s => (s.date || s.createdAt || "").startsWith(periodPrefix))
+        .reduce((acc, s) => acc + s.mortuaryFee, 0),
       "Efectivo": 0,
       "Transferencia": 0,
       "Crédito": 0,
@@ -144,11 +191,13 @@ export function Dashboard() {
 
     services.forEach(s => {
       s.payments.forEach(p => {
-        const method = p.method as string;
-        if (method === "Tarjeta") {
-          breakdown["Crédito"] += p.amount; // Mapeo legado
-        } else if (breakdown[method] !== undefined) {
-          breakdown[method] += p.amount;
+        if (p.date?.startsWith(periodPrefix)) {
+          const method = p.method as string;
+          if (method === "Tarjeta") {
+            breakdown["Crédito"] += p.amount; // Mapeo legado
+          } else if (breakdown[method] !== undefined) {
+            breakdown[method] += p.amount;
+          }
         }
       });
     });
@@ -156,49 +205,133 @@ export function Dashboard() {
     return Object.entries(breakdown)
       .map(([name, value]) => ({ name, value }))
       .filter(item => item.value > 0);
-  }, [services]);
+  }, [services, selectedYear, selectedMonth, periodPrefix]);
 
   const statCards = [
     {
-      label: "Total Recaudado",
-      value: formatCLP(totalRecaudado),
+      label: selectedMonth === "all" ? `Recaudado en ${selectedYear}` : `Recaudado en ${months.find(m => m.value === selectedMonth)?.label || ""}`,
+      value: formatCLP(filteredTotals.recaudado),
       icon: TrendingUp,
       iconBg: "linear-gradient(135deg, #16a34a, #22c55e)",
-      change: "Ingresos por pagos",
+      change: "Ingresos por abonos",
       changePositive: true,
       to: "/cobros",
     },
     {
-      label: "Total Gastos",
-      value: formatCLP(totalGastos),
+      label: selectedMonth === "all" ? `Gastos en ${selectedYear}` : `Gastos en ${months.find(m => m.value === selectedMonth)?.label || ""}`,
+      value: formatCLP(filteredTotals.gastos),
       icon: Wallet,
       iconBg: "linear-gradient(135deg, #dc2626, #ef4444)",
-      change: `${expenses.length} egresos registrados`,
+      change: "Egresos del periodo",
       changePositive: false,
       to: "/gastos",
     },
     {
-      label: "Utilidad Neta",
-      value: formatCLP(utilidadNeta),
+      label: selectedMonth === "all" ? `Utilidad en ${selectedYear}` : `Utilidad en ${months.find(m => m.value === selectedMonth)?.label || ""}`,
+      value: formatCLP(filteredTotals.utilidad),
       icon: DollarSign,
       iconBg: "linear-gradient(135deg, #0d1b3e, #1a2f5a)",
       change: "Recaudado - Gastos",
-      changePositive: utilidadNeta >= 0,
+      changePositive: filteredTotals.utilidad >= 0,
       to: "/",
     },
     {
-      label: "Servicios Activos",
+      label: selectedMonth === "all" ? `Servicios de ${selectedYear}` : `Servicios de ${months.find(m => m.value === selectedMonth)?.label || ""}`,
       value: totalServicios.toString(),
       icon: FileText,
       iconBg: "linear-gradient(135deg, #c9a84c, #e8c97a)",
-      change: `${pagados} completados`,
+      change: `${pagados} finalizados`,
       changePositive: true,
       to: "/registro",
     },
-  ];
+  ].filter((c, i) => {
+    // Hide Recaudado, Gastos, Utilidad for non-admin
+    if (!isAdmin && (i === 0 || i === 1 || i === 2)) return false;
+    return true;
+  });
+
+  const incomeDetails = useMemo(() => {
+    const period = selectedMonth === "all" ? `${selectedYear}-` : `${selectedYear}-${String(selectedMonth).padStart(2, "0")}-`;
+    const breakdown: Record<string, number> = {
+      "Cuota Mortuoria": 0,
+      "Efectivo": 0,
+      "Transferencia": 0,
+      "Tarjeta": 0,
+      "Cheque": 0,
+      "Otros": 0
+    };
+
+    services.forEach(s => {
+      // Cuota mortuoria y aportes municipales se cuentan si el servicio es del periodo
+      if ((s.date || s.createdAt || "").startsWith(period)) {
+        breakdown["Cuota Mortuoria"] += (s.mortuaryFee || 0);
+        if (s.municipalContribution > 0) breakdown["Otros"] += s.municipalContribution;
+      }
+      
+      // Pagos realizados en el periodo
+      s.payments.forEach(p => {
+        if (p.date?.startsWith(period)) {
+          const method = p.method as string;
+          if (breakdown[method] !== undefined) {
+            breakdown[method] += p.amount;
+          } else {
+            breakdown["Otros"] += p.amount;
+          }
+        }
+      });
+    });
+
+    return Object.entries(breakdown)
+      .map(([name, value]) => ({ name, value }))
+      .filter(item => item.value > 0)
+      .sort((a, b) => b.value - a.value);
+  }, [services, selectedYear, selectedMonth]);
 
   return (
     <div className="space-y-6">
+      {/* Filters Header */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-white p-4 rounded-2xl border border-gray-100 shadow-sm">
+        <div>
+          <h2 className="text-lg font-bold text-[#0d1b3e] flex items-center gap-2">
+            <Calendar size={20} className="text-[#c9a84c]" />
+            Resumen de Gestión
+          </h2>
+          <p className="text-xs text-gray-400">Visualización de rendimiento por periodo anual</p>
+        </div>
+        
+        <div className="flex flex-wrap items-center gap-4">
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Año:</span>
+            <select 
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(parseInt(e.target.value, 10))}
+              className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-[#0d1b3e] outline-none focus:ring-2 focus:ring-[#c9a84c]/20 transition-all cursor-pointer shadow-sm"
+            >
+              {availableYears.map(year => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Mes:</span>
+            <select 
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value === "all" ? "all" : parseInt(e.target.value, 10))}
+              className="px-3 py-1.5 bg-gray-50 border border-gray-200 rounded-lg text-xs font-bold text-[#0d1b3e] outline-none focus:ring-2 focus:ring-[#c9a84c]/20 transition-all cursor-pointer shadow-sm"
+            >
+              {months.map(m => {
+                const hasData = m.value !== "all" && activeMonths.has(m.value as number);
+                return (
+                  <option key={m.value} value={m.value}>
+                    {m.label} {hasData ? "•" : ""}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+        </div>
+      </div>
       {/* Stat Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
         {statCards.map((card, i) => (
@@ -233,44 +366,64 @@ export function Dashboard() {
              <PieIcon size={18} />
            </div>
            <div>
-             <h3 className="text-sm font-bold uppercase tracking-widest text-[#0d1b3e]">
-               Detalle de Recaudación por Medio de Pago
-             </h3>
-             <p className="text-xs text-gray-400">Desglose de ingresos acumulados según el método utilizado</p>
+              <h3 className="text-sm font-bold uppercase tracking-widest text-[#0d1b3e]">
+                Detalle de Servicios por Estado
+              </h3>
+              <p className="text-xs text-gray-400">Distribución de servicios registrados en el sistema</p>
            </div>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-4">
-          {revenueBreakdown.length === 0 ? (
-            <p className="text-xs text-gray-400 italic py-4">No hay ingresos registrados aún</p>
-          ) : (
-            revenueBreakdown.map((item) => {
-              const methodColors: Record<string, string> = {
-                "Cuota Mortuoria": "#0d1b3e",
-                "Efectivo": "#16a34a",
-                "Transferencia": "#2563eb",
-                "Crédito": "#8b5cf6",
-                "Débito": "#db2777",
-              };
-              const color = methodColors[item.name] || "#6b7280";
-              const percentage = totalRecaudado > 0 ? (item.value / totalRecaudado) * 100 : 0;
-              
-              return (
-                <div key={item.name} className="p-4 rounded-xl border border-gray-100 transition-all hover:border-gray-200 bg-gray-50/30">
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">{item.name}</p>
-                  <p className="text-lg font-bold" style={{ color }}>{formatCLP(item.value)}</p>
-                  <div className="mt-2 flex items-center justify-between">
-                     <span className="text-[10px] text-gray-400">{percentage.toFixed(1)}%</span>
-                     <div className="w-16 h-1 bg-gray-100 rounded-full overflow-hidden shadow-inner">
-                        <div className="h-full rounded-full transition-all duration-700" style={{ background: color, width: `${percentage}%` }} />
-                     </div>
-                  </div>
-                </div>
-              );
-            })
-          )}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          {pieData.map((item) => (
+            <div key={item.name} className="p-4 rounded-xl border border-gray-100 transition-all hover:border-gray-200 bg-gray-50/30">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-gray-400 mb-1">{item.name}</p>
+              <p className="text-lg font-bold" style={{ color: item.color }}>{item.value} Servicios</p>
+            </div>
+          ))}
         </div>
       </div>
+
+      {/* Income Details Breakdown - Desktop Only / Admin Only */}
+      {isAdmin && (
+        <div className="rounded-2xl p-6 shadow-sm mb-6" style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}>
+          <div className="flex items-center justify-between mb-5">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-blue-50 text-blue-600">
+                <TrendingUp size={18} />
+              </div>
+              <div>
+                <h3 className="text-sm font-bold uppercase tracking-widest text-[#0d1b3e]">Detalle de Ingresos del Periodo</h3>
+                <p className="text-xs text-gray-400">Desglose de recaudación por método de pago</p>
+              </div>
+            </div>
+            <div className="text-right">
+              <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Total Recaudado</p>
+              <p className="text-sm font-bold text-[#16a34a]">{formatCLP(filteredTotals.recaudado)}</p>
+            </div>
+          </div>
+
+          {incomeDetails.length === 0 ? (
+            <div className="py-8 text-center text-gray-400 text-xs italic">
+              No hay ingresos registrados en este periodo
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+              {incomeDetails.map((item) => (
+                <div key={item.name} className="p-4 rounded-xl border border-gray-100 bg-white shadow-sm transition-all hover:shadow-md">
+                  <div className="flex items-center gap-2 mb-2">
+                    <div className="w-2 h-2 rounded-full" style={{ background: item.name === "Cuota Mortuoria" ? "#7c3aed" : item.name === "Efectivo" ? "#16a34a" : "#2563eb" }} />
+                    <p className="text-[10px] font-bold text-gray-500 uppercase truncate">{item.name}</p>
+                  </div>
+                  <p className="text-sm font-bold text-[#0d1b3e]">{formatCLP(item.value)}</p>
+                  <p className="text-[9px] text-gray-400 mt-1">
+                    {filteredTotals.recaudado > 0 ? `${((item.value / filteredTotals.recaudado) * 100).toFixed(1)}% del total` : "0%"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-4">
@@ -282,10 +435,12 @@ export function Dashboard() {
           <div className="flex items-center justify-between mb-5">
             <div>
               <h3 style={{ color: "#0d1b3e" }}>Flujo Financiero Mensual</h3>
-              <p className="text-xs mt-0.5" style={{ color: "#9ca3af" }}>Últimos 6 meses</p>
+              <p className="text-xs mt-0.5" style={{ color: "#9ca3af" }}>
+                {selectedMonth === "all" ? `Resumen Anual ${selectedYear}` : `Mes de ${months.find(m => m.value === selectedMonth)?.label} ${selectedYear}`}
+              </p>
             </div>
           </div>
-          {monthlyData.length === 0 ? (
+          {monthlyDataWithIds.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-[220px]">
               <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: "#f0f2f5" }}>
                 <TrendingUp size={20} style={{ color: "#9ca3af" }} />
@@ -299,9 +454,9 @@ export function Dashboard() {
                 <XAxis dataKey="month" tick={{ fontSize: 11, fill: "#9ca3af" }} axisLine={false} tickLine={false} />
                 <YAxis tick={{ fontSize: 10, fill: "#9ca3af" }} axisLine={false} tickLine={false} tickFormatter={(v) => `$${(v / 1000000).toFixed(1)}M`} />
                 <Tooltip content={<CustomTooltip />} />
-                 <Area type="monotone" dataKey="recaudado" name="Recaudado" stroke="#1a2f5a" strokeWidth={2.5} fill="#1a2f5a" fillOpacity={0.1} />
-                <Area type="monotone" dataKey="gastos" name="Gastos" stroke="#dc2626" strokeWidth={2} fill="#dc2626" fillOpacity={0.05} />
-                <Area type="monotone" dataKey="deuda" name="Deuda" stroke="#fbbf24" strokeWidth={2} fill="#fbbf24" fillOpacity={0.05} />
+                 <Area type="monotone" dataKey="recaudado" name="Recaudado" stroke="#1a2f5a" strokeWidth={2.5} fill="#1a2f5a" fillOpacity={0.1} hide={!isAdmin} />
+                <Area type="monotone" dataKey="gastos" name="Gastos" stroke="#dc2626" strokeWidth={2} fill="#dc2626" fillOpacity={0.05} hide={!isAdmin} />
+                <Area type="monotone" dataKey="deuda" name="Deuda" stroke="#fbbf24" strokeWidth={2} fill="#fbbf24" fillOpacity={0.05} hide={!isAdmin} />
               </AreaChart>
             </ResponsiveContainer>
           )}
@@ -364,10 +519,15 @@ export function Dashboard() {
             style={{ background: "#f0f2f5" }}
           >
             <DollarSign size={13} style={{ color: "#c9a84c" }} />
-            <span className="text-xs" style={{ color: "#1a2f5a" }}>Total: {formatCLP(totalRecaudado + totalDeuda)}</span>
+            <span className="text-xs" style={{ color: "#1a2f5a" }}>Total Servicios: {totalServicios}</span>
           </div>
         </div>
-        {monthlyData.length === 0 ? (
+        {!isAdmin ? (
+          <div className="flex flex-col items-center justify-center h-[200px] bg-gray-50/30 rounded-xl border border-dashed border-gray-200">
+             <Lock size={20} className="text-gray-300 mb-2" />
+             <p className="text-xs text-gray-400">Gráfico financiero restringido para este perfil</p>
+          </div>
+        ) : monthlyDataWithIds.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-[200px]">
             <div className="w-12 h-12 rounded-full flex items-center justify-center mb-3" style={{ background: "#f0f2f5" }}>
               <DollarSign size={20} style={{ color: "#9ca3af" }} />
