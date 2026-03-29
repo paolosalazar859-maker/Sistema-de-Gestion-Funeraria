@@ -32,9 +32,12 @@ const parseMoney = (value: string): number => {
 };
 
 const formatDate = (dateStr: string) => {
-  if (dateStr === "-") return "—";
+  if (!dateStr || dateStr === "-") return "—";
   const d = new Date(dateStr + "T12:00:00");
-  return d.toLocaleDateString("es-CL", { day: "2-digit", month: "short", year: "numeric" });
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
 };
 
 const StatusBadge = ({ status }: { status: string }) => {
@@ -79,6 +82,7 @@ function AddPaymentModal({
   onClose: () => void;
   onSaved: (updated: FuneralService) => void;
 }) {
+  const { role } = useUser();
   // Calcular si hay cuotas y cuánto falta por pagar de la próxima cuota
   const hasInstallments = service.installments?.enabled && service.installments.totalInstallments > 0;
   const baseAmount = service.installments?.baseAmount ?? 0;
@@ -115,6 +119,7 @@ function AddPaymentModal({
       method: method as any,
       balance: Math.max(0, service.pendingBalance - amountNum),
       notes: notes || undefined,
+      registeredBy: role ?? "admin",
     };
 
     const newTotalPaid = service.totalPaid + amountNum;
@@ -672,7 +677,7 @@ function ClientDetail({
             <table className="w-full">
               <thead>
                 <tr style={{ background: "#f8f9fa" }}>
-                    {["#", "Fecha", "Monto", "Método", isAdmin && "Saldo Rest.", "Notas", "Recibo", isAdmin && "Acción"].filter(Boolean).map((h) => (
+                    {["#", "Fecha", "Monto", "Método", "Ingresado por", isAdmin && "Saldo Rest.", "Notas", "Recibo", isAdmin && "Acción"].filter(Boolean).map((h) => (
                       <th key={h as string} className="px-4 py-3 text-left text-xs font-semibold" style={{ color: "#6b7280" }}>
                         {h}
                       </th>
@@ -705,6 +710,23 @@ function ClientDetail({
                       >
                         {payment.method}
                       </span>
+                    </td>
+                    <td className="px-4 py-3">
+                      {payment.registeredBy ? (
+                        <span
+                          className="text-xs px-2 py-0.5 rounded-full"
+                          style={{
+                            background: payment.registeredBy === "admin" ? "#eff6ff" : "#fef3c7",
+                            color: payment.registeredBy === "admin" ? "#1d4ed8" : "#92400e",
+                            fontWeight: 600,
+                            border: `1px solid ${payment.registeredBy === "admin" ? "#bfdbfe" : "#fde68a"}`,
+                          }}
+                        >
+                          {payment.registeredBy === "admin" ? "Admin" : "Oficina"}
+                        </span>
+                      ) : (
+                        <span className="text-xs" style={{ color: "#9ca3af" }}>—</span>
+                      )}
                     </td>
                     {isAdmin && (
                       <td className="px-4 py-3 text-xs" style={{ color: payment.balance > 0 ? "#dc2626" : "#16a34a", fontWeight: 600 }}>
@@ -840,11 +862,12 @@ function ClientDetail({
 }
 
 export function CollectionStatus() {
+  const { role } = useUser();
+  const isAdmin = role === "admin";
   const [selectedService, setSelectedService] = useState<FuneralService | null>(null);
   const [search, setSearch] = useState("");
   const [currentServiceId, setCurrentServiceId] = useState<string>("");
   const [services, setServices] = useState(() => loadServices().filter(s => !s.isDeleted));
-  const [isAdmin, setIsAdmin] = useState(false);
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
   const [sortField, setSortField] = useState<string>("date");
   const [sortAsc, setSortAsc] = useState(false);
@@ -852,7 +875,7 @@ export function CollectionStatus() {
   // Load from localStorage on mount
   useEffect(() => {
     setServices(loadServices().filter(s => !s.isDeleted));
-  }, []);
+  }, [role]);
 
   const handleServiceUpdated = (updated: FuneralService) => {
     const refreshed = loadServices();
@@ -911,44 +934,46 @@ export function CollectionStatus() {
 
   return (
     <div className="space-y-5">
-      {/* Summary Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {[
-          { label: "Total Recaudado", value: formatCLP(totalRecaudado), color: "#16a34a", bg: "#dcfce7", icon: TrendingUp, filter: "Todos" },
-          { label: "Deuda Pendiente", value: formatCLP(totalDeuda), color: "#dc2626", bg: "#fee2e2", icon: TrendingDown, filter: "Deudores" },
-          {
-            label: "Cuentas Pagadas",
-            value: services.filter((s) => s.status === "Pagado").length.toString(),
-            color: "#16a34a", bg: "#dcfce7", icon: CheckCircle2,
-            filter: "Pagado"
-          },
-          {
-            label: "Con Deuda",
-            value: services.filter((s) => s.status !== "Pagado").length.toString(),
-            color: "#dc2626", bg: "#fee2e2", icon: AlertCircle,
-            filter: "Deudores"
-          },
-        ].map((card) => (
-          <div
-            key={card.label}
-            onClick={() => card.filter && setStatusFilter(card.filter)}
-            className={`rounded-2xl p-4 shadow-sm transition-all ${card.filter ? "cursor-pointer hover:scale-[1.02] active:scale-95" : ""}`}
-            style={{ 
-              background: "#ffffff", 
-              border: `1px solid ${statusFilter === card.filter ? card.color : "#e5e7eb"}`,
-              boxShadow: statusFilter === card.filter ? `0 0 0 1px ${card.color}10` : ""
-            }}
-          >
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: card.bg }}>
-                <card.icon size={15} style={{ color: card.color }} />
+      {/* Summary Cards — solo visibles para el Administrador */}
+      {isAdmin && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+          {[
+            { label: "Total Recaudado", value: formatCLP(totalRecaudado), color: "#16a34a", bg: "#dcfce7", icon: TrendingUp, filter: "Todos" },
+            { label: "Deuda Pendiente", value: formatCLP(totalDeuda), color: "#dc2626", bg: "#fee2e2", icon: TrendingDown, filter: "Deudores" },
+            {
+              label: "Cuentas Pagadas",
+              value: services.filter((s) => s.status === "Pagado").length.toString(),
+              color: "#16a34a", bg: "#dcfce7", icon: CheckCircle2,
+              filter: "Pagado"
+            },
+            {
+              label: "Con Deuda",
+              value: services.filter((s) => s.status !== "Pagado").length.toString(),
+              color: "#dc2626", bg: "#fee2e2", icon: AlertCircle,
+              filter: "Deudores"
+            },
+          ].map((card) => (
+            <div
+              key={card.label}
+              onClick={() => card.filter && setStatusFilter(card.filter)}
+              className={`rounded-2xl p-4 shadow-sm transition-all ${card.filter ? "cursor-pointer hover:scale-[1.02] active:scale-95" : ""}`}
+              style={{ 
+                background: "#ffffff", 
+                border: `1px solid ${statusFilter === card.filter ? card.color : "#e5e7eb"}`,
+                boxShadow: statusFilter === card.filter ? `0 0 0 1px ${card.color}10` : ""
+              }}
+            >
+              <div className="flex items-center gap-2 mb-2">
+                <div className="w-8 h-8 rounded-lg flex items-center justify-center" style={{ background: card.bg }}>
+                  <card.icon size={15} style={{ color: card.color }} />
+                </div>
               </div>
+              <p className="text-xs" style={{ color: "#6b7280" }}>{card.label}</p>
+              <p className="text-base mt-0.5" style={{ color: card.color, fontWeight: 700 }}>{card.value}</p>
             </div>
-            <p className="text-xs" style={{ color: "#6b7280" }}>{card.label}</p>
-            <p className="text-base mt-0.5" style={{ color: card.color, fontWeight: 700 }}>{card.value}</p>
-          </div>
-        ))}
-      </div>
+          ))}
+        </div>
+      )}
 
       {/* Filters */}
       <div

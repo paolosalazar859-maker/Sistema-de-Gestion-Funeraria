@@ -22,13 +22,9 @@ import {
 } from "lucide-react";
 import { openPrint } from "../utils/printUtils";
 import { funeralServiceTypes, productServiceTypes } from "../data/mockData";
-import {
-  loadServices,
-  persistService,
-  generateServiceId,
-  deriveStatus,
-} from "../data/serviceStore";
+import { loadServices, persistService, generateServiceId, deriveStatus } from "../data/serviceStore";
 import { loadCompanyProfile } from "../data/companyStore";
+import { useUser } from "../context/UserContext";
 
 const formatCLP = (value: number) =>
   new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(value);
@@ -705,11 +701,10 @@ export function ServiceRegistration() {
   const [showVoucher, setShowVoucher] = useState(false);
   const [currentServiceId, setCurrentServiceId] = useState<string>("");
   const [services, setServices] = useState(() => loadServices().filter(s => !s.isDeleted));
-  const [isAdmin, setIsAdmin] = useState(false);
-
-  useEffect(() => {
-    setIsAdmin(localStorage.getItem("adminSession") === "true");
-  }, []);
+  const { role } = useUser();
+  const isAdmin = role === "admin";
+  // isNewService = no hay un servicio seleccionado o viene de URL pero sin editar
+  const isNewService = !selectedId && !serviceId;
 
   // Efecto para cargar servicio si viene por URL
   useEffect(() => {
@@ -871,7 +866,7 @@ export function ServiceRegistration() {
       payments: isEdit && existingService
         ? existingService.payments
         : (init > 0
-            ? [{ id: `${id}-P1`, date: today, amount: init, method: form.initialPaymentMethod, balance: pending, notes: form.paymentNotes || "Abono inicial" }]
+            ? [{ id: `${id}-P1`, date: today, amount: init, method: form.initialPaymentMethod, balance: pending, notes: form.paymentNotes || "Abono inicial", registeredBy: role ?? "admin" }]
             : []),
       createdAt: isEdit && existingService ? existingService.createdAt : today,
     };
@@ -1592,7 +1587,7 @@ export function ServiceRegistration() {
                       value={form.invoice1}
                       onChange={set("invoice1")}
                       placeholder="0001"
-                      disabled={!editMode || !isAdmin}
+                      disabled={!editMode || (!isAdmin && !isNewService)}
                     />
                   </div>
                   <div className="lg:col-span-1">
@@ -1601,7 +1596,7 @@ export function ServiceRegistration() {
                       value={form.invoice2}
                       onChange={set("invoice2")}
                       placeholder="0002"
-                      disabled={!editMode || !isAdmin}
+                      disabled={!editMode || (!isAdmin && !isNewService)}
                     />
                   </div>
                   <div className="lg:col-span-1">
@@ -1610,7 +1605,7 @@ export function ServiceRegistration() {
                       value={form.invoice3}
                       onChange={set("invoice3")}
                       placeholder="0003"
-                      disabled={!editMode || !isAdmin}
+                      disabled={!editMode || (!isAdmin && !isNewService)}
                     />
                   </div>
                 </div>
@@ -1635,13 +1630,13 @@ export function ServiceRegistration() {
                 type="date"
                 value={form.date}
                 onChange={set("date")}
-                disabled={!editMode || !isAdmin}
+                disabled={!editMode || (!isAdmin && !isNewService)}
               />
               <div className="lg:col-span-1">
                 <CemeteryAutocomplete
                   value={form.cemetery}
                   onChange={set("cemetery")}
-                  disabled={!editMode || !isAdmin}
+                  disabled={!editMode || (!isAdmin && !isNewService)}
                 />
               </div>
               <div className="lg:col-span-1">
@@ -1649,7 +1644,7 @@ export function ServiceRegistration() {
                   label={isProduct ? "Artículo" : "Tipo de Servicio"}
                   value={form.serviceType}
                   onChange={set("serviceType")}
-                  disabled={!editMode || !isAdmin}
+                  disabled={!editMode || (!isAdmin && !isNewService)}
                   options={currentTypeOptions}
                 />
               </div>
@@ -1683,14 +1678,14 @@ export function ServiceRegistration() {
                       value={form.municipalContribution}
                       onChange={set("municipalContribution")}
                       placeholder="0"
-                      disabled={!editMode || !isAdmin}
+                      disabled={!editMode || (!isAdmin && !isNewService)}
                     />
                     <MoneyInput
                       label="Cuota Mortuoria ($)"
                       value={form.mortuaryFee}
                       onChange={set("mortuaryFee")}
                       placeholder="0"
-                      disabled={!editMode || !isAdmin}
+                      disabled={!editMode || (!isAdmin && !isNewService)}
                     />
                   </>
                 )}
@@ -1699,21 +1694,21 @@ export function ServiceRegistration() {
                   value={form.discount}
                   onChange={set("discount")}
                   placeholder="0"
-                  disabled={!editMode || !isAdmin}
+                  disabled={!editMode || (!isAdmin && !isNewService)}
                 />
                 <MoneyInput
                   label="Pie / Abono Inicial ($)"
                   value={form.initialPayment}
                   onChange={set("initialPayment")}
                   placeholder="0"
-                  disabled={!editMode || !isAdmin}
+                  disabled={!editMode || (!isAdmin && !isNewService)}
                 />
                 <InputField
                   label="Método Abono Inicial"
                   value={form.initialPaymentMethod}
                   onChange={set("initialPaymentMethod")}
                   options={["Efectivo", "Transferencia", "Cheque", "Tarjeta", "Crédito", "Débito"]}
-                  disabled={!editMode || !isAdmin}
+                  disabled={!editMode || (!isAdmin && !isNewService)}
                 />
                 <div className="sm:col-span-2">
                   <InputField
@@ -1721,7 +1716,7 @@ export function ServiceRegistration() {
                     value={form.paymentNotes}
                     onChange={set("paymentNotes")}
                     placeholder="Ej: Pago con cheque N° 123, abono parcial, etc."
-                    disabled={!editMode || !isAdmin}
+                    disabled={!editMode || (!isAdmin && !isNewService)}
                   />
                 </div>
               </div>
@@ -1759,7 +1754,7 @@ export function ServiceRegistration() {
                         type="checkbox"
                         checked={form.installmentsEnabled}
                         onChange={(e) => setForm((prev) => ({ ...prev, installmentsEnabled: e.target.checked }))}
-                        disabled={!editMode || !isAdmin}
+                        disabled={!editMode || (!isAdmin && !isNewService)}
                         className="w-5 h-5 rounded-md"
                         style={{ accentColor: "#c9a84c" }}
                       />
@@ -1782,7 +1777,7 @@ export function ServiceRegistration() {
                       value={form.numberOfInstallments}
                       onChange={set("numberOfInstallments")}
                       placeholder="3"
-                      disabled={!editMode || !isAdmin}
+                      disabled={!editMode || (!isAdmin && !isNewService)}
                     />
                   )}
                 </div>
@@ -1950,14 +1945,14 @@ export function ServiceRegistration() {
               <textarea
                 value={form.observations}
                 onChange={(e) => set("observations")(e.target.value)}
-                disabled={!editMode || !isAdmin}
+                disabled={!editMode || (!isAdmin && !isNewService)}
                 rows={3}
                 placeholder="Ingresa notas u observaciones internas aquí..."
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all"
                 style={{
                   border: "1.5px solid #e5e7eb",
                   color: "#0d1b3e",
-                  background: (!editMode || !isAdmin) ? "#f8f9fa" : "#ffffff",
+                  background: (!editMode || (!isAdmin && !isNewService)) ? "#f8f9fa" : "#ffffff",
                   lineHeight: "1.6",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}

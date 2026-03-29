@@ -23,7 +23,7 @@ export function loadServices(): FuneralService[] {
     if (!Array.isArray(parsed)) return [];
     
     // Migración y saneamiento de datos
-    return (parsed as any[]).map((s) => {
+    const migrated = (parsed as any[]).map((s) => {
       const service = { ...s };
       
       // 1. Asegurar categoría de servicio
@@ -60,7 +60,31 @@ export function loadServices(): FuneralService[] {
 
       return service as FuneralService;
     });
+
+    const now = new Date();
+    let hasChanges = false;
+    
+    // Auto-completar eliminación lógica tras 30 días
+    const cleanData = migrated.filter((s) => {
+      if (s.isDeleted && s.deletedAt) {
+        const deletedDate = new Date(s.deletedAt);
+        const diffTime = Math.abs(now.getTime() - deletedDate.getTime());
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        if (diffDays >= 30) {
+          hasChanges = true;
+          return false; // Eliminate completely
+        }
+      }
+      return true;
+    });
+
+    if (hasChanges) {
+       localStorage.setItem(SERVICES_KEY, JSON.stringify(cleanData));
+    }
+
+    return cleanData;
   } catch (err) {
+
     console.error("Error cargando servicios:", err);
     return [];
   }

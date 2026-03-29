@@ -7,6 +7,7 @@ export interface Payment {
   method: "Efectivo" | "Transferencia" | "Cheque" | "Tarjeta" | "Crédito" | "Débito";
   balance: number;
   notes?: string;
+  registeredBy?: string; // e.g., "admin" or "oficina"
 }
 
 export interface Expense {
