@@ -13,7 +13,7 @@ dev-dist/
 *.rpm
 *.AppImage
 *.db
-supabase/
+/supabase/
 crear-instalador-windows.bat
 install.sh
 LIMPIAR-CACHE.sh
