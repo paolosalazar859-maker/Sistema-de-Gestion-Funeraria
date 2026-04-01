@@ -1,6 +1,14 @@
 import { useState, useEffect } from "react";
 import { Package, Trash2, Sparkles } from "lucide-react";
-import { loadInventory, addInventoryItem, deleteInventoryItem, InventoryItem, addInventoryItems } from "../data/inventoryStore";
+import { 
+  loadInventory, 
+  addInventoryItem, 
+  deleteInventoryItem, 
+  InventoryItem, 
+  addInventoryItems,
+  getEngravingPrice,
+  saveEngravingPrice
+} from "../data/inventoryStore";
 import { useUser } from "../context/UserContext";
 import { funeralServiceTypes } from "../data/mockData";
 
@@ -10,9 +18,11 @@ export function InventoryManager() {
   const [invForm, setInvForm] = useState({ name: "", price: "", category: "" });
   const [invFilter, setInvFilter] = useState("all");
   const [invSort, setInvSort] = useState("asc");
+  const [engravingPrice, setEngravingPrice] = useState("500");
 
   useEffect(() => {
     setInventory(loadInventory());
+    setEngravingPrice(getEngravingPrice().toString());
   }, []);
 
   const handleAddInventory = () => {
@@ -44,6 +54,12 @@ export function InventoryManager() {
       deleteInventoryItem(id);
       setInventory(loadInventory());
     }
+  };
+
+  const handleSaveEngravingPrice = () => {
+    const price = Number(engravingPrice);
+    saveEngravingPrice(price);
+    alert("Precio por letra actualizado correctamente.");
   };
 
   const uniqueCategories = Array.from(new Set(inventory.map(i => i.category))).filter(Boolean);
@@ -157,7 +173,45 @@ export function InventoryManager() {
                 </button>
               </div>
             </div>
+
+            {/* Configuración de Grabado (Global) */}
+            <div className="mb-8 p-5 rounded-2xl border flex flex-col sm:flex-row items-center justify-between gap-4" 
+              style={{ background: "#fffbeb", borderColor: "#fbbf24" }}>
+              <div className="flex items-center gap-4 text-left">
+                <div className="w-10 h-10 rounded-xl flex items-center justify-center bg-amber-100 text-amber-700">
+                  <Sparkles size={20} />
+                </div>
+                <div className="text-left">
+                  <p className="text-sm font-bold text-amber-900 uppercase tracking-tighter">Precio de Grabado</p>
+                  <p className="text-[11px] text-amber-700">Configura el valor que se cobrará por cada letra grabada.</p>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <div className="relative flex-1 sm:w-32">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-700 font-bold">$</span>
+                  <input
+                    type="text"
+                    value={engravingPrice}
+                    onChange={e => setEngravingPrice(e.target.value.replace(/\D/g, ""))}
+                    placeholder="500"
+                    disabled={role !== "admin"}
+                    className="w-full pl-7 pr-3 py-2 rounded-xl text-sm font-bold border-1.5 focus:border-amber-500 outline-none transition-all disabled:opacity-60"
+                    style={{ borderColor: "#fbbf24", background: "#ffffff" }}
+                  />
+                </div>
+                {role === "admin" && (
+                  <button
+                    onClick={handleSaveEngravingPrice}
+                    className="px-4 py-2 rounded-xl bg-amber-600 text-white text-xs font-bold hover:bg-amber-700 transition-all shadow-sm"
+                  >
+                    Guardar
+                  </button>
+                )}
+              </div>
+            </div>
             <div className="h-px w-full my-6" style={{ background: "#f0f2f5" }} />
+
           </>
         )}
 

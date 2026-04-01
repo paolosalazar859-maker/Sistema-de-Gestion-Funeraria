@@ -1,4 +1,5 @@
 const INVENTORY_KEY = "funeral_inventory";
+const ENGRAVING_PRICE_KEY = "engraving_price_per_letter";
 
 export interface InventoryItem {
   id: string;
@@ -56,4 +57,21 @@ export function deleteInventoryItem(id: string): void {
   const items = loadInventory();
   const filtered = items.filter(i => i.id !== id);
   saveInventory(filtered);
+}
+
+export function getEngravingPrice(): number {
+  try {
+    const saved = localStorage.getItem(ENGRAVING_PRICE_KEY);
+    return saved ? Number(saved) : 500; // Default price: 500
+  } catch {
+    return 500;
+  }
+}
+
+export function saveEngravingPrice(price: number): void {
+  try {
+    localStorage.setItem(ENGRAVING_PRICE_KEY, price.toString());
+  } catch (error) {
+    console.error("Error saving engraving price:", error);
+  }
 }

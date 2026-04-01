@@ -24,7 +24,7 @@ import { openPrint } from "../utils/printUtils";
 import { loadServices, persistService, generateServiceId, deriveStatus } from "../data/serviceStore";
 import { loadCompanyProfile } from "../data/companyStore";
 import { useUser } from "../context/UserContext";
-import { loadInventory } from "../data/inventoryStore";
+import { loadInventory, getEngravingPrice } from "../data/inventoryStore";
 
 const formatCLP = (value: number) =>
   new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(value);
@@ -189,7 +189,7 @@ const emptyForm: FormData = {
   observations: "",
   engravingNotes: "",
   paymentNotes: "",
-  pricePerLetter: "0",
+  pricePerLetter: "500", // Will be updated on mount
   needsEngraving: false,
   initialPaymentMethod: "Efectivo",
 };
@@ -728,6 +728,12 @@ export function ServiceRegistration() {
       setSaved(false);
     }
   }, [serviceId]);
+
+  useEffect(() => {
+    if (!serviceId && !selectedId) {
+      setForm(prev => ({ ...prev, pricePerLetter: getEngravingPrice().toString() }));
+    }
+  }, [serviceId, selectedId]);
 
   const set = (field: keyof FormData) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }));
@@ -1523,14 +1529,17 @@ export function ServiceRegistration() {
                                 const rawVal = e.target.value.replace(/\D/g, "");
                                 setForm((prev) => ({ ...prev, pricePerLetter: rawVal }));
                               }}
-                              disabled={!editMode}
-                              className="w-full pl-7 pr-3 py-2.5 rounded-xl text-sm outline-none font-bold shadow-sm"
+                              disabled={!editMode || role !== "admin"}
+                              className="w-full pl-7 pr-3 py-2.5 rounded-xl text-sm outline-none font-bold shadow-sm disabled:opacity-75"
                               style={{
                                 border: "1.5px solid #d97706",
                                 color: "#0d1b3e",
-                                background: "#ffffff",
+                                background: role !== "admin" ? "#fffbeb" : "#ffffff",
                               }}
                             />
+                            {role !== "admin" && (
+                              <p className="text-[9px] text-amber-600 mt-1 pl-1">Solo Administradores pueden modificar el precio oficial</p>
+                            )}
                           </div>
                           
                           {/* Resumen de cálculo */}
