@@ -5,10 +5,9 @@ const KEY = "funeral_service_types";
 export function loadServiceTypes(): string[] {
   try {
     const raw = localStorage.getItem(KEY);
-    if (!raw) return [...funeralServiceTypes];
+    if (raw === null) return [...funeralServiceTypes];
     const parsed = JSON.parse(raw);
-    if (!Array.isArray(parsed) || parsed.length === 0) return [...funeralServiceTypes];
-    return parsed as string[];
+    return Array.isArray(parsed) ? (parsed as string[]) : [...funeralServiceTypes];
   } catch {
     return [...funeralServiceTypes];
   }
