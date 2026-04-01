@@ -1644,14 +1644,16 @@ export function ServiceRegistration() {
                 onChange={set("date")}
                 disabled={!editMode}
               />
-              <div className="lg:col-span-1">
-                <CemeteryAutocomplete
-                  value={form.cemetery}
-                  onChange={set("cemetery")}
-                  disabled={!editMode}
-                />
-              </div>
-              <div className="lg:col-span-1">
+              {!isProduct && (
+                <div className="lg:col-span-1">
+                  <CemeteryAutocomplete
+                    value={form.cemetery}
+                    onChange={set("cemetery")}
+                    disabled={!editMode}
+                  />
+                </div>
+              )}
+              <div className={isProduct ? "lg:col-span-2" : "lg:col-span-1"}>
                 <InputField
                   label={isProduct ? "Artículo" : "Tipo de Servicio"}
                   value={form.serviceType}
@@ -1676,6 +1678,22 @@ export function ServiceRegistration() {
                 placeholder="0"
                 disabled={!editMode}
               />
+              {isProduct && (
+                <div className="lg:col-span-4">
+                  <label className="block text-xs mb-1.5" style={{ color: "#374151", fontWeight: 500 }}>Notas</label>
+                  <textarea
+                    value={form.observations}
+                    onChange={(e) => set("observations")(e.target.value)}
+                    disabled={!editMode}
+                    rows={3}
+                    placeholder="Observaciones sobre el artículo o la venta..."
+                    className="w-full px-3 py-2.5 rounded-xl text-sm outline-none resize-none transition-all"
+                    style={{ border: "1.5px solid #e5e7eb", color: "#374151", background: !editMode ? "#f8f9fa" : "#ffffff" }}
+                    onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
+                    onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
