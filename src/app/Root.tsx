@@ -10,7 +10,7 @@ import { apiLoadServices, apiMigrateServices } from "./data/serviceApi";
 import { setLocalCache, loadServices, isMigrated, markMigrated, recalculateAllStatuses } from "./data/serviceStore";
 
 // Routes accessible by 'oficina' role
-const OFICINA_ALLOWED = ["/registro", "/cobros"];
+const OFICINA_ALLOWED = ["/registro", "/cobros", "/inventario"];
 
 type SyncState = "loading" | "ready";
 
