@@ -25,6 +25,7 @@ import { funeralServiceTypes, productServiceTypes } from "../data/mockData";
 import { loadServices, persistService, generateServiceId, deriveStatus } from "../data/serviceStore";
 import { loadCompanyProfile } from "../data/companyStore";
 import { useUser } from "../context/UserContext";
+import { loadInventory } from "../data/inventoryStore";
 
 const formatCLP = (value: number) =>
   new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(value);
@@ -701,6 +702,7 @@ export function ServiceRegistration() {
   const [showVoucher, setShowVoucher] = useState(false);
   const [currentServiceId, setCurrentServiceId] = useState<string>("");
   const [services, setServices] = useState(() => loadServices().filter(s => !s.isDeleted));
+  const inventoryItems = useMemo(() => loadInventory(), []);
   const { role } = useUser();
   const isAdmin = role === "admin";
   // isNewService = no hay un servicio seleccionado o viene de URL pero sin editar
@@ -726,7 +728,11 @@ export function ServiceRegistration() {
     setForm((prev) => ({ ...prev, [field]: val }));
 
   const isProduct = form.serviceCategory === "Venta de Artículo";
-  const currentTypeOptions = isProduct ? productServiceTypes : funeralServiceTypes;
+  const currentTypeOptions = useMemo(() => {
+    const baseOptions = isProduct ? productServiceTypes : funeralServiceTypes;
+    const invNames = inventoryItems.map(i => i.name).filter(Boolean);
+    return Array.from(new Set([...baseOptions, ...invNames]));
+  }, [isProduct, inventoryItems]);
   const hasTallado = isProduct && form.serviceType.includes("Tallado");
 
   const serviceValue = numericInput(form.serviceValue);
@@ -1640,7 +1646,16 @@ export function ServiceRegistration() {
                 <InputField
                   label={isProduct ? "Artículo" : "Tipo de Servicio"}
                   value={form.serviceType}
-                  onChange={set("serviceType")}
+                  onChange={(val) => {
+                    setForm(p => {
+                      const match = inventoryItems.find(i => i.name === val);
+                      return {
+                        ...p,
+                        serviceType: val,
+                        ...(match ? { serviceValue: match.price.toString() } : {})
+                      };
+                    });
+                  }}
                   disabled={!editMode}
                   options={currentTypeOptions}
                 />
