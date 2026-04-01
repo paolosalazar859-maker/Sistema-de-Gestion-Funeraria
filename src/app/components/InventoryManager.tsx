@@ -83,10 +83,13 @@ export function InventoryManager() {
           <div>
             <label style={labelStyle}>Precio referencial ($)</label>
             <input
-              type="number"
-              placeholder="Ej. 1500000"
-              value={invForm.price}
-              onChange={e => setInvForm(p => ({ ...p, price: e.target.value }))}
+              type="text"
+              placeholder="Ej. 1.500.000"
+              value={invForm.price ? new Intl.NumberFormat("es-CL").format(Number(invForm.price)) : ""}
+              onChange={e => {
+                const rawVal = e.target.value.replace(/\D/g, "");
+                setInvForm(p => ({ ...p, price: rawVal }));
+              }}
               style={inputStyle()}
             />
           </div>
