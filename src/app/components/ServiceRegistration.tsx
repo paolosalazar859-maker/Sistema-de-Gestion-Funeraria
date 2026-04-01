@@ -1672,6 +1672,7 @@ export function ServiceRegistration() {
                 />
               </div>
               <MoneyInput
+                key={`price-${form.serviceType}`}
                 label={isProduct ? "Precio ($)" : "Valor del Servicio ($)"}
                 value={form.serviceValue}
                 onChange={set("serviceValue")}
