@@ -154,7 +154,9 @@ interface FormData {
   invoice2: string;
   invoice3: string;
   observations: string;
+  engravingNotes: string;
   paymentNotes: string;
+  pricePerLetter: string;
   initialPaymentMethod: "Efectivo" | "Transferencia" | "Cheque" | "Tarjeta" | "Crédito" | "Débito";
 }
 
@@ -184,7 +186,9 @@ const emptyForm: FormData = {
   invoice2: "",
   invoice3: "",
   observations: "",
+  engravingNotes: "",
   paymentNotes: "",
+  pricePerLetter: "0",
   initialPaymentMethod: "Efectivo",
 };
 
@@ -742,7 +746,11 @@ export function ServiceRegistration() {
     .map(i => i.name)
     .filter(Boolean);
 
-  const hasTallado = isProduct && form.serviceType.includes("Tallado");
+  const hasTallado = isProduct && (
+    form.serviceType.toLowerCase().includes("tallado") || 
+    form.serviceType.toLowerCase().includes("grabado")
+  );
+
 
   const serviceValue = numericInput(form.serviceValue);
   const transferCost = numericInput(form.transferCost);
@@ -783,7 +791,9 @@ export function ServiceRegistration() {
           invoice2: srv.invoice2 || "",
           invoice3: srv.invoice3 || "",
           observations: srv.observations || "",
+          engravingNotes: (srv as any).engravingNotes || "",
           paymentNotes: srv.payments[0]?.notes || "",
+          pricePerLetter: (srv as any).pricePerLetter || "0",
           initialPaymentMethod: (srv.payments[0]?.method as any) || "Efectivo",
           installmentsEnabled: srv.installments?.enabled || false,
           numberOfInstallments: srv.installments?.totalInstallments.toString() || "3",
@@ -1441,120 +1451,148 @@ export function ServiceRegistration() {
                   />
                 </div>
 
-                {/* ── Campo de Tallado ── */}
+                {/* ── Sección de Grabado / Tallado ── */}
                 {hasTallado && (
                   <div
-                    className="mt-4 rounded-2xl p-4"
-                    style={{ background: "linear-gradient(135deg, #fef3c7, #fef9ec)", border: "1.5px solid #fbbf24" }}
+                    className="mt-6 rounded-2xl overflow-hidden border"
+                    style={{ 
+                      background: "#ffffff", 
+                      borderColor: "#fbbf24",
+                      boxShadow: "0 4px 15px rgba(251, 191, 36, 0.1)"
+                    }}
                   >
-                    {/* Header */}
-                    <div className="flex items-center gap-2 mb-3">
-                      <div
-                        className="w-7 h-7 rounded-lg flex items-center justify-center"
-                        style={{ background: "#92400e" }}
-                      >
-                        <Type size={13} style={{ color: "#ffffff" }} />
-                      </div>
-                      <div>
-                        <p className="text-xs" style={{ color: "#92400e", fontWeight: 600 }}>
-                          Texto para Tallado
-                        </p>
-                        <p className="text-xs" style={{ color: "#a16207" }}>
-                          Ingresa el texto exacto a grabar en la lápida
-                        </p>
-                      </div>
-                    </div>
-
-                    {/* Textarea + contador */}
-                    <div className="relative">
-                      <textarea
-                        value={form.engravingText}
-                        onChange={(e) => set("engravingText")(e.target.value)}
-                        disabled={!editMode}
-                        rows={4}
-                        placeholder={"Ej: Juan Pérez García\n12 de Enero 1940 — 3 de Marzo 2024\n\"En nuestros corazones vivirás siempre\""}
-                        className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all"
-                        style={{
-                          border: "1.5px solid #fbbf24",
-                          color: "#0d1b3e",
-                          background: !editMode ? "#fef9ec" : "#ffffff",
-                          fontFamily: "Georgia, serif",
-                          lineHeight: "1.7",
-                        }}
-                        onFocus={(e) => (e.target.style.borderColor = "#92400e")}
-                        onBlur={(e) => (e.target.style.borderColor = "#fbbf24")}
-                      />
-
-                      {/* Contador de caracteres */}
-                      <div
-                        className="mt-2 flex items-center justify-between"
-                      >
-                        {/* desglose por líneas */}
-                        <div className="flex flex-wrap gap-2">
-                          {form.engravingText
-                            ? form.engravingText.split("\n").map((line, i) => (
-                                <span
-                                  key={i}
-                                  className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs"
-                                  style={{ background: "#fef3c7", border: "1px solid #fbbf24", color: "#92400e" }}
-                                >
-                                  <span style={{ color: "#a16207" }}>L{i + 1}</span>
-                                  <span style={{ fontWeight: 600 }}>{line.length}</span>
-                                  <span style={{ color: "#a16207" }}>letras</span>
-                                </span>
-                              ))
-                            : (
-                              <span className="text-xs" style={{ color: "#a16207" }}>
-                                Las líneas se contarán al escribir el texto
-                              </span>
-                            )}
+                    {/* Header con gradiente */}
+                    <div className="px-5 py-3 border-b flex items-center justify-between" style={{ background: "linear-gradient(90deg, #fef3c7, #fffbeb)", borderColor: "#fbbf24" }}>
+                      <div className="flex items-center gap-3">
+                        <div className="w-8 h-8 rounded-lg flex items-center justify-center shadow-sm" style={{ background: "#92400e" }}>
+                          <Type size={16} style={{ color: "#ffffff" }} />
                         </div>
-
-                        {/* total */}
-                        <span
-                          className="text-xs px-2.5 py-1 rounded-lg shrink-0 ml-2"
-                          style={{
-                            background: form.engravingText.length > 0 ? "#92400e" : "#f0f2f5",
-                            color: form.engravingText.length > 0 ? "#ffffff" : "#9ca3af",
-                            fontWeight: 600,
-                          }}
-                        >
-                          {form.engravingText.replace(/\n/g, "").length} letras en total
+                        <div>
+                          <p className="text-sm font-bold" style={{ color: "#92400e" }}>Configuración de Grabado / Tallado</p>
+                          <p className="text-[10px]" style={{ color: "#a16207" }}>Ingresa el texto y calcula el valor por letra</p>
+                        </div>
+                      </div>
+                      
+                      {/* Badge de contador rápido */}
+                      <div className="px-3 py-1 rounded-full bg-white border border-amber-200 shadow-sm flex items-center gap-1.5">
+                        <span className="text-[10px] font-bold text-amber-800 uppercase tracking-tight">Letras:</span>
+                        <span className="text-sm font-black text-amber-600">
+                          {form.engravingText.replace(/[^a-zA-Z0-9]/g, "").length}
                         </span>
                       </div>
                     </div>
 
-                    {/* Vista previa estilo lápida */}
-                    {form.engravingText.trim() && (
-                      <div
-                        className="mt-4 rounded-xl p-4 text-center"
-                        style={{
-                          background: "linear-gradient(180deg, #374151 0%, #1f2937 100%)",
-                          border: "2px solid #6b7280",
-                          boxShadow: "inset 0 2px 8px rgba(0,0,0,0.3)",
-                        }}
-                      >
-                        <p className="text-xs mb-2" style={{ color: "rgba(201,168,76,0.7)", letterSpacing: "0.12em" }}>
-                          VISTA PREVIA
-                        </p>
-                        {form.engravingText.split("\n").map((line, i) => (
-                          <p
-                            key={i}
-                            className="leading-relaxed"
-                            style={{
-                              color: "#e8c97a",
-                              fontFamily: "Georgia, serif",
-                              fontSize: i === 0 ? "15px" : "13px",
-                              fontWeight: i === 0 ? 600 : 400,
-                              letterSpacing: "0.04em",
-                              textShadow: "0 1px 3px rgba(0,0,0,0.5)",
-                            }}
-                          >
-                            {line || "\u00A0"}
-                          </p>
-                        ))}
+                    <div className="p-5 space-y-5">
+                      {/* Texto Principal */}
+                      <div>
+                        <label className="block text-[11px] font-bold mb-2 uppercase tracking-wide" style={{ color: "#92400e" }}>
+                          Texto del Grabado (Frase)
+                        </label>
+                        <textarea
+                          value={form.engravingText}
+                          onChange={(e) => set("engravingText")(e.target.value)}
+                          disabled={!editMode}
+                          rows={3}
+                          placeholder={"Ej: En memoria de...\n1940 — 2024"}
+                          className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all"
+                          style={{
+                            border: "1.5px solid #fbbf24",
+                            color: "#0d1b3e",
+                            background: !editMode ? "#f9fafb" : "#ffffff",
+                            fontFamily: "Georgia, serif",
+                            lineHeight: "1.7",
+                          }}
+                        />
                       </div>
-                    )}
+
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                        {/* Precio por Letra */}
+                        <div className="bg-amber-50/30 p-4 rounded-xl border border-amber-100">
+                          <label className="block text-[11px] font-bold mb-2 uppercase tracking-wide" style={{ color: "#92400e" }}>
+                            Valor por Letra ($)
+                          </label>
+                          <div className="relative">
+                            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-amber-600 font-bold">$</span>
+                            <input
+                              type="text"
+                              value={form.pricePerLetter ? new Intl.NumberFormat("es-CL").format(Number(form.pricePerLetter)) : ""}
+                              onChange={(e) => {
+                                const rawVal = e.target.value.replace(/\D/g, "");
+                                setForm((prev) => ({ ...prev, pricePerLetter: rawVal }));
+                              }}
+                              disabled={!editMode}
+                              className="w-full pl-7 pr-3 py-2.5 rounded-xl text-sm outline-none font-bold shadow-sm"
+                              style={{
+                                border: "1.5px solid #d97706",
+                                color: "#0d1b3e",
+                                background: "#ffffff",
+                              }}
+                            />
+                          </div>
+                          
+                          {/* Resumen de cálculo */}
+                          <div className="mt-3 flex items-center justify-between border-t border-amber-100 pt-3">
+                            <span className="text-[10px] text-amber-700 font-medium">TOTAL ESTIMADO:</span>
+                            <span className="text-sm font-black text-amber-900 bg-amber-200/40 px-2 py-0.5 rounded">
+                              {new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 })
+                                .format(form.engravingText.replace(/[^a-zA-Z0-9]/g, "").length * Number(form.pricePerLetter || 0))}
+                            </span>
+                          </div>
+                        </div>
+
+                        {/* Comentarios de Grabado */}
+                        <div>
+                          <label className="block text-[11px] font-bold mb-2 uppercase tracking-wide" style={{ color: "#92400e" }}>
+                            Detalles / Diseño Especial
+                          </label>
+                          <textarea
+                            value={form.engravingNotes}
+                            onChange={(e) => set("engravingNotes")(e.target.value)}
+                            disabled={!editMode}
+                            rows={4}
+                            placeholder="Ej: Letra cursiva, color dorado, añadir cruz..."
+                            className="w-full px-4 py-3 rounded-xl text-[12px] outline-none resize-none transition-all italic border shadow-sm"
+                            style={{
+                              borderColor: "#e5e7eb",
+                              color: "#374151",
+                              background: !editMode ? "#f9fafb" : "#ffffff",
+                            }}
+                          />
+                        </div>
+                      </div>
+
+                      {/* Vista previa estilo lápida (estilizada) */}
+                      {form.engravingText.trim() && (
+                        <div
+                          className="mt-2 rounded-xl p-6 text-center shadow-lg relative overflow-hidden"
+                          style={{
+                            background: "linear-gradient(180deg, #374151 0%, #1f2937 100%)",
+                            border: "2px solid #6b7280",
+                          }}
+                        >
+                          <div className="absolute top-0 left-0 w-full h-[1px] bg-white/10"></div>
+                          <p className="text-[10px] mb-4 opacity-50 uppercase tracking-[0.2em]" style={{ color: "#c9a84c" }}>
+                            Vista Previa de Grabado
+                          </p>
+                          {form.engravingText.split("\n").map((line, i) => (
+                            <p
+                              key={i}
+                              className="leading-relaxed"
+                              style={{
+                                color: "#e8c97a",
+                                fontFamily: "Georgia, serif",
+                                fontSize: i === 0 ? "16px" : "13px",
+                                fontWeight: i === 0 ? 600 : 400,
+                                letterSpacing: "0.04em",
+                                textShadow: "0 1px 3px rgba(0,0,0,0.8)",
+                              }}
+                            >
+                              {line || "\u00A0"}
+                            </p>
+                          ))}
+                        </div>
+                      )}
+                    </div>
                   </div>
                 )}
               </>

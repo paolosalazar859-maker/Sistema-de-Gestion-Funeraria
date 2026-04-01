@@ -99,9 +99,15 @@ const UserContext = createContext<UserContextValue>({
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole | null>(() => {
-    const saved = localStorage.getItem(SESSION_KEY);
+    // Usar sessionStorage para mayor seguridad (se borra al cerrar pestaña/navegador)
+    const saved = sessionStorage.getItem(SESSION_KEY);
     return (saved as UserRole) || null;
   });
+
+  // Limpiar cualquier residuo de localStorage antiguo por seguridad al iniciar
+  useEffect(() => {
+    localStorage.removeItem(SESSION_KEY);
+  }, []);
 
   const [adminProfile, setAdminProfile] = useState<AdminProfile>(loadCachedProfile);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -124,12 +130,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [role]);
 
   const login = (r: UserRole) => {
-    localStorage.setItem(SESSION_KEY, r);
+    sessionStorage.setItem(SESSION_KEY, r);
     setRole(r);
   };
 
   const logout = () => {
-    localStorage.removeItem(SESSION_KEY);
+    sessionStorage.removeItem(SESSION_KEY);
     setRole(null);
     setAdminProfile(DEFAULT_PROFILE);
   };
