@@ -729,15 +729,11 @@ export function ServiceRegistration() {
     setForm((prev) => ({ ...prev, [field]: val }));
 
   const isProduct = form.serviceCategory === "Venta de Artículo";
-  const currentTypeOptions = useMemo(() => {
-    if (isProduct) {
-      // Solo artículos del inventario para Venta de Artículo
-      return inventoryItems.map(i => i.name).filter(Boolean);
-    } else {
-      // Tipos de servicio gestionados desde AdminProfile → Configuración
-      return loadServiceTypes();
-    }
-  }, [isProduct, inventoryItems]);
+  // Obtenemos las opciones directamente para asegurar que estén actualizadas
+  const currentTypeOptions = isProduct 
+    ? inventoryItems.map(i => i.name).filter(Boolean)
+    : loadServiceTypes();
+
   const hasTallado = isProduct && form.serviceType.includes("Tallado");
 
   const serviceValue = numericInput(form.serviceValue);

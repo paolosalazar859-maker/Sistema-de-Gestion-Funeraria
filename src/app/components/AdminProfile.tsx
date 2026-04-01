@@ -246,6 +246,21 @@ export function AdminProfile() {
   const [serviceTypesList, setServiceTypesList] = useState<string[]>(() => loadServiceTypes());
   const [newServiceType, setNewServiceType] = useState("");
 
+  const handleAddServiceType = () => {
+    const trimmed = newServiceType.trim();
+    if (!trimmed) return;
+    
+    // Check for duplicate manually for UI feedback if needed
+    if (serviceTypesList.includes(trimmed)) {
+      alert("Este tipo de servicio ya existe en la lista.");
+      return;
+    }
+
+    const updated = addServiceType(trimmed);
+    setServiceTypesList([...updated]);
+    setNewServiceType("");
+  };
+
   // Initials avatar
   const initials = adminProfile.name
     ? adminProfile.name.split(" ").map((w) => w[0]).slice(0, 2).join("").toUpperCase()
@@ -815,10 +830,8 @@ export function AdminProfile() {
               value={newServiceType}
               onChange={(e) => setNewServiceType(e.target.value)}
               onKeyDown={(e) => {
-                if (e.key === "Enter" && newServiceType.trim()) {
-                  const updated = addServiceType(newServiceType.trim());
-                  setServiceTypesList(updated);
-                  setNewServiceType("");
+                if (e.key === "Enter") {
+                  handleAddServiceType();
                 }
               }}
               placeholder="Nombre del nuevo tipo de servicio..."
@@ -828,12 +841,8 @@ export function AdminProfile() {
               onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
             />
             <button
-              onClick={() => {
-                if (!newServiceType.trim()) return;
-                const updated = addServiceType(newServiceType.trim());
-                setServiceTypesList(updated);
-                setNewServiceType("");
-              }}
+              type="button"
+              onClick={handleAddServiceType}
               className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm"
               style={{ background: "#0d1b3e", color: "#c9a84c" }}
             >
@@ -856,10 +865,11 @@ export function AdminProfile() {
                 >
                   <span className="text-sm" style={{ color: "#374151" }}>{tipo}</span>
                   <button
+                    type="button"
                     onClick={() => {
                       if (!window.confirm(`¿Eliminar "${tipo}" de la lista?`)) return;
                       const updated = removeServiceType(tipo);
-                      setServiceTypesList(updated);
+                      setServiceTypesList([...updated]);
                     }}
                     className="w-6 h-6 rounded-lg flex items-center justify-center transition-all"
                     style={{ background: "#fee2e2", color: "#dc2626" }}
