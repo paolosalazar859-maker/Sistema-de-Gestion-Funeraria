@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useNavigate } from "react-router";
 import {
   CheckCircle2, Clock, XCircle, AlertCircle, Plus, ArrowLeft,
@@ -7,7 +7,7 @@ import {
   Edit3, Trash2,
 } from "lucide-react";
 import { FuneralService } from "../data/mockData";
-import { loadServices, persistService, deriveStatus } from "../data/serviceStore";
+import { loadServices, persistService, deriveStatus, getAvailableYears, getMonthsWithData } from "../data/serviceStore";
 import { useUser } from "../context/UserContext";
 import { printServiceVoucher, printPaymentReceipt } from "../utils/printUtils";
 import { exportServicesToCSV, exportPaymentsCSV } from "../utils/exportUtils";
@@ -871,6 +871,27 @@ export function CollectionStatus() {
   const [statusFilter, setStatusFilter] = useState<string>("Todos");
   const [sortField, setSortField] = useState<string>("date");
   const [sortAsc, setSortAsc] = useState(false);
+  const [selectedYear, setSelectedYear] = useState<number | "all">("all");
+  const [selectedMonth, setSelectedMonth] = useState<number | "all">("all");
+
+  const availableYears = useMemo(() => getAvailableYears(services), [services]);
+  const activeMonths = useMemo(() => selectedYear !== "all" ? getMonthsWithData(services, selectedYear) : new Set<number>(), [services, selectedYear]);
+
+  const monthsList = [
+    { value: "all", label: "Todos los meses" },
+    { value: 1, label: "Enero" },
+    { value: 2, label: "Febrero" },
+    { value: 3, label: "Marzo" },
+    { value: 4, label: "Abril" },
+    { value: 5, label: "Mayo" },
+    { value: 6, label: "Junio" },
+    { value: 7, label: "Julio" },
+    { value: 8, label: "Agosto" },
+    { value: 9, label: "Septiembre" },
+    { value: 10, label: "Octubre" },
+    { value: 11, label: "Noviembre" },
+    { value: 12, label: "Diciembre" },
+  ];
 
   // Load from localStorage on mount
   useEffect(() => {
@@ -898,7 +919,22 @@ export function CollectionStatus() {
         statusFilter === "Todos" || 
         (statusFilter === "Deudores" && s.pendingBalance > 0) ||
         s.status === statusFilter;
-      return matchSearch && matchStatus;
+        
+      let matchDate = true;
+      if (selectedYear !== "all" || selectedMonth !== "all") {
+        const sDate = s.date || s.createdAt || "";
+        const parts = sDate.split("-");
+        if (parts.length >= 2) {
+          const y = parseInt(parts[0], 10);
+          const m = parseInt(parts[1], 10);
+          if (selectedYear !== "all" && y !== selectedYear) matchDate = false;
+          if (selectedMonth !== "all" && m !== selectedMonth) matchDate = false;
+        } else {
+          matchDate = false;
+        }
+      }
+
+      return matchSearch && matchStatus && matchDate;
     })
     .sort((a, b) => {
       let va: any, vb: any;
@@ -1031,7 +1067,38 @@ export function CollectionStatus() {
             ))}
           </div>
 
-          <div className="flex items-center gap-2 sm:border-l sm:pl-3" style={{ borderColor: "#e5e7eb" }}>
+          <div className="flex items-center gap-2 sm:border-l flex-wrap" style={{ borderColor: "#e5e7eb" }}>
+            <select
+              title="Filtrar por Año"
+              value={selectedYear}
+              onChange={(e) => setSelectedYear(e.target.value === "all" ? "all" : parseInt(e.target.value, 10))}
+              className="bg-transparent text-xs font-semibold outline-none cursor-pointer py-1 px-1 sm:ml-2"
+              style={{ color: "#0d1b3e" }}
+            >
+              <option value="all">Todos los años</option>
+              {availableYears.map((year: number) => (
+                <option key={year} value={year}>{year}</option>
+              ))}
+            </select>
+            <select
+              title="Filtrar por Mes"
+              value={selectedMonth}
+              onChange={(e) => setSelectedMonth(e.target.value === "all" ? "all" : parseInt(e.target.value, 10))}
+              className="bg-transparent text-xs font-semibold outline-none cursor-pointer py-1 px-1"
+              style={{ color: "#0d1b3e" }}
+            >
+              {monthsList.map(m => {
+                const hasData = m.value !== "all" && selectedYear !== "all" && activeMonths.has(m.value as number);
+                return (
+                  <option key={m.value} value={m.value}>
+                    {m.label} {hasData ? "•" : ""}
+                  </option>
+                );
+              })}
+            </select>
+          </div>
+
+          <div className="flex items-center gap-1 sm:border-l sm:pl-3" style={{ borderColor: "#e5e7eb" }}>
             <div className="w-8 h-8 rounded-lg flex items-center justify-center bg-gray-50">
               <ChevronDown size={14} style={{ color: "#9ca3af" }} />
             </div>
