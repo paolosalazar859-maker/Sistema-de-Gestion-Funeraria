@@ -7,6 +7,7 @@ import { Clients } from "./components/Clients";
 import { AdminProfile } from "./components/AdminProfile";
 import { ExpensesManager } from "./components/ExpensesManager";
 import { RouteErrorPage } from "./components/RouteErrorPage";
+import { InventoryManager } from "./components/InventoryManager";
 
 export const router = createHashRouter([
   {
@@ -20,6 +21,7 @@ export const router = createHashRouter([
       { path: "clientes", Component: Clients },
       { path: "perfil", Component: AdminProfile },
       { path: "gastos", Component: ExpensesManager },
+      { path: "inventario", Component: InventoryManager },
     ],
   },
 ]);

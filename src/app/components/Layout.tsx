@@ -15,6 +15,7 @@ import {
   UserCircle,
   RefreshCw,
   Wallet,
+  Package,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import { recalculateAllStatuses, loadServices } from "../data/serviceStore";
@@ -26,6 +27,7 @@ const ALL_NAV = [
   { path: "/cobros",   label: "Estado de Cobros",     icon: CreditCard,      roles: ["admin", "oficina"] },
   { path: "/clientes", label: "Clientes",             icon: Users,           roles: ["admin"] },
   { path: "/gastos",   label: "Gastos",               icon: Wallet,          roles: ["admin"] },
+  { path: "/inventario", label: "Inventario",         icon: Package,         roles: ["admin"] },
   { path: "/perfil",   label: "Mi Perfil",            icon: Settings,        roles: ["admin"] },
 ];
 

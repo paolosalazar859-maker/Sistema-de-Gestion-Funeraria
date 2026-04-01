@@ -29,13 +29,13 @@ import React, { Suspense } from "react";
 import { loadCompanyProfile, saveCompanyProfile, CompanyProfile } from "../data/companyStore";
 import { loadServices, restoreService, hardDeleteService } from "../data/serviceStore";
 import { FuneralService } from "../data/mockData";
-import { loadInventory, addInventoryItem, deleteInventoryItem, InventoryItem } from "../data/inventoryStore";
+
 
 // Cargar componentes pesados o con dependencias de Electron de forma diferida
 const DatabaseManager = React.lazy(() => import("./DatabaseManager").then(m => ({ default: m.DatabaseManager })));
 const UpdateManagerComponent = React.lazy(() => import("./UpdateManager"));
 
-type Tab = "perfil" | "empresa" | "inventario" | "seguridad" | "database" | "updates" | "papelera";
+type Tab = "perfil" | "empresa" | "seguridad" | "database" | "updates" | "papelera";
 
 export function AdminProfile() {
   const { 
@@ -211,41 +211,7 @@ export function AdminProfile() {
     }
   };
 
-  // ── Inventory state ──────────────────────────────────────────
-  const [inventory, setInventory] = useState<InventoryItem[]>([]);
-  const [invForm, setInvForm] = useState({ name: "", price: "", category: "" });
-  const [invFilter, setInvFilter] = useState("all");
-  const [invSort, setInvSort] = useState("asc");
 
-  useEffect(() => {
-    if (activeTab === "inventario") {
-      setInventory(loadInventory());
-    }
-  }, [activeTab]);
-
-  const handleAddInventory = () => {
-    if (!invForm.name || !invForm.price) return;
-    addInventoryItem({
-      name: invForm.name,
-      price: Number(invForm.price),
-      category: invForm.category || "General"
-    });
-    setInventory(loadInventory());
-    setInvForm({ name: "", price: "", category: "" });
-  };
-
-  const handleDeleteInventory = (id: string) => {
-    if (window.confirm("¿Estás seguro de eliminar este artículo?")) {
-      deleteInventoryItem(id);
-      setInventory(loadInventory());
-    }
-  };
-
-  const uniqueCategories = Array.from(new Set(inventory.map(i => i.category))).filter(Boolean);
-  
-  const filteredInventory = inventory
-    .filter(i => invFilter === "all" || i.category === invFilter)
-    .sort((a, b) => invSort === "asc" ? a.price - b.price : b.price - a.price);
 
   // ── Helpers ─────────────────────────────────────────────────────
   const inputStyle = (hasError = false) => ({
@@ -265,7 +231,7 @@ export function AdminProfile() {
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: "perfil", label: "Datos personales", icon: UserCircle },
     { id: "empresa", label: "Empresa", icon: Building2 },
-    { id: "inventario", label: "Inventario", icon: Package },
+
     { id: "seguridad", label: "Seguridad", icon: KeyRound },
     { id: "database", label: "Base de datos", icon: Database },
     { id: "updates", label: "Actualizaciones", icon: Download },
@@ -597,134 +563,7 @@ export function AdminProfile() {
         </div>
       )}
 
-      {/* ── INVENTARIO TAB ─────────────────────────────────────────── */}
-      {activeTab === "inventario" && (
-        <div
-          className="rounded-2xl p-6 shadow-sm"
-          style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
-        >
-          <div className="mb-5">
-            <p className="text-sm font-bold" style={{ color: "#0d1b3e" }}>Gestión de Inventario</p>
-            <p className="text-xs text-gray-400 mt-1">
-              Agrega y administra los artículos, servicios o planes para tener un listado de precios centralizado.
-            </p>
-          </div>
 
-          {/* Formulario */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-gray-50/50 p-4 rounded-xl border border-gray-100">
-            <div>
-              <label style={labelStyle}>Nombre del artículo</label>
-              <input
-                type="text"
-                placeholder="Ej. Urna Premium"
-                value={invForm.name}
-                onChange={e => setInvForm(p => ({ ...p, name: e.target.value }))}
-                style={inputStyle()}
-                className="pl-3"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Precio referencial ($)</label>
-              <input
-                type="number"
-                placeholder="Ej. 1500000"
-                value={invForm.price}
-                onChange={e => setInvForm(p => ({ ...p, price: e.target.value }))}
-                style={inputStyle()}
-                className="pl-3"
-              />
-            </div>
-            <div>
-              <label style={labelStyle}>Categoría</label>
-              <input
-                type="text"
-                list="categories-list"
-                placeholder="Ej. Urnas, Arreglos..."
-                value={invForm.category}
-                onChange={e => setInvForm(p => ({ ...p, category: e.target.value }))}
-                style={inputStyle()}
-                className="pl-3"
-              />
-              <datalist id="categories-list">
-                {uniqueCategories.map(c => <option key={c} value={c} />)}
-              </datalist>
-            </div>
-            <div className="sm:col-span-3 flex justify-end">
-              <button
-                onClick={handleAddInventory}
-                disabled={!invForm.name || !invForm.price}
-                className="flex items-center gap-2 px-4 py-2 rounded-xl text-sm font-bold transition-all disabled:opacity-50"
-                style={{ background: "#0d1b3e", color: "#c9a84c" }}
-              >
-                + Añadir artículo
-              </button>
-            </div>
-          </div>
-
-          <div className="h-px w-full my-6" style={{ background: "#f0f2f5" }} />
-
-          {/* Listado */}
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 mb-4">
-            <h3 className="text-sm font-bold text-[#0d1b3e]">Artículos ({filteredInventory.length})</h3>
-            <div className="flex items-center gap-2 w-full sm:w-auto">
-              <select 
-                value={invFilter} 
-                onChange={e => setInvFilter(e.target.value)}
-                className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs outline-none"
-              >
-                <option value="all">Todas las categorías</option>
-                {uniqueCategories.map(c => <option key={c} value={c}>{c}</option>)}
-              </select>
-              <select 
-                value={invSort} 
-                onChange={e => setInvSort(e.target.value)}
-                className="px-3 py-1.5 bg-white border border-gray-200 rounded-lg text-xs outline-none"
-              >
-                <option value="asc">Menor precio</option>
-                <option value="desc">Mayor precio</option>
-              </select>
-            </div>
-          </div>
-
-          {filteredInventory.length === 0 ? (
-            <div className="py-12 flex flex-col items-center justify-center border border-dashed border-gray-200 rounded-xl bg-gray-50/30">
-               <Package size={24} className="text-gray-300 mb-2" />
-               <p className="text-sm text-gray-500">No hay artículos que coincidan con la búsqueda.</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto rounded-xl border border-gray-100">
-              <table className="w-full text-left text-xs">
-                <thead>
-                  <tr className="bg-gray-50 text-gray-500 uppercase tracking-wider">
-                    <th className="px-4 py-3 font-semibold">Artículo</th>
-                    <th className="px-4 py-3 font-semibold">Categoría</th>
-                    <th className="px-4 py-3 font-semibold">Precio</th>
-                    <th className="px-4 py-3 font-semibold text-right">Acción</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-100">
-                  {filteredInventory.map(item => (
-                    <tr key={item.id} className="hover:bg-gray-50/50 transition-colors">
-                      <td className="px-4 py-3 font-bold text-[#0d1b3e]">{item.name}</td>
-                      <td className="px-4 py-3">
-                         <span className="bg-gray-100 text-gray-600 px-2 py-1 rounded-md text-[10px] font-semibold">{item.category}</span>
-                      </td>
-                      <td className="px-4 py-3 font-semibold text-green-600">
-                        {new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(item.price)}
-                      </td>
-                      <td className="px-4 py-3 text-right">
-                        <button onClick={() => handleDeleteInventory(item.id)} className="text-red-500 hover:text-red-700 hover:bg-red-50 p-1.5 rounded-lg transition-colors">
-                           <Trash2 size={14} />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* ── SEGURIDAD TAB ─────────────────────────────────────────── */}
       {activeTab === "seguridad" && (
