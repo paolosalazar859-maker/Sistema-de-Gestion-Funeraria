@@ -21,8 +21,6 @@ import {
   Heart,
 } from "lucide-react";
 import { openPrint } from "../utils/printUtils";
-import { funeralServiceTypes, productServiceTypes } from "../data/mockData";
-import { loadServiceTypes } from "../data/serviceTypesStore";
 import { loadServices, persistService, generateServiceId, deriveStatus } from "../data/serviceStore";
 import { loadCompanyProfile } from "../data/companyStore";
 import { useUser } from "../context/UserContext";
@@ -729,10 +727,20 @@ export function ServiceRegistration() {
     setForm((prev) => ({ ...prev, [field]: val }));
 
   const isProduct = form.serviceCategory === "Venta de Artículo";
-  // Obtenemos las opciones directamente para asegurar que estén actualizadas
-  const currentTypeOptions = isProduct 
-    ? inventoryItems.map(i => i.name).filter(Boolean)
-    : loadServiceTypes();
+  // Obtenemos las opciones desde el inventario filtrando por categoría
+  const currentTypeOptions = inventoryItems
+    .filter(item => {
+      if (isProduct) {
+        // Para venta de artículos, mostramos todo lo que NO sea "Servicio Funerario"
+        // o explícitamente lo que sea "Venta de Artículo"
+        return item.category !== "Servicio Funerario";
+      } else {
+        // Para servicios funerarios, mostramos solo esa categoría
+        return item.category === "Servicio Funerario";
+      }
+    })
+    .map(i => i.name)
+    .filter(Boolean);
 
   const hasTallado = isProduct && form.serviceType.includes("Tallado");
 

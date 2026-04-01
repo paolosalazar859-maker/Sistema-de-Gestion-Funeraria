@@ -40,6 +40,18 @@ export function addInventoryItem(item: Omit<InventoryItem, "id" | "createdAt">):
   return newItem;
 }
 
+export function addInventoryItems(itemsToAdd: Omit<InventoryItem, "id" | "createdAt">[]): void {
+  const items = loadInventory();
+  const now = new Date().toISOString();
+  const newItems = itemsToAdd.map((it, idx) => ({
+    ...it,
+    id: `INV-${Date.now()}-${idx}-${Math.floor(Math.random() * 1000)}`,
+    createdAt: now
+  }));
+  
+  saveInventory([...items, ...newItems]);
+}
+
 export function deleteInventoryItem(id: string): void {
   const items = loadInventory();
   const filtered = items.filter(i => i.id !== id);

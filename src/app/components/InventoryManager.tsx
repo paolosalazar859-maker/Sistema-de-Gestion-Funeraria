@@ -1,7 +1,8 @@
 import { useState, useEffect } from "react";
-import { Package, Trash2 } from "lucide-react";
-import { loadInventory, addInventoryItem, deleteInventoryItem, InventoryItem } from "../data/inventoryStore";
+import { Package, Trash2, Sparkles } from "lucide-react";
+import { loadInventory, addInventoryItem, deleteInventoryItem, InventoryItem, addInventoryItems } from "../data/inventoryStore";
 import { useUser } from "../context/UserContext";
+import { funeralServiceTypes } from "../data/mockData";
 
 export function InventoryManager() {
   const { role } = useUser();
@@ -23,6 +24,19 @@ export function InventoryManager() {
     });
     setInventory(loadInventory());
     setInvForm({ name: "", price: "", category: "" });
+  };
+
+  const handleSeedDefaults = () => {
+    if (!window.confirm("¿Deseas cargar las urnas y servicios por defecto en el inventario?")) return;
+    
+    const defaults = funeralServiceTypes.map(name => ({
+      name,
+      price: 0,
+      category: "Servicio Funerario"
+    }));
+    
+    addInventoryItems(defaults);
+    setInventory(loadInventory());
   };
 
   const handleDeleteInventory = (id: string) => {
@@ -70,6 +84,21 @@ export function InventoryManager() {
           </div>
         </div>
 
+        {inventory.length === 0 && role === "admin" && (
+          <div className="mb-6 p-4 rounded-xl flex items-center justify-between border border-blue-100 bg-blue-50/50">
+            <div className="flex items-center gap-3 text-blue-800">
+              <Sparkles size={18} className="text-blue-500" />
+              <p className="text-sm">¿Tu inventario está vacío? Puedes cargar las urnas y servicios básicos automáticamente.</p>
+            </div>
+            <button
+              onClick={handleSeedDefaults}
+              className="text-xs font-bold px-4 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition-colors"
+            >
+              Cargar por defecto
+            </button>
+          </div>
+        )}
+
         {/* Formulario */}
         {role === "admin" && (
           <>
@@ -99,17 +128,23 @@ export function InventoryManager() {
               </div>
               <div>
                 <label style={labelStyle}>Categoría</label>
-                <input
-                  type="text"
-                  list="categories-list"
-                  placeholder="Ej. Urnas, Arreglos..."
-                  value={invForm.category}
-                  onChange={e => setInvForm(p => ({ ...p, category: e.target.value }))}
-                  style={inputStyle()}
-                />
-                <datalist id="categories-list">
-                  {uniqueCategories.map(c => <option key={c} value={c} />)}
-                </datalist>
+                <div className="relative">
+                  <input
+                    type="text"
+                    list="categories-list"
+                    placeholder="Ej. Servicio Funerario, Venta de Artículo..."
+                    value={invForm.category}
+                    onChange={e => setInvForm(p => ({ ...p, category: e.target.value }))}
+                    style={inputStyle()}
+                  />
+                  <datalist id="categories-list">
+                    <option value="Servicio Funerario" />
+                    <option value="Venta de Artículo" />
+                    {uniqueCategories.filter(c => c !== "Servicio Funerario" && c !== "Venta de Artículo").map(c => (
+                      <option key={c} value={c} />
+                    ))}
+                  </datalist>
+                </div>
               </div>
               <div className="sm:col-span-3 flex justify-end mt-2">
                 <button
