@@ -1337,7 +1337,8 @@ export function ServiceRegistration() {
       {/* ── Resto del formulario (solo si hay categoría) ── */}
       {form.serviceCategory && (
         <>
-          {/* Section 3: Datos del Contratante */}
+          {/* Section 3: Datos del Contratante — solo Servicio Funerario */}
+          {!isProduct && (
           <div
             className="rounded-2xl p-5 shadow-sm"
             style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
@@ -1391,6 +1392,7 @@ export function ServiceRegistration() {
               </div>
             </div>
           </div>
+          )}
 
           {/* Section 2: Fallecido / Beneficiario */}
           <div
@@ -1408,7 +1410,7 @@ export function ServiceRegistration() {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
                   <div className="lg:col-span-2">
                     <InputField
-                      label="Nombre del Cliente / Beneficiario (opcional)"
+                      label="Nombre del Cliente (opcional)"
                       value={form.deceasedName}
                       onChange={set("deceasedName")}
                       placeholder="Nombre completo"
@@ -1416,9 +1418,16 @@ export function ServiceRegistration() {
                     />
                   </div>
                   <RutInput
-                    label="RUT Beneficiario (opcional)"
+                    label="RUT (opcional)"
                     value={form.deceasedRut}
                     onChange={set("deceasedRut")}
+                    disabled={!editMode}
+                  />
+                  <InputField
+                    label="Teléfono (opcional)"
+                    value={form.contractorPhone}
+                    onChange={set("contractorPhone")}
+                    placeholder="+56 9 1234 5678"
                     disabled={!editMode}
                   />
                 </div>
