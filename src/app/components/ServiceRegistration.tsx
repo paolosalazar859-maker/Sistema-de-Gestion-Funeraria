@@ -746,10 +746,13 @@ export function ServiceRegistration() {
     .map(i => i.name)
     .filter(Boolean);
 
-  const hasTallado = isProduct && (
+  const hasTallado = (
     form.serviceType.toLowerCase().includes("tallado") || 
     form.serviceType.toLowerCase().includes("grabado")
   );
+
+  const engravingLettersCount = form.engravingText.replace(/[^a-zA-Z0-9]/g, "").length;
+  const engravingCost = engravingLettersCount * Number(form.pricePerLetter || 0);
 
 
   const serviceValue = numericInput(form.serviceValue);
@@ -759,7 +762,7 @@ export function ServiceRegistration() {
   const discount = numericInput(form.discount);
   const initial = numericInput(form.initialPayment);
 
-  const totalService = serviceValue + transferCost;
+  const totalService = serviceValue + transferCost + engravingCost;
   const totalAbonado = municipal + mortuary + initial;
   const saldo = totalService - totalAbonado - discount;
 
@@ -1965,8 +1968,16 @@ export function ServiceRegistration() {
                 {!isProduct && (
                   <div className="flex justify-between">
                     <span className="text-xs" style={{ color: "rgba(255,255,255,0.5)" }}>Traslado</span>
-                    <span className="text-xs" style={{ color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>
+                    <span className="text-x" style={{ color: "rgba(255,255,255,0.7)", fontWeight: 500 }}>
                       {formatCLP(transferCost)}
+                    </span>
+                  </div>
+                )}
+                {engravingCost > 0 && (
+                  <div className="flex justify-between">
+                    <span className="text-xs" style={{ color: "rgba(251,191,36,0.8)", fontWeight: 600 }}>Costo Grabado</span>
+                    <span className="text-xs" style={{ color: "#fbbf24", fontWeight: 700 }}>
+                      {formatCLP(engravingCost)}
                     </span>
                   </div>
                 )}
