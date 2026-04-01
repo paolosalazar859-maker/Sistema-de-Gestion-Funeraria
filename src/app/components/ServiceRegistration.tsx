@@ -1525,21 +1525,18 @@ export function ServiceRegistration() {
                             <input
                               type="text"
                               value={form.pricePerLetter ? new Intl.NumberFormat("es-CL").format(Number(form.pricePerLetter)) : ""}
-                              onChange={(e) => {
-                                const rawVal = e.target.value.replace(/\D/g, "");
-                                setForm((prev) => ({ ...prev, pricePerLetter: rawVal }));
-                              }}
-                              disabled={!editMode || role !== "admin"}
-                              className="w-full pl-7 pr-3 py-2.5 rounded-xl text-sm outline-none font-bold shadow-sm disabled:opacity-75"
+                              disabled={true}
+                              className="w-full pl-7 pr-3 py-2.5 rounded-xl text-sm outline-none font-bold shadow-sm opacity-80"
                               style={{
-                                border: "1.5px solid #d97706",
-                                color: "#0d1b3e",
-                                background: role !== "admin" ? "#fffbeb" : "#ffffff",
+                                border: "1.5px solid #d1d5db",
+                                color: "#4b5563",
+                                background: "#f3f4f6",
+                                cursor: "not-allowed"
                               }}
                             />
-                            {role !== "admin" && (
-                              <p className="text-[9px] text-amber-600 mt-1 pl-1">Solo Administradores pueden modificar el precio oficial</p>
-                            )}
+                            <p className="text-[9px] text-amber-700 mt-1 pl-1 font-medium bg-amber-50/50 py-1 rounded inline-block px-2 border border-amber-100">
+                               Precio oficial bloqueado (Gestiónalo desde el Inventario)
+                            </p>
                           </div>
                           
                           {/* Resumen de cálculo */}
