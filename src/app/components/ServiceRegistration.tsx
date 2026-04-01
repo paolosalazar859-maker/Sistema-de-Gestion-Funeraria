@@ -157,6 +157,7 @@ interface FormData {
   engravingNotes: string;
   paymentNotes: string;
   pricePerLetter: string;
+  needsEngraving: boolean;
   initialPaymentMethod: "Efectivo" | "Transferencia" | "Cheque" | "Tarjeta" | "Crédito" | "Débito";
 }
 
@@ -189,6 +190,7 @@ const emptyForm: FormData = {
   engravingNotes: "",
   paymentNotes: "",
   pricePerLetter: "0",
+  needsEngraving: false,
   initialPaymentMethod: "Efectivo",
 };
 
@@ -746,10 +748,7 @@ export function ServiceRegistration() {
     .map(i => i.name)
     .filter(Boolean);
 
-  const hasTallado = (
-    form.serviceType.toLowerCase().includes("tallado") || 
-    form.serviceType.toLowerCase().includes("grabado")
-  );
+  const hasTallado = isProduct && form.needsEngraving;
 
   const engravingLettersCount = form.engravingText.replace(/[^a-zA-Z0-9]/g, "").length;
   const engravingCost = engravingLettersCount * Number(form.pricePerLetter || 0);
@@ -795,8 +794,9 @@ export function ServiceRegistration() {
           invoice3: srv.invoice3 || "",
           observations: srv.observations || "",
           engravingNotes: (srv as any).engravingNotes || "",
-          paymentNotes: srv.payments[0]?.notes || "",
+          paymentNotes: (srv.payments[0]?.notes as any) || "",
           pricePerLetter: (srv as any).pricePerLetter || "0",
+          needsEngraving: (srv as any).needsEngraving || !!(srv as any).engravingText,
           initialPaymentMethod: (srv.payments[0]?.method as any) || "Efectivo",
           installmentsEnabled: srv.installments?.enabled || false,
           numberOfInstallments: srv.installments?.totalInstallments.toString() || "3",
@@ -1729,6 +1729,34 @@ export function ServiceRegistration() {
                 placeholder="0"
                 disabled={!editMode}
               />
+              
+              {/* Checkbox de Grabado (Solo para artículos) */}
+              {isProduct && (
+                <div className="flex items-center mt-2 pl-1">
+                  <label className="flex items-center gap-3 cursor-pointer group">
+                    <div className="relative flex items-center">
+                      <input
+                        type="checkbox"
+                        checked={form.needsEngraving}
+                        onChange={(e) => setForm(prev => ({ ...prev, needsEngraving: e.target.checked }))}
+                        disabled={!editMode}
+                        className="peer h-5 w-5 cursor-pointer appearance-none rounded-md border border-slate-300 transition-all checked:border-amber-500 checked:bg-amber-500 disabled:opacity-50"
+                      />
+                      <span className="absolute text-white opacity-0 peer-checked:opacity-100 top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 pointer-events-none">
+                        <CheckCircle size={14} strokeWidth={3} />
+                      </span>
+                    </div>
+                    <div className="flex flex-col">
+                      <span className="text-sm font-semibold" style={{ color: "#92400e" }}>
+                        ¿Necesita Grabado?
+                      </span>
+                      <span className="text-[10px]" style={{ color: "#6b7280" }}>
+                        Habilitar texto y cobro por letra
+                      </span>
+                    </div>
+                  </label>
+                </div>
+              )}
               {isProduct && (
                 <div className="lg:col-span-4">
                   <label className="block text-xs mb-1.5" style={{ color: "#374151", fontWeight: 500 }}>Notas</label>
