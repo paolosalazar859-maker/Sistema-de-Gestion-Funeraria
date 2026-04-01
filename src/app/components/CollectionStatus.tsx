@@ -108,7 +108,7 @@ function AddPaymentModal({
   const initialFormatted = hasInstallments && currentInstallmentAmount > 0 ? formatMoney(currentInstallmentAmount.toString()) : "";
   const [displayAmount, setDisplayAmount] = useState(initialFormatted);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const amountNum = parseInt(amount.replace(/\D/g, ""), 10);
     if (!amountNum || amountNum <= 0) return;
 
@@ -148,7 +148,7 @@ function AddPaymentModal({
       installments: updatedInstallments,
     };
 
-    persistService(updated);
+    await persistService(updated);
     onSaved(updated);
     setSaved(true);
     setTimeout(() => onClose(), 1200);
@@ -375,7 +375,7 @@ function ClientDetail({
     Tarjeta: "#c9a84c",
   };
 
-  const handleDeletePayment = (paymentId: string) => {
+  const handleDeletePayment = async (paymentId: string) => {
     const paymentToDelete = service.payments.find(p => p.id === paymentId);
     if (!paymentToDelete) return;
 
@@ -414,7 +414,7 @@ function ClientDetail({
       } : undefined
     };
 
-    persistService(updatedService);
+    await persistService(updatedService);
     onPaymentSaved(updatedService);
   };
 

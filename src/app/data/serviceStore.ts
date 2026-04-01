@@ -185,10 +185,10 @@ export async function migrateToSQLite(): Promise<boolean> {
 
 // ── Escritura: local inmediata + Supabase en background ──────────────────────
 
-export function persistService(service: FuneralService): void {
+export async function persistService(service: FuneralService): Promise<void> {
   // Si estamos en Electron, usar SQLite
   if (isElectronWithDB()) {
-    persistServiceElectron(service);
+    await persistServiceElectron(service);
     return;
   }
 
@@ -264,10 +264,10 @@ function persistServiceWeb(service: FuneralService): void {
   }
 }
 
-export function deleteService(id: string): void {
+export async function deleteService(id: string): Promise<void> {
   // Si estamos en Electron, usar SQLite
   if (isElectronWithDB()) {
-    deleteServiceElectron(id);
+    await deleteServiceElectron(id);
     return;
   }
 
@@ -278,20 +278,20 @@ export function deleteService(id: string): void {
 /**
  * Restaurar un servicio de la papelera
  */
-export function restoreService(id: string): void {
+export async function restoreService(id: string): Promise<void> {
   const current = loadServices();
   const idx = current.findIndex((s) => s.id === id);
   if (idx >= 0) {
     const updated = { ...current[idx], isDeleted: false };
     delete updated.deletedAt;
-    persistService(updated);
+    await persistService(updated);
   }
 }
 
 /**
  * Eliminación permanente de la base de datos
  */
-export function hardDeleteService(id: string): void {
+export async function hardDeleteService(id: string): Promise<void> {
   // 1. Eliminar localmente
   const current = JSON.parse(localStorage.getItem(SERVICES_KEY) || "[]") as FuneralService[];
   const filtered = current.filter((s) => s.id !== id);
@@ -299,7 +299,7 @@ export function hardDeleteService(id: string): void {
 
   // 2. Sincronizar con Supabase (ya existe apiDeleteService)
   if (navigator.onLine) {
-    apiDeleteService(id).catch(err => console.error("Error en hard delete:", err));
+    await apiDeleteService(id).catch(err => console.error("Error en hard delete:", err));
   }
   
   // 3. TODO: Electron/SQLite hard delete
@@ -329,6 +329,13 @@ async function deleteServiceElectron(id: string): Promise<void> {
           const idx = services.findIndex(s => s.id === id);
           services[idx] = updated;
           localStorage.setItem(SERVICES_KEY, JSON.stringify(services));
+          
+          // Sincronizar con Supabase si hay red
+          if (navigator.onLine) {
+            apiPersistService(updated).catch(e => console.error("Error sincronizando borrado a Supabase:", e));
+          } else {
+            enqueueOperation({ id: updated.id, type: "upsert", payload: updated }).catch(e => console.error("Error encolando borrado:", e));
+          }
        }
     }
   } catch (error) {

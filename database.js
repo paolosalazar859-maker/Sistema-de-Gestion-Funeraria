@@ -46,11 +46,35 @@ function initDatabase() {
     // Crear tablas
     createTables();
 
+    // Migraciones rápidas (añadir columnas si no existen)
+    migrateDatabase();
+
     console.log('✅ Base de datos SQLite inicializada correctamente');
     return true;
   } catch (error) {
     console.error('❌ Error inicializando base de datos:', error);
     return false;
+  }
+}
+
+/**
+ * Migraciones rápidas para añadir columnas nuevas
+ */
+function migrateDatabase() {
+  try {
+    const tableInfo = db.prepare("PRAGMA table_info(services)").all();
+    const columns = tableInfo.map(c => c.name);
+
+    if (!columns.includes('is_deleted')) {
+      db.exec("ALTER TABLE services ADD COLUMN is_deleted INTEGER DEFAULT 0");
+      console.log("➕ Columna is_deleted añadida a services");
+    }
+    if (!columns.includes('deleted_at')) {
+      db.exec("ALTER TABLE services ADD COLUMN deleted_at TEXT");
+      console.log("➕ Columna deleted_at añadida a services");
+    }
+  } catch (error) {
+    console.error("❌ Error en migración de base de datos:", error);
   }
 }
 
@@ -90,6 +114,8 @@ function createTables() {
       pending_balance REAL NOT NULL,
       status TEXT NOT NULL,
       last_payment_date TEXT NOT NULL,
+      is_deleted INTEGER DEFAULT 0,
+      deleted_at TEXT,
       created_at TEXT NOT NULL,
       updated_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP
     )
@@ -231,6 +257,8 @@ function upsertService(serviceData) {
       pending_balance: serviceData.pendingBalance,
       status: serviceData.status,
       last_payment_date: serviceData.lastPaymentDate,
+      is_deleted: serviceData.isDeleted ? 1 : 0,
+      deleted_at: serviceData.deletedAt || null,
       created_at: serviceData.createdAt || now,
       updated_at: now
     };
@@ -270,6 +298,8 @@ function upsertService(serviceData) {
           pending_balance = ?,
           status = ?,
           last_payment_date = ?,
+          is_deleted = ?,
+          deleted_at = ?,
           updated_at = ?
         WHERE id = ?
       `);
@@ -303,6 +333,8 @@ function upsertService(serviceData) {
         serviceDB.pending_balance,
         serviceDB.status,
         serviceDB.last_payment_date,
+        serviceDB.is_deleted,
+        serviceDB.deleted_at,
         serviceDB.updated_at,
         serviceDB.id
       );
@@ -316,8 +348,9 @@ function upsertService(serviceData) {
           contractor_email, municipal_contribution, mortuary_fee, discount,
           initial_payment, installments_enabled, total_installments,
           installment_amount, paid_installments, total_service, total_paid,
-          pending_balance, status, last_payment_date, created_at, updated_at
-        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+          pending_balance, status, last_payment_date, is_deleted, deleted_at,
+          created_at, updated_at
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
       `);
 
       insertStmt.run(
@@ -350,6 +383,8 @@ function upsertService(serviceData) {
         serviceDB.pending_balance,
         serviceDB.status,
         serviceDB.last_payment_date,
+        serviceDB.is_deleted,
+        serviceDB.deleted_at,
         serviceDB.created_at,
         serviceDB.updated_at
       );
@@ -631,6 +666,8 @@ function serviceFromDB(serviceDB, payments) {
     pendingBalance: serviceDB.pending_balance,
     status: serviceDB.status,
     lastPaymentDate: serviceDB.last_payment_date,
+    isDeleted: serviceDB.is_deleted === 1,
+    deletedAt: serviceDB.deleted_at || undefined,
     payments: payments.map(p => ({
       id: p.id,
       date: p.date,

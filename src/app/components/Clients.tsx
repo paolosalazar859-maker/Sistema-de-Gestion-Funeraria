@@ -152,17 +152,19 @@ function DeleteConfirmModal({
   description,
   onConfirm,
   onClose,
+  isDeleting = false,
 }: {
   title: string;
   description: string;
-  onConfirm: () => void;
-  onClose: () => void;
+  onConfirm: () => any;
+  onClose: () => any;
+  isDeleting?: boolean;
 }) {
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center p-4"
       style={{ background: "rgba(0,0,0,0.55)" }}
-      onClick={onClose}
+      onClick={() => !isDeleting && onClose()}
     >
       <div
         className="w-full max-w-sm rounded-2xl shadow-2xl overflow-hidden"
@@ -185,37 +187,52 @@ function DeleteConfirmModal({
               {description}
             </p>
           </div>
-          <button onClick={onClose} style={{ color: "#9ca3af" }} className="mt-0.5">
-            <X size={16} />
-          </button>
+          {!isDeleting && (
+            <button onClick={onClose} style={{ color: "#9ca3af" }} className="mt-0.5">
+              <X size={16} />
+            </button>
+          )}
         </div>
 
         {/* Warning banner */}
-        <div
-          className="mx-6 mb-5 px-3 py-2.5 rounded-xl flex items-center gap-2"
-          style={{ background: "#fef2f2", border: "1px solid #fecaca" }}
-        >
-          <AlertTriangle size={13} style={{ color: "#dc2626" }} />
-          <p className="text-xs" style={{ color: "#991b1b" }}>
-            Esta acción es permanente y no se puede deshacer.
-          </p>
-        </div>
+        {!isDeleting && (
+          <div
+            className="mx-6 mb-5 px-3 py-2.5 rounded-xl flex items-center gap-2"
+            style={{ background: "#fef2f2", border: "1px solid #fecaca" }}
+          >
+            <AlertTriangle size={13} style={{ color: "#dc2626" }} />
+            <p className="text-xs" style={{ color: "#991b1b" }}>
+              Esta acción es permanente y no se puede deshacer.
+            </p>
+          </div>
+        )}
 
         {/* Buttons */}
         <div className="px-6 pb-6 flex gap-2">
           <button
             onClick={onClose}
+            disabled={isDeleting}
             className="flex-1 py-2.5 rounded-xl text-sm transition-all"
-            style={{ background: "#f0f2f5", color: "#374151", border: "1.5px solid #e5e7eb" }}
+            style={{ 
+              background: "#f0f2f5", 
+              color: "#374151", 
+              border: "1.5px solid #e5e7eb",
+              opacity: isDeleting ? 0.5 : 1
+            }}
           >
             Cancelar
           </button>
           <button
-            onClick={() => { onConfirm(); onClose(); }}
-            className="flex-1 py-2.5 rounded-xl text-sm shadow-md flex items-center justify-center gap-2"
-            style={{ background: "linear-gradient(135deg, #dc2626, #b91c1c)", color: "#ffffff" }}
+            onClick={onConfirm}
+            disabled={isDeleting}
+            className="flex-1 py-2.5 rounded-xl text-sm transition-all shadow-sm"
+            style={{ 
+              background: "#dc2626", 
+              color: "#ffffff",
+              opacity: isDeleting ? 0.7 : 1
+            }}
           >
-            <Trash2 size={14} /> Eliminar
+            {isDeleting ? "Borrando..." : "Eliminar"}
           </button>
         </div>
       </div>
@@ -385,7 +402,7 @@ function AddPaymentModal({
   const [notes, setNotes] = useState("");
   const [done, setDone] = useState(false);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     const num = parseInt(amount.replace(/\D/g, ""), 10);
     if (!num || num <= 0) return;
 
@@ -409,7 +426,7 @@ function AddPaymentModal({
         },
       ],
     };
-    persistService(updated);
+    await persistService(updated);
     onSaved(updated);
     setDone(true);
     setTimeout(onClose, 1200);
@@ -577,7 +594,7 @@ function AddPaymentModal({
   );
 }
 
-// ─── Client Detail View ─────────────────────────────��─────────────────────────
+// ─── Client Detail View ──────────────────────────────────────────────────────
 
 function ClientDetail({
   client,
@@ -588,12 +605,10 @@ function ClientDetail({
   onBack: () => void;
   onUpdate: () => void;
 }) {
+  const [isDeleting, setIsDeleting] = useState(false);
   const [payingService, setPayingService] = useState<FuneralService | null>(null);
+  const [deleteTarget, setDeleteTarget] = useState<{ type: "service" | "client"; id: string } | null>(null);
   const [expandedService, setExpandedService] = useState<string | null>(null);
-  const [deleteTarget, setDeleteTarget] = useState<{
-    type: "client" | "service";
-    serviceId?: string;
-  } | null>(null);
   const [editingClient, setEditingClient] = useState(false);
 
   const [localServices, setLocalServices] = useState<FuneralService[]>(client.services);
@@ -603,18 +618,32 @@ function ClientDetail({
     onUpdate();
   };
 
-  const handleDeleteService = (id: string) => {
-    deleteService(id);
-    const remaining = localServices.filter((s) => s.id !== id);
-    setLocalServices(remaining);
-    onUpdate();
-    if (remaining.length === 0) onBack();
+  const handleDeleteService = async (id: string) => {
+    setIsDeleting(true);
+    try {
+      await deleteService(id);
+      const remaining = localServices.filter((s) => s.id !== id);
+      setLocalServices(remaining);
+      onUpdate();
+      if (remaining.length === 0) onBack();
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
   };
 
-  const handleDeleteClient = () => {
-    localServices.forEach((s) => deleteService(s.id));
-    onUpdate();
-    onBack();
+  const handleDeleteClient = async () => {
+    setIsDeleting(true);
+    try {
+      for (const s of localServices) {
+        await deleteService(s.id);
+      }
+      onUpdate();
+      onBack();
+    } finally {
+      setIsDeleting(false);
+      setDeleteTarget(null);
+    }
   };
 
   const totalPaid = localServices.reduce((a, s) => a + s.totalPaid, 0);
@@ -646,18 +675,20 @@ function ClientDetail({
       {deleteTarget?.type === "client" && (
         <DeleteConfirmModal
           title={`Eliminar cliente: ${client.name}`}
-          description={`Se eliminarán permanentemente ${localServices.length} servicio${localServices.length !== 1 ? "s" : ""} registrado${localServices.length !== 1 ? "s" : ""} a nombre de este cliente.`}
+          description={isDeleting ? "Borrando cliente y servicios asociados..." : `Se eliminarán permanentemente ${localServices.length} servicio${localServices.length !== 1 ? "s" : ""} registrado${localServices.length !== 1 ? "s" : ""} a nombre de este cliente.`}
           onConfirm={handleDeleteClient}
-          onClose={() => setDeleteTarget(null)}
+          onClose={() => !isDeleting && setDeleteTarget(null)}
+          isDeleting={isDeleting}
         />
       )}
 
-      {deleteTarget?.type === "service" && deleteTarget.serviceId && (
+      {deleteTarget?.type === "service" && deleteTarget.id && (
         <DeleteConfirmModal
-          title={`Eliminar servicio ${deleteTarget.serviceId}`}
-          description="Se eliminará este registro de servicio. El resto del historial del cliente se mantendrá intacto."
-          onConfirm={() => handleDeleteService(deleteTarget.serviceId!)}
-          onClose={() => setDeleteTarget(null)}
+          title={`Eliminar servicio ${deleteTarget.id}`}
+          description={isDeleting ? "Borrando servicio..." : "Se eliminará este registro de servicio. El resto del historial del cliente se mantendrá intacto."}
+          onConfirm={() => handleDeleteService(deleteTarget.id)}
+          onClose={() => !isDeleting && setDeleteTarget(null)}
+          isDeleting={isDeleting}
         />
       )}
 
@@ -742,7 +773,7 @@ function ClientDetail({
                 <Pencil size={12} /> Editar datos
               </button>
               <button
-                onClick={() => setDeleteTarget({ type: "client" })}
+                onClick={() => setDeleteTarget({ type: "client", id: client.rut })}
                 className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs transition-all"
                 style={{
                   background: "rgba(239,68,68,0.15)",
@@ -860,7 +891,7 @@ function ClientDetail({
                         )}
                         {/* Delete service */}
                         <button
-                          onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "service", serviceId: svc.id }); }}
+                          onClick={(e) => { e.stopPropagation(); setDeleteTarget({ type: "service", id: svc.id }); }}
                           className="w-7 h-7 rounded-xl flex items-center justify-center transition-all shrink-0"
                           style={{ background: "#fee2e2", color: "#dc2626" }}
                           title="Eliminar servicio"
@@ -1002,11 +1033,19 @@ export function Clients() {
   };
 
   useEffect(() => { reload(); }, []);
+  const [isDeletingGlobal, setIsDeletingGlobal] = useState(false);
 
-  const handleDeleteClient = (client: Client) => {
-    client.services.forEach((s) => deleteService(s.id));
-    reload();
-    setDeleteClientTarget(null);
+  const handleDeleteClient = async (client: Client) => {
+    setIsDeletingGlobal(true);
+    try {
+      for (const s of client.services) {
+        await deleteService(s.id);
+      }
+      reload();
+      setDeleteClientTarget(null);
+    } finally {
+      setIsDeletingGlobal(false);
+    }
   };
 
   const clients = buildClients(allServices);
@@ -1065,9 +1104,10 @@ export function Clients() {
       {deleteClientTarget && (
         <DeleteConfirmModal
           title={`Eliminar cliente: ${deleteClientTarget.name}`}
-          description={`Se eliminarán permanentemente ${deleteClientTarget.services.length} servicio${deleteClientTarget.services.length !== 1 ? "s" : ""} de este cliente. Los registros de cobro también serán eliminados.`}
+          description={isDeletingGlobal ? "Borrando cliente y servicios asociados..." : `Se eliminarán permanentemente ${deleteClientTarget.services.length} servicio${deleteClientTarget.services.length !== 1 ? "s" : ""} de este cliente. Los registros de cobro también serán eliminados.`}
           onConfirm={() => handleDeleteClient(deleteClientTarget)}
-          onClose={() => setDeleteClientTarget(null)}
+          onClose={() => !isDeletingGlobal && setDeleteClientTarget(null)}
+          isDeleting={isDeletingGlobal}
         />
       )}
 

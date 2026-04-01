@@ -781,7 +781,7 @@ export function ServiceRegistration() {
     }
   }, [selectedId]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     // Save cemetery to autocomplete history
     saveCemeteryToStorage(form.cemetery);
 
@@ -871,9 +871,10 @@ export function ServiceRegistration() {
       createdAt: isEdit && existingService ? existingService.createdAt : today,
     };
 
-    persistService(service as any);
+    await persistService(service as any);
     setCurrentServiceId(id);
-    setServices(loadServices()); // refresh dropdown list
+    const updatedServices = await loadServices();
+    setServices(updatedServices); // refresh dropdown list
     setSaved(true);
     setEditMode(false);
 
@@ -1324,12 +1325,8 @@ export function ServiceRegistration() {
             ⚠ Selecciona una categoría para continuar
           </p>
         )}
-        {form.serviceCategory && !isAdmin && (
-          <p className="mt-3 text-xs" style={{ color: "#c9a84c" }}>
-            ℹ Perfil Oficina: Solo puedes editar datos del contratante y fallecido.
-          </p>
-        )}
       </div>
+
 
       {/* ── Resto del formulario (solo si hay categoría) ── */}
       {form.serviceCategory && (
@@ -1587,7 +1584,7 @@ export function ServiceRegistration() {
                       value={form.invoice1}
                       onChange={set("invoice1")}
                       placeholder="0001"
-                      disabled={!editMode || (!isAdmin && !isNewService)}
+                      disabled={!editMode}
                     />
                   </div>
                   <div className="lg:col-span-1">
@@ -1596,7 +1593,7 @@ export function ServiceRegistration() {
                       value={form.invoice2}
                       onChange={set("invoice2")}
                       placeholder="0002"
-                      disabled={!editMode || (!isAdmin && !isNewService)}
+                      disabled={!editMode}
                     />
                   </div>
                   <div className="lg:col-span-1">
@@ -1605,7 +1602,7 @@ export function ServiceRegistration() {
                       value={form.invoice3}
                       onChange={set("invoice3")}
                       placeholder="0003"
-                      disabled={!editMode || (!isAdmin && !isNewService)}
+                      disabled={!editMode}
                     />
                   </div>
                 </div>
@@ -1630,13 +1627,13 @@ export function ServiceRegistration() {
                 type="date"
                 value={form.date}
                 onChange={set("date")}
-                disabled={!editMode || (!isAdmin && !isNewService)}
+                disabled={!editMode}
               />
               <div className="lg:col-span-1">
                 <CemeteryAutocomplete
                   value={form.cemetery}
                   onChange={set("cemetery")}
-                  disabled={!editMode || (!isAdmin && !isNewService)}
+                  disabled={!editMode}
                 />
               </div>
               <div className="lg:col-span-1">
@@ -1644,7 +1641,7 @@ export function ServiceRegistration() {
                   label={isProduct ? "Artículo" : "Tipo de Servicio"}
                   value={form.serviceType}
                   onChange={set("serviceType")}
-                  disabled={!editMode || (!isAdmin && !isNewService)}
+                  disabled={!editMode}
                   options={currentTypeOptions}
                 />
               </div>
@@ -1678,14 +1675,14 @@ export function ServiceRegistration() {
                       value={form.municipalContribution}
                       onChange={set("municipalContribution")}
                       placeholder="0"
-                      disabled={!editMode || (!isAdmin && !isNewService)}
+                      disabled={!editMode}
                     />
                     <MoneyInput
                       label="Cuota Mortuoria ($)"
                       value={form.mortuaryFee}
                       onChange={set("mortuaryFee")}
                       placeholder="0"
-                      disabled={!editMode || (!isAdmin && !isNewService)}
+                      disabled={!editMode}
                     />
                   </>
                 )}
@@ -1694,21 +1691,21 @@ export function ServiceRegistration() {
                   value={form.discount}
                   onChange={set("discount")}
                   placeholder="0"
-                  disabled={!editMode || (!isAdmin && !isNewService)}
+                  disabled={!editMode}
                 />
                 <MoneyInput
                   label="Pie / Abono Inicial ($)"
                   value={form.initialPayment}
                   onChange={set("initialPayment")}
                   placeholder="0"
-                  disabled={!editMode || (!isAdmin && !isNewService)}
+                  disabled={!editMode}
                 />
                 <InputField
                   label="Método Abono Inicial"
                   value={form.initialPaymentMethod}
                   onChange={set("initialPaymentMethod")}
                   options={["Efectivo", "Transferencia", "Cheque", "Tarjeta", "Crédito", "Débito"]}
-                  disabled={!editMode || (!isAdmin && !isNewService)}
+                  disabled={!editMode}
                 />
                 <div className="sm:col-span-2">
                   <InputField
@@ -1716,7 +1713,7 @@ export function ServiceRegistration() {
                     value={form.paymentNotes}
                     onChange={set("paymentNotes")}
                     placeholder="Ej: Pago con cheque N° 123, abono parcial, etc."
-                    disabled={!editMode || (!isAdmin && !isNewService)}
+                    disabled={!editMode}
                   />
                 </div>
               </div>
@@ -1747,14 +1744,14 @@ export function ServiceRegistration() {
                       style={{ 
                         background: form.installmentsEnabled ? "rgba(201,168,76,0.08)" : "#fafbfc",
                         border: `1.5px solid ${form.installmentsEnabled ? "rgba(201,168,76,0.3)" : "#e5e7eb"}`,
-                        opacity: (!editMode || !isAdmin) ? 0.6 : 1
+                        opacity: !editMode ? 0.6 : 1
                       }}
                     >
                       <input
                         type="checkbox"
                         checked={form.installmentsEnabled}
                         onChange={(e) => setForm((prev) => ({ ...prev, installmentsEnabled: e.target.checked }))}
-                        disabled={!editMode || (!isAdmin && !isNewService)}
+                        disabled={!editMode}
                         className="w-5 h-5 rounded-md"
                         style={{ accentColor: "#c9a84c" }}
                       />
@@ -1777,7 +1774,7 @@ export function ServiceRegistration() {
                       value={form.numberOfInstallments}
                       onChange={set("numberOfInstallments")}
                       placeholder="3"
-                      disabled={!editMode || (!isAdmin && !isNewService)}
+                      disabled={!editMode}
                     />
                   )}
                 </div>
@@ -1945,14 +1942,14 @@ export function ServiceRegistration() {
               <textarea
                 value={form.observations}
                 onChange={(e) => set("observations")(e.target.value)}
-                disabled={!editMode || (!isAdmin && !isNewService)}
+                disabled={!editMode}
                 rows={3}
                 placeholder="Ingresa notas u observaciones internas aquí..."
                 className="w-full px-4 py-3 rounded-xl text-sm outline-none resize-none transition-all"
                 style={{
                   border: "1.5px solid #e5e7eb",
                   color: "#0d1b3e",
-                  background: (!editMode || (!isAdmin && !isNewService)) ? "#f8f9fa" : "#ffffff",
+                  background: !editMode ? "#f8f9fa" : "#ffffff",
                   lineHeight: "1.6",
                 }}
                 onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}

@@ -42,10 +42,44 @@ function RootContent() {
           if (local.length > 0) await apiMigrateServices(local);
           markMigrated();
         }
-        // Only fetch remote if online
-        if (navigator.onLine) {
-          const remote = await apiLoadServices();
-          if (remote.length > 0) setLocalCache(remote);
+
+        // SQLite Migration (Electron only)
+        try {
+          const { isSQLiteMigrated, migrateToSQLite, loadServicesAsync, setLocalCache, loadServices } = await import("./data/serviceStore");
+          
+          // 1. Prioridad: Cargar desde SQLite si estamos en Electron
+          const localFromDB = await loadServicesAsync();
+          if (localFromDB.length > 0) {
+            setLocalCache(localFromDB);
+          }
+
+          if (!isSQLiteMigrated()) {
+            await migrateToSQLite();
+          }
+
+          // 2. Sincronizar con Supabase pero SIN sobrescribir el estado de borrado local
+          if (navigator.onLine) {
+            const remote = await apiLoadServices();
+            if (remote.length > 0) {
+              const current = loadServices();
+              // Mezclamos: Conservamos el flag de borrado si existe localmente
+              const merged = remote.map(rSrv => {
+                const localMatch = current.find(l => l.id === rSrv.id);
+                if (localMatch && localMatch.isDeleted) {
+                  return { ...rSrv, isDeleted: true, deletedAt: localMatch.deletedAt };
+                }
+                return rSrv;
+              });
+              setLocalCache(merged);
+            }
+          }
+        } catch (e) {
+          console.log("No estamos en entorno Electron o error en inicio:", e);
+          // Fallback normal fuera de Electron
+          if (navigator.onLine) {
+            const remote = await apiLoadServices();
+            if (remote.length > 0) setLocalCache(remote);
+          }
         }
         recalculateAllStatuses();
         setSyncState("ready");

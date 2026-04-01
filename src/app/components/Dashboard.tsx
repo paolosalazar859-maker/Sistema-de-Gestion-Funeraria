@@ -62,32 +62,15 @@ export function Dashboard() {
   const isAdmin = role === "admin";
   const [services, setServices] = useState(() => loadServices().filter(s => !s.isDeleted));
   const [expenses, setExpenses] = useState(() => loadExpenses());
-  const [selectedYear, setSelectedYear] = useState(new Date().getFullYear());
-  const [selectedMonth, setSelectedMonth] = useState<number | "all">("all");
+  const [selectedYear, setSelectedYear] = useState(() => new Date().getFullYear());
+  const [selectedMonth, setSelectedMonth] = useState<number | "all">(() => new Date().getMonth() + 1);
 
   const availableYears = useMemo(() => getAvailableYears(services), [services]);
   
   // Meses con datos para el año seleccionado
   const activeMonths = useMemo(() => getMonthsWithData(services, selectedYear), [services, selectedYear]);
 
-  // Auto-selección inicial: Buscar el año/mes más reciente con datos
-  useEffect(() => {
-    if (services.length > 0) {
-      const years = getAvailableYears(services);
-      if (years.length > 0) {
-        const latestYear = years[0]; // Están ordenados desc
-        setSelectedYear(latestYear);
-        
-        const monthsWithData = getMonthsWithData(services, latestYear);
-        if (monthsWithData.size > 0) {
-          const latestMonth = Math.max(...Array.from(monthsWithData));
-          setSelectedMonth(latestMonth);
-        } else {
-          setSelectedMonth("all");
-        }
-      }
-    }
-  }, [services.length === 0]); // Solo al cargar por primera vez
+  // Auto-selección inicial eliminada. Ahora siempre usa la fecha actual del computador.
   
   const months = [
     { value: "all", label: "Todos los meses" },

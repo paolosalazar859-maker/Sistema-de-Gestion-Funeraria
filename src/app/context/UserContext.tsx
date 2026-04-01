@@ -99,7 +99,7 @@ const UserContext = createContext<UserContextValue>({
 
 export function UserProvider({ children }: { children: ReactNode }) {
   const [role, setRole] = useState<UserRole | null>(() => {
-    const saved = sessionStorage.getItem(SESSION_KEY);
+    const saved = localStorage.getItem(SESSION_KEY);
     return (saved as UserRole) || null;
   });
 
@@ -124,12 +124,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
   }, [role]);
 
   const login = (r: UserRole) => {
-    sessionStorage.setItem(SESSION_KEY, r);
+    localStorage.setItem(SESSION_KEY, r);
     setRole(r);
   };
 
   const logout = () => {
-    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
     setRole(null);
     setAdminProfile(DEFAULT_PROFILE);
   };
