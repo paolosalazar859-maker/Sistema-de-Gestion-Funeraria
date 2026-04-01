@@ -23,19 +23,23 @@ import {
   RefreshCcw,
   Trash,
   Package,
+  Settings,
+  Plus,
+  X,
 } from "lucide-react";
 import { useUser } from "../context/UserContext";
 import React, { Suspense } from "react";
 import { loadCompanyProfile, saveCompanyProfile, CompanyProfile } from "../data/companyStore";
 import { loadServices, restoreService, hardDeleteService } from "../data/serviceStore";
 import { FuneralService } from "../data/mockData";
+import { loadServiceTypes, addServiceType, removeServiceType } from "../data/serviceTypesStore";
 
 
 // Cargar componentes pesados o con dependencias de Electron de forma diferida
 const DatabaseManager = React.lazy(() => import("./DatabaseManager").then(m => ({ default: m.DatabaseManager })));
 const UpdateManagerComponent = React.lazy(() => import("./UpdateManager"));
 
-type Tab = "perfil" | "empresa" | "seguridad" | "database" | "updates" | "papelera";
+type Tab = "perfil" | "empresa" | "seguridad" | "database" | "updates" | "papelera" | "configuracion";
 
 export function AdminProfile() {
   const { 
@@ -231,12 +235,16 @@ export function AdminProfile() {
   const tabs: { id: Tab; label: string; icon: any }[] = [
     { id: "perfil", label: "Datos personales", icon: UserCircle },
     { id: "empresa", label: "Empresa", icon: Building2 },
-
     { id: "seguridad", label: "Seguridad", icon: KeyRound },
+    { id: "configuracion", label: "Configuración", icon: Settings },
     { id: "database", label: "Base de datos", icon: Database },
     { id: "updates", label: "Actualizaciones", icon: Download },
     { id: "papelera", label: "Papelera", icon: Trash2 },
   ];
+
+  // ── Service Types state ──────────────────────────────────────────
+  const [serviceTypesList, setServiceTypesList] = useState<string[]>(() => loadServiceTypes());
+  const [newServiceType, setNewServiceType] = useState("");
 
   // Initials avatar
   const initials = adminProfile.name
@@ -781,6 +789,94 @@ export function AdminProfile() {
               </table>
             </div>
           )}
+        </div>
+      )}
+
+      {/* ── CONFIGURACIÓN TAB ───────────────────────────────────────── */}
+      {activeTab === "configuracion" && (
+        <div
+          className="rounded-2xl p-6 shadow-sm"
+          style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
+        >
+          <div className="flex items-center gap-3 mb-5">
+            <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ background: "rgba(26,47,90,0.08)" }}>
+              <Settings size={17} style={{ color: "#1a2f5a" }} />
+            </div>
+            <div>
+              <p className="text-sm font-bold" style={{ color: "#0d1b3e" }}>Tipos de Servicio Funerario</p>
+              <p className="text-xs" style={{ color: "#9ca3af" }}>Administra las opciones que aparecen en el formulario de registro.</p>
+            </div>
+          </div>
+
+          {/* Input para agregar */}
+          <div className="flex gap-2 mb-5">
+            <input
+              type="text"
+              value={newServiceType}
+              onChange={(e) => setNewServiceType(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && newServiceType.trim()) {
+                  const updated = addServiceType(newServiceType.trim());
+                  setServiceTypesList(updated);
+                  setNewServiceType("");
+                }
+              }}
+              placeholder="Nombre del nuevo tipo de servicio..."
+              className="flex-1 px-3 py-2.5 rounded-xl text-sm outline-none"
+              style={{ border: "1.5px solid #e5e7eb", color: "#374151" }}
+              onFocus={(e) => (e.target.style.borderColor = "#c9a84c")}
+              onBlur={(e) => (e.target.style.borderColor = "#e5e7eb")}
+            />
+            <button
+              onClick={() => {
+                if (!newServiceType.trim()) return;
+                const updated = addServiceType(newServiceType.trim());
+                setServiceTypesList(updated);
+                setNewServiceType("");
+              }}
+              className="flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-sm"
+              style={{ background: "#0d1b3e", color: "#c9a84c" }}
+            >
+              <Plus size={15} /> Agregar
+            </button>
+          </div>
+
+          {/* Lista actual */}
+          {serviceTypesList.length === 0 ? (
+            <div className="py-8 text-center text-xs" style={{ color: "#9ca3af" }}>
+              No hay tipos de servicio. Agrega uno arriba.
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {serviceTypesList.map((tipo) => (
+                <div
+                  key={tipo}
+                  className="flex items-center justify-between px-3 py-2.5 rounded-xl"
+                  style={{ background: "#f8f9fa", border: "1px solid #e5e7eb" }}
+                >
+                  <span className="text-sm" style={{ color: "#374151" }}>{tipo}</span>
+                  <button
+                    onClick={() => {
+                      if (!window.confirm(`¿Eliminar "${tipo}" de la lista?`)) return;
+                      const updated = removeServiceType(tipo);
+                      setServiceTypesList(updated);
+                    }}
+                    className="w-6 h-6 rounded-lg flex items-center justify-center transition-all"
+                    style={{ background: "#fee2e2", color: "#dc2626" }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = "#dc2626"; e.currentTarget.style.color = "#fff"; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = "#fee2e2"; e.currentTarget.style.color = "#dc2626"; }}
+                    title={`Eliminar "${tipo}"`}
+                  >
+                    <X size={12} />
+                  </button>
+                </div>
+              ))}
+            </div>
+          )}
+
+          <p className="mt-4 text-xs" style={{ color: "#9ca3af" }}>
+            ℹ️ Los cambios se aplican inmediatamente al formulario de Registro de Servicio.
+          </p>
         </div>
       )}
     </div>

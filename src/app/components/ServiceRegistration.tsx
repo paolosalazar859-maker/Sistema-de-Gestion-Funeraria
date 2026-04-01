@@ -22,6 +22,7 @@ import {
 } from "lucide-react";
 import { openPrint } from "../utils/printUtils";
 import { funeralServiceTypes, productServiceTypes } from "../data/mockData";
+import { loadServiceTypes } from "../data/serviceTypesStore";
 import { loadServices, persistService, generateServiceId, deriveStatus } from "../data/serviceStore";
 import { loadCompanyProfile } from "../data/companyStore";
 import { useUser } from "../context/UserContext";
@@ -729,9 +730,13 @@ export function ServiceRegistration() {
 
   const isProduct = form.serviceCategory === "Venta de Artículo";
   const currentTypeOptions = useMemo(() => {
-    const baseOptions = isProduct ? productServiceTypes : funeralServiceTypes;
-    const invNames = inventoryItems.map(i => i.name).filter(Boolean);
-    return Array.from(new Set([...baseOptions, ...invNames]));
+    if (isProduct) {
+      // Solo artículos del inventario para Venta de Artículo
+      return inventoryItems.map(i => i.name).filter(Boolean);
+    } else {
+      // Tipos de servicio gestionados desde AdminProfile → Configuración
+      return loadServiceTypes();
+    }
   }, [isProduct, inventoryItems]);
   const hasTallado = isProduct && form.serviceType.includes("Tallado");
 
