@@ -3,7 +3,7 @@ use tauri::Runtime;
 #[tauri::command]
 fn get_machine_id() -> String {
     // Obtenemos el ID único de la máquina (HWID)
-    machine_id::MachineId::get().unwrap_or_else(|_| "unknown-hwid".to_string())
+    machine_id::get().unwrap_or_else(|_| "unknown-hwid".to_string())
 }
 
 fn main() {
