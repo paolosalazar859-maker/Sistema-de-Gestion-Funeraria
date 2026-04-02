@@ -9,6 +9,7 @@
     "create_backup",
     "restore_backup",
     "get_app_version",
-    "print_html"
+    "print_html",
+    "get_machine_id"
   ]
 }
