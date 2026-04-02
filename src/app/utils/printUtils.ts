@@ -89,59 +89,196 @@ const BASE_STYLE = `
 export function openPrint(html: string, title: string) {
   console.log(`🖨️ Iniciando proceso de impresión: "${title}"`);
 
-  // 1. Intentar usar la API nativa de Electron si está disponible
-  if ((window as any).electronAPI?.printHTML) {
+  // Detección robusta de Tauri v2
+  const isTauri = typeof window !== 'undefined' && (!!(window as any).__TAURI_INTERNALS__ || !!(window as any).__TAURI__ || !!(window as any).__TAURI_METADATA__);
+  const isElectron = typeof window !== 'undefined' && !!(window as any).electronAPI?.printHTML;
+
+  // 1. Intentar usar la API nativa de Electron si está disponible (Retrocompatibilidad)
+  if (isElectron) {
     console.log("🖥️ Utilizando API nativa de Electron para impresión");
-    // Envolver el HTML con el estilo base antes de enviar al proceso principal
     const completeHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>${title}</title>${BASE_STYLE}</head><body>${html}</body></html>`;
     
     (window as any).electronAPI.printHTML(completeHtml).then((result: any) => {
       if (result && !result.success && result.error) {
         console.error("❌ Error en impresión nativa:", result.error);
-        alert(`Error al imprimir: ${result.error}. Intentando método alternativo...`);
-        // Si falla la nativa, intentamos el fallback
         performBrowserPrint(completeHtml, title);
-      } else {
-        console.log("✅ Impresión nativa enviada con éxito");
       }
-    }).catch((err: any) => {
-      console.error("❌ Excepción en impresión nativa:", err);
+    }).catch(() => {
+      performBrowserPrint(completeHtml, title);
       performBrowserPrint(html, title);
     });
     return;
   }
 
-  // 2. Fallback: Abrir ventana nueva (comportamiento original / modo web)
-  console.warn("🌐 API de Electron no detectada. Usando impresión de navegador.");
-  const completeHtml = `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>${title}</title>${BASE_STYLE}</head><body>${html}</body></html>`;
-  performBrowserPrint(completeHtml, title);
+  // 2. Método para Tauri o Navegador: Iframe oculto (Evita bloqueador de pop-ups)
+  console.log(isTauri ? "🛸 Ejecutando impresión en entorno Tauri (Iframe)" : "🌐 Usando impresión de navegador (Iframe)");
+  performBrowserPrint(html, title);
 }
 
 /**
- * Método de impresión estándar del navegador como fallback
+ * Método de impresión maestro vía Ventana Emergente (Glassmorphism)
+ * ¡El método definitivo! Simula una ventana emergente sobre la app desenfocada.
  */
-function performBrowserPrint(html: string, title: string) {
-  const win = window.open("", "_blank", "width=900,height=800");
-  if (!win) {
-    alert("No se pudo abrir la ventana de impresión. Por favor, asegúrate de que los pop-ups estén permitidos.");
-    return;
+async function performBrowserPrint(html: string, title: string) {
+  console.log("📢 Activando ventana emergente de impresión para:", title);
+  
+  // 1. Crear el contenedor maestro si no existe
+  let overlay = document.getElementById('aura-print-overlay');
+  if (!overlay) {
+    overlay = document.createElement('div');
+    overlay.id = 'aura-print-overlay';
+    document.body.appendChild(overlay);
   }
-  
-  // Asegurarnos de que el HTML sea un documento completo
-  const fullHtml = html.toLowerCase().includes('<!doctype') 
-    ? html 
-    : `<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8"/><title>${title}</title>${BASE_STYLE}</head><body>${html}</body></html>`;
 
-  win.document.write(fullHtml);
-  win.document.close();
+  // 2. Inyectar estilos (Pantalla Emergente vs Papel)
+  const styleId = 'aura-print-overlay-styles';
+  let styleElement = document.getElementById(styleId) as HTMLStyleElement;
+  if (!styleElement) {
+    styleElement = document.createElement('style');
+    styleElement.id = styleId;
+    document.head.appendChild(styleElement);
+  }
+
+  styleElement.textContent = `
+    /* Vista en pantalla (Ventana Emergente / Modal Premium) */
+    @media screen {
+      #aura-print-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(31, 41, 55, 0.4); /* Fondo más claro y translúcido */
+        -webkit-backdrop-filter: blur(20px); /* Desenfoque Apple Style */
+        backdrop-filter: blur(20px); 
+        z-index: 2147483647;
+        overflow-y: auto;
+        padding: 60px 20px;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        transition: all 0.4s ease;
+      }
+      .paper-preview {
+        background: white !important;
+        width: 100%;
+        max-width: 800px;
+        padding: 0;
+        box-shadow: 0 35px 70px -15px rgba(0, 0, 0, 0.6); /* Sombra más profunda y realista */
+        border-radius: 12px;
+        position: relative;
+        margin-top: 20px;
+        margin-bottom: 60px;
+        transform: translateY(0);
+        animation: slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+      @keyframes slideUp {
+        from { opacity: 0; transform: translateY(30px); }
+        to { opacity: 1; transform: translateY(0); }
+      }
+      body { overflow: hidden !important; }
+      
+      .print-controls {
+        display: flex;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .btn-action {
+        padding: 10px 24px; 
+        border-radius: 10px; 
+        cursor: pointer; 
+        font-weight: 700; 
+        font-family: 'Inter', sans-serif;
+        font-size: 13px;
+        transition: all 0.2s;
+        border: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        box-shadow: 0 4px 6px -1px rgba(0,0,0,0.2);
+      }
+      .btn-print { background: #c9a84c; color: white; }
+      .btn-print:hover { background: #b08f3d; transform: scale(1.02); }
+      .btn-close { background: #ef4444; color: white; }
+      .btn-close:hover { background: #dc2626; transform: scale(1.02); }
+    }
+    
+    /* Vista en papel (EQUILIBRIO TOTAL) */
+    @media print {
+      html, body { 
+        margin: 0 !important; 
+        padding: 0 !important; 
+        height: auto !important; 
+        min-height: auto !important;
+        overflow: visible !important; 
+      }
+      body > *:not(#aura-print-overlay) { display: none !important; }
+      #aura-print-overlay { 
+        position: static !important; 
+        display: block !important; 
+        padding: 0 !important; 
+        margin: 0 !important; 
+        background: white !important; 
+      }
+      .paper-preview { 
+        box-shadow: none !important; 
+        padding: 0 !important; 
+        margin: 0 !important; 
+        width: 100% !important; 
+        max-width: none !important; 
+        border-radius: 0 !important; 
+        min-height: auto !important;
+      }
+      .print-controls { display: none !important; }
+      
+      /* Gestión Profesional de Márgenes (WYSIWYG) */
+      @page { margin: 10mm !important; size: auto; }
+      
+      .page { 
+        padding: 10mm !important; /* Aire interno de la hoja */
+        margin: 0 auto !important; 
+        width: 180mm !important; /* Ancho fijo para evitar estiramiento */
+        max-width: 180mm !important;
+        border: none !important;
+        background: white !important;
+      }
+      
+      .section { break-inside: avoid; margin-bottom: 12px !important; }
+      .sig-row { break-inside: avoid; margin-top: 15px !important; }
+      .footer { margin-top: 15px !important; }
+      /* Fuente original para máxima legibilidad */
+      body { font-size: 12px !important; } 
+    }
+  `;
+
+  // 3. Inyectar contenido con diseño emergente
+  overlay.innerHTML = `
+    <div class="print-controls">
+      <button class="btn-action btn-print" id="trigger-native-print">
+        <span>🖨️</span> Imprimir Comprobante
+      </button>
+      <button class="btn-action btn-close" id="close-print-overlay">
+        <span>✕</span> Cerrar Ventana
+      </button>
+    </div>
+    <div class="paper-preview">
+      ${BASE_STYLE}
+      ${html}
+    </div>
+  `;
+
+  const originalTitle = document.title;
+  document.title = title;
+
+  // 4. Lógica de botones
+  const closeBtn = document.getElementById('close-print-overlay');
+  const printBtn = document.getElementById('trigger-native-print');
   
-  win.onload = () => {
-    setTimeout(() => {
-      win.focus();
-      win.print();
-      // En modo navegador, no cerramos automáticamente para que el usuario pueda ver si algo falló
-    }, 500);
+  const finalize = () => {
+    overlay!.innerHTML = '';
+    overlay!.style.display = 'none';
+    document.title = originalTitle;
   };
+  
+  closeBtn?.addEventListener('click', finalize);
+  printBtn?.addEventListener('click', () => window.print());
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -149,18 +286,22 @@ function performBrowserPrint(html: string, title: string) {
 // ─────────────────────────────────────────────────────────────────────────────
 export function printServiceVoucher(service: FuneralService) {
   const company = loadCompanyProfile();
+  
+  // Seguridad: Asegurar que payments sea al menos un array vacío
+  const payments = service.payments || [];
+  
   const saldoFinal = Math.max(0, service.pendingBalance);
   const statusClass = service.status === "Pagado" ? "badge-ok" : service.status === "Abonando" ? "badge-partial" : "badge-debt";
 
-  const paymentRows = service.payments.length === 0
+  const paymentRows = payments.length === 0
     ? `<tr><td colspan="5" style="text-align:center;color:#9ca3af;padding:16px;">Sin abonos registrados</td></tr>`
-    : service.payments.map((p, i) => `
+    : payments.map((p, i) => `
         <tr>
           <td>${i + 1}</td>
           <td>${formatDate(p.date)}</td>
           <td style="font-weight:600;color:#16a34a;">${formatCLP(p.amount)}</td>
           <td>${p.method}</td>
-          <td style="color:${p.balance > 0 ? "#dc2626" : "#16a34a"};font-weight:600;">${formatCLP(p.balance)}</td>
+          <td style="color:${(p.balance || 0) > 0 ? "#dc2626" : "#16a34a"};font-weight:600;">${formatCLP(p.balance || 0)}</td>
         </tr>`).join("");
 
   // Generar HTML para información de cuotas
@@ -267,7 +408,7 @@ export function printServiceVoucher(service: FuneralService) {
 
     <!-- HISTORIAL DE PAGOS -->
     <div class="section">
-      <div class="sec-title">Historial de Abonos (${service.payments.length})</div>
+      <div class="sec-title">Historial de Abonos (${payments.length})</div>
       <table class="pay-table">
         <thead>
           <tr>

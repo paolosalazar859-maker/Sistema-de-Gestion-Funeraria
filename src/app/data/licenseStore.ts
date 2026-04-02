@@ -1,58 +1,106 @@
+import { invoke } from "@tauri-apps/api/core";
+import { supabase } from "../../lib/supabase";
+
 export interface LicenseToken {
   serialKey: string;
-  clientName: string;
-  expiresAt: string;
+  activatedAt: string;
   deviceId: string;
 }
 
-const LICENSE_KEY = "funeral_app_license";
-const DEVICE_KEY = "funeral_app_device_id";
+const LICENSE_KEY = "aura_activation_data";
 
-// Genera un ID "permanente" para la máquina usando localStorage 
-// (En una app pura de Electron usaríamos node-machine-id, pero esto funciona transversalmente)
-export function getOrCreateDeviceId(): string {
-  let deviceId = localStorage.getItem(DEVICE_KEY);
-  if (!deviceId) {
-    deviceId = "DEV-" + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
-    localStorage.setItem(DEVICE_KEY, deviceId);
-  }
-  return deviceId;
-}
-
-export function loadLicenseToken(): LicenseToken | null {
+/**
+ * Obtiene el ID único de hardware desde el proceso de Rust (Tauri)
+ */
+export async function getHardwareId(): Promise<string> {
   try {
-    const raw = localStorage.getItem(LICENSE_KEY);
-    if (!raw) return null;
-    return JSON.parse(raw) as LicenseToken;
+    const hwid = await invoke<string>("get_machine_id");
+    return hwid;
   } catch (err) {
-    console.error("Error al cargar la licencia", err);
-    return null;
+    console.error("Error al obtener HWID:", err);
+    return "unknown-hwid";
   }
 }
 
-export function saveLicenseToken(token: LicenseToken) {
+/**
+ * Verifica si esta PC ya está registrada en Supabase
+ */
+export async function checkServerActivation(hwid: string): Promise<boolean> {
   try {
-    localStorage.setItem(LICENSE_KEY, JSON.stringify(token));
+    const { data, error } = await supabase
+      .from("activations")
+      .select("*")
+      .eq("machine_id", hwid)
+      .eq("is_used", true)
+      .single();
+
+    if (error || !data) return false;
+    return true;
   } catch (err) {
-    console.error("Error al guardar la licencia", err);
-  }
-}
-
-export function clearLicenseToken() {
-  localStorage.removeItem(LICENSE_KEY);
-}
-
-export function isLicenseValidLocally(): boolean {
-  const token = loadLicenseToken();
-  if (!token) return false;
-
-  const now = new Date();
-  const expiresDate = new Date(token.expiresAt);
-  
-  // Si la fecha actual superó la de expiración
-  if (now > expiresDate) {
     return false;
   }
+}
 
-  return true;
+/**
+ * Intenta activar la aplicación con un serial
+ */
+export async function activateWithSerial(serial: string): Promise<{ success: boolean; message: string }> {
+  try {
+    const hwid = await getHardwareId();
+
+    // 1. Verificar si el serial existe y no está usado
+    const { data: license, error: fetchError } = await supabase
+      .from("activations")
+      .select("*")
+      .eq("serial", serial)
+      .eq("is_used", false)
+      .single();
+
+    if (fetchError || !license) {
+      return { success: false, message: "Serial inválido o ya utilizado en otra PC." };
+    }
+
+    // 2. Vincular el serial a esta PC (HWID)
+    const { error: updateError } = await supabase
+      .from("activations")
+      .update({
+        is_used: true,
+        machine_id: hwid,
+        activated_at: new Date().toISOString()
+      })
+      .eq("serial", serial);
+
+    if (updateError) {
+      return { success: false, message: "Error al registrar la activación. Reintente." };
+    }
+
+    // 3. Guardar localmente para acceso rápido
+    const token: LicenseToken = {
+      serialKey: serial,
+      deviceId: hwid,
+      activatedAt: new Date().toISOString()
+    };
+    localStorage.setItem(LICENSE_KEY, JSON.stringify(token));
+
+    return { success: true, message: "¡Activación exitosa!" };
+  } catch (err) {
+    return { success: false, message: "Error de conexión con el servidor de licencias." };
+  }
+}
+
+/**
+ * Validación rápida al arrancar
+ */
+export async function isAppActivated(): Promise<boolean> {
+  // Primero check local para velocidad
+  const local = localStorage.getItem(LICENSE_KEY);
+  if (!local) {
+    // Si no hay local, intentamos ver si el server reconoce esta PC (por si reinstaló la app)
+    const hwid = await getHardwareId();
+    return await checkServerActivation(hwid);
+  }
+
+  // Opcional: Re-validar contra server cada vez (más seguro pero requiere internet siempre)
+  const hwid = await getHardwareId();
+  return await checkServerActivation(hwid);
 }

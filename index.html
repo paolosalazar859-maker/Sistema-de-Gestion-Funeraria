@@ -7,6 +7,13 @@
     <meta name="description" content="Sistema de gestión integral para servicios funerarios AURA" />
     <meta name="theme-color" content="#1a1f2e" />
     <title>AURA - Sistema de Gestión Funeraria</title>
+    <script>
+      console.log("🟡 [DEBUG] El HTML ha cargado. Iniciando módulos...");
+      window.onerror = function(msg, url, line, col, error) {
+        console.error("🔴 [DEBUG] Error Global detectado:", msg, "en", url, ":", line);
+        return false;
+      };
+    </script>
   </head>
   <body>
     <div id="root"></div>

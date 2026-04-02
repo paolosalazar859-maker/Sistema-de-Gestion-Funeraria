@@ -75,6 +75,12 @@ export function PWAInstallPrompt() {
 
   // Detectar actualizaciones del service worker
   useEffect(() => {
+    // Si estamos en entorno Tauri, no mostramos avisos de actualización de PWA
+    if ((window as any).__TAURI__ || (window as any).__TAURI_METADATA__) {
+      setUpdateAvailable(false);
+      return;
+    }
+
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.ready.then((registration) => {
         registration.addEventListener("updatefound", () => {

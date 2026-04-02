@@ -31,9 +31,8 @@ import { loadServices, restoreService, hardDeleteService } from "../data/service
 import { FuneralService } from "../data/mockData";
 
 
-// Cargar componentes pesados o con dependencias de Electron de forma diferida
-const DatabaseManager = React.lazy(() => import("./DatabaseManager").then(m => ({ default: m.DatabaseManager })));
-const UpdateManagerComponent = React.lazy(() => import("./UpdateManager"));
+import DatabaseManager from "./DatabaseManager";
+import UpdateManagerComponent from "./UpdateManager";
 
 type Tab = "perfil" | "empresa" | "seguridad" | "database" | "updates" | "papelera";
 
@@ -710,29 +709,21 @@ export function AdminProfile() {
         </div>
       )}
 
-      {/* ── DATABASE TAB ─────────────────────────────────────────── */}
       {activeTab === "database" && (
         <div
-          className="rounded-2xl p-6 shadow-sm"
-          style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
+          className="rounded-3xl p-2"
         >
-          <p className="text-sm mb-5" style={{ color: "#0d1b3e", fontWeight: 600 }}>Gestión de Datos</p>
-          <Suspense fallback={<div>Cargando...</div>}>
-            <DatabaseManager />
-          </Suspense>
+          <DatabaseManager />
         </div>
       )}
 
-      {/* ── UPDATES TAB ─────────────────────────────────────────── */}
       {activeTab === "updates" && (
         <div
           className="rounded-2xl p-6 shadow-sm"
           style={{ background: "#ffffff", border: "1px solid #e5e7eb" }}
         >
           <p className="text-sm mb-5" style={{ color: "#0d1b3e", fontWeight: 600 }}>Actualizaciones</p>
-          <Suspense fallback={<div>Cargando...</div>}>
-            <UpdateManagerComponent />
-          </Suspense>
+          <UpdateManagerComponent />
         </div>
       )}
 

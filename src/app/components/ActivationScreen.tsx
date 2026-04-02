@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { KeyRound, Loader2, AlertCircle } from "lucide-react";
 import { licenseService } from "../services/licenseService";
-import { saveLicenseToken, LicenseToken } from "../data/licenseStore";
+import { LicenseToken } from "../data/licenseStore";
 
 interface ActivationScreenProps {
   onActivated: (token: LicenseToken) => void;
@@ -23,8 +23,10 @@ export default function ActivationScreen({ onActivated }: ActivationScreenProps)
     setError(null);
 
     try {
+      // Usamos el nuevo servicio que ya gestiona Supabase y Rust
       const token = await licenseService.activateLicense(serial.trim());
-      saveLicenseToken(token);
+      // El token ya se guarda internamente en activateLicense si fuera necesario, 
+      // pero aquí notificamos al componente padre para que desbloquee la App.
       onActivated(token);
     } catch (err: any) {
       setError(err.message || "Error desconocido al activar la licencia.");

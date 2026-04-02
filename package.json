@@ -1,7 +1,7 @@
 {
   "name": "@figma/my-make-file",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0",
   "type": "module",
   "main": "electron.js",
   "author": "AURA Funeraria",
@@ -19,6 +19,9 @@
     "publish:win": "vite build && electron-builder --win --publish always",
     "publish:linux": "vite build && electron-builder --linux --publish always",
     "rebuild": "npm rebuild better-sqlite3 --build-from-source",
+    "tauri": "tauri",
+    "tauri:dev": "tauri dev",
+    "tauri:build": "tauri build",
     "postinstall": "if [ -z \"$VERCEL\" ]; then electron-builder install-app-deps; fi"
   },
   "dependencies": {
@@ -54,6 +57,9 @@
     "@radix-ui/react-toggle-group": "1.1.2",
     "@radix-ui/react-tooltip": "1.1.8",
     "@supabase/supabase-js": "^2.99.3",
+    "@tauri-apps/api": "^2.10.1",
+    "@tauri-apps/plugin-dialog": "^2.6.0",
+    "@tauri-apps/plugin-fs": "^2.4.5",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
     "cmdk": "1.1.1",
@@ -88,6 +94,7 @@
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
+    "@tauri-apps/cli": "^2.1.0",
     "@vitejs/plugin-react": "4.7.0",
     "concurrently": "^9.1.2",
     "electron": "^34.0.0",

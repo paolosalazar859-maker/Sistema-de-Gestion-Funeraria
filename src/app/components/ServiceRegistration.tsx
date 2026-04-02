@@ -24,7 +24,7 @@ import { openPrint } from "../utils/printUtils";
 import { loadServices, persistService, generateServiceId, deriveStatus } from "../data/serviceStore";
 import { loadCompanyProfile } from "../data/companyStore";
 import { useUser } from "../context/UserContext";
-import { loadInventory, getEngravingPrice } from "../data/inventoryStore";
+import { loadInventory, getEngravingPrice, addInventoryItem } from "../data/inventoryStore";
 
 const formatCLP = (value: number) =>
   new Intl.NumberFormat("es-CL", { style: "currency", currency: "CLP", maximumFractionDigits: 0 }).format(value);
@@ -511,8 +511,19 @@ const CEMETERY_STORAGE_KEY = "funeral_cemeteries";
 
 function loadSavedCemeteries(): string[] {
   try {
+    const services = loadServices();
+    // Extraer cementerios de los servicios históricos
+    const fromServices = services
+      .map(s => s.cemetery?.trim())
+      .filter((c): c is string => !!c);
+
+    // Obtener cementerios guardados manualmente en localStorage
     const raw = localStorage.getItem(CEMETERY_STORAGE_KEY);
-    return raw ? JSON.parse(raw) : [];
+    const fromStorage: string[] = raw ? JSON.parse(raw) : [];
+
+    // Combinar, eliminar duplicados y ordenar
+    const combined = Array.from(new Set([...fromServices, ...fromStorage])).sort();
+    return combined;
   } catch {
     return [];
   }
@@ -523,7 +534,12 @@ function saveCemeteryToStorage(name: string) {
   const current = loadSavedCemeteries();
   const normalized = name.trim();
   if (!current.includes(normalized)) {
-    localStorage.setItem(CEMETERY_STORAGE_KEY, JSON.stringify([...current, normalized]));
+    // Solo guardamos en localStorage si no existe ni en servicios ni en storage previo
+    const raw = localStorage.getItem(CEMETERY_STORAGE_KEY);
+    const fromStorage: string[] = raw ? JSON.parse(raw) : [];
+    if (!fromStorage.includes(normalized)) {
+        localStorage.setItem(CEMETERY_STORAGE_KEY, JSON.stringify([...fromStorage, normalized]));
+    }
   }
 }
 
@@ -707,8 +723,10 @@ export function ServiceRegistration() {
   const [showVoucher, setShowVoucher] = useState(false);
   const [currentServiceId, setCurrentServiceId] = useState<string>("");
   const [services, setServices] = useState(() => loadServices().filter(s => !s.isDeleted));
-  const inventoryItems = useMemo(() => loadInventory(), []);
+  const [inventoryItems, setInventoryItems] = useState(() => loadInventory());
   const { role } = useUser();
+  const [newProduct, setNewProduct] = useState({ name: "", price: "" });
+  const [isAddingNewProduct, setIsAddingNewProduct] = useState(false);
   const isAdmin = role === "admin";
   // isNewService = no hay un servicio seleccionado o viene de URL pero sin editar
   const isNewService = !selectedId && !serviceId;
@@ -735,6 +753,16 @@ export function ServiceRegistration() {
     }
   }, [serviceId, selectedId]);
 
+  // Sincronizar precio desde inventario cuando cambia el tipo de servicio (solo en nuevos)
+  useEffect(() => {
+    if (isNewService && form.serviceType) {
+      const item = inventoryItems.find(i => i.name === form.serviceType);
+      if (item) {
+        setForm(prev => ({ ...prev, serviceValue: item.price.toString() }));
+      }
+    }
+  }, [form.serviceType, isNewService, inventoryItems]);
+
   const set = (field: keyof FormData) => (val: string) =>
     setForm((prev) => ({ ...prev, [field]: val }));
 
@@ -753,6 +781,8 @@ export function ServiceRegistration() {
     })
     .map(i => i.name)
     .filter(Boolean);
+
+  const typeOptionsWithAdd = [...currentTypeOptions, "+ Añadir nuevo artículo..."];
 
   const hasTallado = isProduct && form.needsEngraving;
 
@@ -816,6 +846,19 @@ export function ServiceRegistration() {
   }, [selectedId]);
 
   const handleSave = async () => {
+    // Save new product to inventory if applicable
+    if (isAddingNewProduct && newProduct.name.trim()) {
+      addInventoryItem({
+        name: newProduct.name.trim(),
+        price: numericInput(newProduct.price),
+        category: isProduct ? "Venta de Artículo" : "Servicio Funerario"
+      });
+      // Update local state to include the new product name for the service record and for future selections
+      setInventoryItems(loadInventory());
+      form.serviceType = newProduct.name.trim();
+      form.serviceValue = newProduct.price;
+    }
+
     // Save cemetery to autocomplete history
     saveCemeteryToStorage(form.cemetery);
 
@@ -932,6 +975,8 @@ export function ServiceRegistration() {
     setShowVoucher(false);
     setSelectedId("");
     setCurrentServiceId("");
+    setIsAddingNewProduct(false);
+    setNewProduct({ name: "", price: "" });
   };
 
   // ── Auto-fill contractor from existing client ─────────────────────────────
@@ -1712,8 +1757,14 @@ export function ServiceRegistration() {
               <div className={isProduct ? "lg:col-span-2" : "lg:col-span-1"}>
                 <InputField
                   label={isProduct ? "Artículo" : "Tipo de Servicio"}
-                  value={form.serviceType}
+                  value={isAddingNewProduct ? "+ Añadir nuevo artículo..." : form.serviceType}
                   onChange={(val) => {
+                    if (val === "+ Añadir nuevo artículo...") {
+                      setIsAddingNewProduct(true);
+                      setForm(p => ({ ...p, serviceType: "", serviceValue: "0" }));
+                      return;
+                    }
+                    setIsAddingNewProduct(false);
                     setForm(p => {
                       const match = inventoryItems.find(i => i.name === val);
                       return {
@@ -1724,17 +1775,44 @@ export function ServiceRegistration() {
                     });
                   }}
                   disabled={!editMode}
-                  options={currentTypeOptions}
+                  options={typeOptionsWithAdd}
                 />
               </div>
-              <MoneyInput
-                key={`price-${form.serviceType}`}
-                label={isProduct ? "Precio ($)" : "Valor del Servicio ($)"}
-                value={form.serviceValue}
-                onChange={set("serviceValue")}
-                placeholder="0"
-                disabled={!editMode}
-              />
+
+              {isAddingNewProduct && (
+                <>
+                  <div className="lg:col-span-2">
+                    <InputField
+                      label="Nombre del Nuevo Artículo"
+                      value={newProduct.name}
+                      onChange={(val) => setNewProduct(p => ({ ...p, name: val }))}
+                      placeholder="Ej: Urna de Roble Tallado"
+                      disabled={!editMode}
+                    />
+                  </div>
+                  <MoneyInput
+                    label="Precio Base ($)"
+                    value={newProduct.price}
+                    onChange={(val) => {
+                      setNewProduct(p => ({ ...p, price: val }));
+                      setForm(p => ({ ...p, serviceValue: val }));
+                    }}
+                    placeholder="0"
+                    disabled={!editMode}
+                  />
+                </>
+              )}
+
+              {!isAddingNewProduct && (
+                <MoneyInput
+                  key={`price-${form.serviceType}`}
+                  label={isProduct ? "Precio ($)" : "Valor del Servicio ($)"}
+                  value={form.serviceValue}
+                  onChange={set("serviceValue")}
+                  placeholder="0"
+                  disabled={!editMode}
+                />
+              )}
               
               {/* Checkbox de Grabado (Solo para artículos) */}
               {isProduct && (

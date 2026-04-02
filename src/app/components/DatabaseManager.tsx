@@ -1,263 +1,257 @@
-import { useState, useEffect } from 'react';
-import { Database, HardDrive, Download, Upload, Info, AlertCircle, CheckCircle2 } from 'lucide-react';
-import { Button } from './ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
-import { Alert, AlertDescription } from './ui/alert';
-import { migrateToSQLite, isSQLiteMigrated } from '../data/serviceStore';
+import React, { useState, useEffect } from "react";
+import { 
+  Database, 
+  Download, 
+  Upload, 
+  AlertCircle, 
+  CheckCircle2, 
+  RefreshCw,
+  FolderOpen,
+  ShieldCheck,
+  ExternalLink,
+  ChevronRight
+} from "lucide-react";
+import { jsonDb } from "../data/jsonDb";
+import { save, open } from "@tauri-apps/plugin-dialog";
+import { copyFile, readTextFile } from "@tauri-apps/plugin-fs";
 
-export function DatabaseManager() {
-  const [isElectron, setIsElectron] = useState(false);
-  const [isSQLiteAvailable, setIsSQLiteAvailable] = useState(false);
-  const [isMigrated, setIsMigrated] = useState(false);
-  const [isMigrating, setIsMigrating] = useState(false);
-  const [dbInfo, setDbInfo] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [success, setSuccess] = useState<string | null>(null);
+const DatabaseManager: React.FC = () => {
+  const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
+  const [message, setMessage] = useState("");
+  const [currentPath, setCurrentPath] = useState<string>("");
 
   useEffect(() => {
-    checkElectronAndSQLite();
-    setIsMigrated(isSQLiteMigrated());
+    const fetchPath = async () => {
+      try {
+        const path = await jsonDb.getDbPath();
+        setCurrentPath(path);
+      } catch (e) {
+        console.error("Error obteniendo ruta:", e);
+      }
+    };
+    fetchPath();
   }, []);
 
-  async function checkElectronAndSQLite() {
-    const electron = typeof window !== 'undefined' && window.electronAPI?.isElectron;
-    setIsElectron(electron);
-
-    if (electron) {
-      try {
-        const available = await window.electronAPI.db.isAvailable();
-        setIsSQLiteAvailable(available);
-
-        if (available) {
-          loadDatabaseInfo();
-        }
-      } catch (err) {
-        console.error('Error verificando SQLite:', err);
-      }
-    }
-  }
-
-  async function loadDatabaseInfo() {
+  const handleCreateBackup = async () => {
+    setStatus("loading");
+    setMessage("Preparando copia de seguridad...");
     try {
-      const response = await window.electronAPI.db.getDatabaseInfo();
-      if (response.success) {
-        setDbInfo(response.data);
-      }
-    } catch (err) {
-      console.error('Error cargando info de BD:', err);
-    }
-  }
+      const selectedPath = await save({
+        filters: [{
+          name: 'Respaldo AURA (JSON)',
+          extensions: ['json']
+        }],
+        defaultPath: `AURA_BACKUP_${new Date().toISOString().split('T')[0]}.json`
+      });
 
-  async function handleMigration() {
-    setIsMigrating(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const result = await migrateToSQLite();
-      
-      if (result) {
-        setSuccess('✅ Migración completada exitosamente');
-        setIsMigrated(true);
-        loadDatabaseInfo();
+      if (selectedPath) {
+        const sourcePath = await jsonDb.getDbPath();
+        await copyFile(sourcePath, selectedPath);
+        setStatus("success");
+        setMessage("¡Copia de seguridad creada con éxito!");
+        setTimeout(() => setStatus("idle"), 3000);
       } else {
-        setError('No se pudo completar la migración');
+        setStatus("idle");
       }
-    } catch (err: any) {
-      setError(`Error: ${err.message}`);
-    } finally {
-      setIsMigrating(false);
+    } catch (error) {
+      console.error(error);
+      setStatus("error");
+      setMessage("Error al procesar el respaldo.");
     }
-  }
+  };
 
-  async function handleCreateBackup() {
+  const handleSetCustomLocation = async () => {
+    setStatus("loading");
+    setMessage("Configurando nueva ubicación...");
     try {
-      setError(null);
-      setSuccess(null);
-      
-      // El diálogo se maneja desde el menú de Electron
-      setSuccess('💾 Usa el menú AURA → Crear Backup para guardar una copia de seguridad');
-    } catch (err: any) {
-      setError(`Error: ${err.message}`);
-    }
-  }
+      const selectedPath = await save({
+        title: "Selecciona el destino de la Base de Datos Principal",
+        defaultPath: "aura_database.json",
+        filters: [{ name: 'JSON', extensions: ['json'] }]
+      });
 
-  async function handleRestoreBackup() {
+      if (selectedPath) {
+        const success = await jsonDb.setCustomPath(selectedPath);
+        if (success) {
+          setCurrentPath(selectedPath);
+          setStatus("success");
+          setMessage("Ubicación del sistema actualizada.");
+          setTimeout(() => setStatus("idle"), 3000);
+        } else {
+          throw new Error("No se pudo mudar la base de datos");
+        }
+      } else {
+        setStatus("idle");
+      }
+    } catch (error) {
+      console.error(error);
+      setStatus("error");
+      setMessage("Error al migrar la ubicación.");
+    }
+  };
+
+  const handleRestoreBackup = async () => {
+    setStatus("loading");
+    setMessage("Validando archivo de respaldo...");
     try {
-      setError(null);
-      setSuccess(null);
-      
-      // El diálogo se maneja desde el menú de Electron
-      setSuccess('📂 Usa el menú AURA → Restaurar Backup para cargar una copia de seguridad');
-    } catch (err: any) {
-      setError(`Error: ${err.message}`);
+      const selectedPath = await open({
+        multiple: false,
+        filters: [{ name: 'Respaldo AURA', extensions: ['json'] }]
+      });
+
+      if (selectedPath) {
+        const content = await readTextFile(selectedPath as string);
+        const parsed = JSON.parse(content);
+        
+        if (parsed.services || parsed.inventory) {
+          await jsonDb.save(parsed);
+          setStatus("success");
+          setMessage("¡Datos restaurados! Reinicia para aplicar los cambios.");
+        } else {
+          throw new Error("El archivo no parece ser un respaldo válido de AURA.");
+        }
+      } else {
+        setStatus("idle");
+      }
+    } catch (error) {
+      console.error(error);
+      setStatus("error");
+      setMessage("Error al restaurar los datos.");
     }
-  }
-
-  // Si no estamos en Electron, no mostrar nada
-  if (!isElectron) {
-    return null;
-  }
-
-  // Si SQLite no está disponible, mostrar advertencia
-  if (!isSQLiteAvailable) {
-    return (
-      <Card className="border-amber-200 bg-amber-50">
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-amber-900">
-            <AlertCircle className="h-5 w-5" />
-            Base de Datos SQLite No Disponible
-          </CardTitle>
-          <CardDescription className="text-amber-700">
-            Para habilitar SQLite en la aplicación de escritorio, instala la dependencia necesaria.
-          </CardDescription>
-        </CardHeader>
-        <CardContent>
-          <Alert className="border-amber-300 bg-amber-100">
-            <AlertCircle className="h-4 w-4 text-amber-600" />
-            <AlertDescription className="text-amber-900">
-              <p className="font-medium mb-2">Instrucciones de instalación:</p>
-              <ol className="list-decimal list-inside space-y-1 text-sm">
-                <li>Abre una terminal en la carpeta del proyecto</li>
-                <li>Ejecuta: <code className="bg-amber-200 px-2 py-1 rounded">npm install better-sqlite3</code></li>
-                <li>Reinicia la aplicación</li>
-              </ol>
-            </AlertDescription>
-          </Alert>
-        </CardContent>
-      </Card>
-    );
-  }
+  };
 
   return (
     <div className="space-y-6">
-      {/* Estado de Migración */}
-      {!isMigrated && (
-        <Card className="border-blue-200 bg-blue-50">
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-blue-900">
-              <Database className="h-5 w-5" />
-              Migración a SQLite Disponible
-            </CardTitle>
-            <CardDescription className="text-blue-700">
-              Migra tus datos de localStorage a SQLite para mejor rendimiento y confiabilidad
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-blue-800">
-              SQLite proporciona una base de datos robusta y eficiente para la aplicación de escritorio.
-              Tus datos actuales se migrarán de forma segura.
-            </p>
-            
-            <Button 
-              onClick={handleMigration}
-              disabled={isMigrating}
-              className="bg-blue-600 hover:bg-blue-700"
+      {/* Header Sección */}
+      <div className="flex items-center justify-between">
+        <div className="space-y-1">
+          <h3 className="text-lg font-bold text-[#0d1b3e] flex items-center gap-2">
+            <Database className="text-[#c9a84c]" size={20} />
+            Mantenimiento de Datos
+          </h3>
+          <p className="text-xs text-slate-500">
+            Control integral de integridad y redundancia de la información.
+          </p>
+        </div>
+      </div>
+
+      {/* Tarjeta de Ubicación Actual (Premium Glass) */}
+      <div className="bg-white border border-slate-100 rounded-3xl p-6 shadow-sm overflow-hidden relative group transition-all duration-300 hover:shadow-md">
+        <div className="absolute top-0 right-0 p-4">
+           <div className="flex items-center gap-2 px-2.5 py-1 rounded-full bg-emerald-50 border border-emerald-100">
+              <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse" />
+              <span className="text-[10px] font-bold text-emerald-700 uppercase tracking-tighter">Motor Activo</span>
+           </div>
+        </div>
+
+        <div className="space-y-4">
+          <div className="flex items-center gap-2 text-slate-400">
+            <FolderOpen size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-widest">Ruta de Persistencia Local</span>
+          </div>
+          
+          <div className="flex items-center gap-4 bg-slate-50/80 rounded-2xl p-4 border border-slate-100 group-hover:bg-slate-50 transition-colors duration-300">
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-mono text-[#0d1b3e]/80 truncate">
+                {currentPath || "Obteniendo ruta de sistema..."}
+              </p>
+            </div>
+            <button 
+              onClick={handleSetCustomLocation}
+              className="px-4 py-2 bg-white border border-slate-200 rounded-xl text-xs font-bold text-[#0d1b3e] hover:bg-[#0d1b3e] hover:text-white transition-all shadow-sm flex items-center gap-2"
             >
-              {isMigrating ? (
-                <>
-                  <div className="animate-spin mr-2 h-4 w-4 border-2 border-white border-t-transparent rounded-full" />
-                  Migrando...
-                </>
-              ) : (
-                <>
-                  <Download className="mr-2 h-4 w-4" />
-                  Migrar a SQLite
-                </>
-              )}
-            </Button>
-          </CardContent>
-        </Card>
-      )}
+              Mudar Datos
+              <ChevronRight size={14} />
+            </button>
+          </div>
+        </div>
+      </div>
 
-      {/* Información de la Base de Datos */}
-      {isMigrated && dbInfo && (
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2">
-              <Database className="h-5 w-5 text-green-600" />
-              Base de Datos SQLite Activa
-            </CardTitle>
-            <CardDescription>
-              Información y herramientas de gestión de la base de datos
-            </CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Stats */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                  <HardDrive className="h-4 w-4" />
-                  Servicios
-                </div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {dbInfo.servicesCount}
-                </div>
-              </div>
-              
-              <div className="p-4 bg-gray-50 rounded-lg">
-                <div className="flex items-center gap-2 text-gray-600 text-sm mb-1">
-                  <Info className="h-4 w-4" />
-                  Tamaño
-                </div>
-                <div className="text-2xl font-bold text-gray-900">
-                  {dbInfo.sizeFormatted}
-                </div>
-              </div>
+      {/* Acciones principales - Grid 2 Columnas */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {/* Backup Card */}
+        <button
+          onClick={handleCreateBackup}
+          disabled={status === "loading"}
+          className="relative group overflow-hidden bg-white hover:bg-slate-50 border border-slate-100 p-6 rounded-[2rem] text-left transition-all duration-500 hover:shadow-xl hover:-translate-y-1"
+        >
+          {/* Background Gradient Detail */}
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-blue-500/10 to-transparent rounded-bl-full translate-x-12 -translate-y-12 group-hover:translate-x-6 group-hover:-translate-y-6 transition-transform duration-700" />
+          
+          <div className="space-y-5">
+            <div className="w-14 h-14 rounded-2xl bg-blue-50 flex items-center justify-center text-blue-600 transition-transform group-hover:scale-110 duration-500">
+              <Download size={26} />
             </div>
-
-            {/* Detalles */}
-            <div className="text-sm text-gray-600 space-y-1">
-              <p><strong>Ubicación:</strong> {dbInfo.path}</p>
-              <p><strong>Pagos registrados:</strong> {dbInfo.paymentsCount}</p>
-              <p><strong>Última modificación:</strong> {new Date(dbInfo.lastModified).toLocaleString('es-CL')}</p>
+            <div>
+              <h4 className="text-lg font-bold text-[#0d1b3e]">Crear Respaldo</h4>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                Genera un archivo portátil de toda la gestión para guardar en disco externo.
+              </p>
             </div>
-
-            {/* Acciones */}
-            <div className="flex gap-3 pt-4 border-t">
-              <Button 
-                variant="outline" 
-                onClick={handleCreateBackup}
-                className="flex-1"
-              >
-                <Download className="mr-2 h-4 w-4" />
-                Crear Backup
-              </Button>
-              
-              <Button 
-                variant="outline" 
-                onClick={handleRestoreBackup}
-                className="flex-1"
-              >
-                <Upload className="mr-2 h-4 w-4" />
-                Restaurar Backup
-              </Button>
+            <div className="flex items-center gap-2 text-blue-600 font-bold text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
+               Ejecutar ahora <ChevronRight size={12} />
             </div>
+          </div>
+        </button>
 
-            <Alert className="border-blue-200 bg-blue-50">
-              <Info className="h-4 w-4 text-blue-600" />
-              <AlertDescription className="text-blue-900 text-sm">
-                También puedes crear y restaurar backups desde el menú <strong>AURA</strong> en la barra superior.
-              </AlertDescription>
-            </Alert>
-          </CardContent>
-        </Card>
+        {/* Restore Card */}
+        <button
+          onClick={handleRestoreBackup}
+          disabled={status === "loading"}
+          className="relative group overflow-hidden bg-white hover:bg-slate-50 border border-slate-100 p-6 rounded-[2rem] text-left transition-all duration-500 hover:shadow-xl hover:-translate-y-1"
+        >
+          {/* Background Gradient Detail */}
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-br from-purple-500/10 to-transparent rounded-bl-full translate-x-12 -translate-y-12 group-hover:translate-x-6 group-hover:-translate-y-6 transition-transform duration-700" />
+
+          <div className="space-y-5">
+            <div className="w-14 h-14 rounded-2xl bg-purple-50 flex items-center justify-center text-purple-600 transition-transform group-hover:scale-110 duration-500">
+              <Upload size={26} />
+            </div>
+            <div>
+              <h4 className="text-lg font-bold text-[#0d1b3e]">Restaurar Datos</h4>
+              <p className="text-xs text-slate-400 mt-1 leading-relaxed">
+                Importa una sesión previa. Sobrescribirá los datos actuales del sistema.
+              </p>
+            </div>
+            <div className="flex items-center gap-2 text-purple-600 font-bold text-[10px] uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity">
+               Cargar archivo <ChevronRight size={12} />
+            </div>
+          </div>
+        </button>
+      </div>
+
+      {/* Barra de Estado Dinámica */}
+      {status !== "idle" && (
+        <div className={`p-4 rounded-2xl flex items-center gap-4 border animate-in slide-in-from-top-2 duration-300
+          ${status === "success" ? "bg-emerald-50 border-emerald-100 text-emerald-700" : ""}
+          ${status === "error" ? "bg-rose-50 border-rose-100 text-rose-700" : ""}
+          ${status === "loading" ? "bg-blue-50 border-blue-100 text-[#0d1b3e]" : ""}
+        `}>
+          <div className="flex-shrink-0">
+            {status === "loading" && <RefreshCw size={18} className="animate-spin text-blue-500" />}
+            {status === "success" && <CheckCircle2 size={18} className="text-emerald-500" />}
+            {status === "error" && <AlertCircle size={18} className="text-rose-500" />}
+          </div>
+          <p className="text-xs font-bold">{message}</p>
+        </div>
       )}
 
-      {/* Mensajes de Error y Éxito */}
-      {error && (
-        <Alert variant="destructive">
-          <AlertCircle className="h-4 w-4" />
-          <AlertDescription>{error}</AlertDescription>
-        </Alert>
-      )}
-
-      {success && (
-        <Alert className="border-green-200 bg-green-50">
-          <CheckCircle2 className="h-4 w-4 text-green-600" />
-          <AlertDescription className="text-green-900">{success}</AlertDescription>
-        </Alert>
-      )}
+      {/* Footer Info Box */}
+      <div className="bg-[#0d1b3e]/[0.02] border border-slate-100 rounded-3xl p-6">
+        <div className="flex gap-4">
+          <div className="w-10 h-10 rounded-xl bg-[#c9a84c]/10 flex items-center justify-center text-[#c9a84c] flex-shrink-0">
+            <ShieldCheck size={20} />
+          </div>
+          <div className="space-y-1">
+             <h5 className="text-sm font-bold text-[#0d1b3e]">Protocolo de Seguridad AURA</h5>
+             <p className="text-xs text-slate-500 leading-relaxed">
+                Este sistema realiza persistencia inmediata. Para mayor seguridad, exporta una copia externa mensualmente a una ubicación física separada de este terminal.
+             </p>
+          </div>
+        </div>
+      </div>
     </div>
   );
-}
+};
+
+export default DatabaseManager;

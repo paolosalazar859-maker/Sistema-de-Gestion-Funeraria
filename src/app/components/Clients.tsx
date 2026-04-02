@@ -1,4 +1,4 @@
-import { loadServices, persistService, setLocalCache, deriveStatus, deleteService } from "../data/serviceStore";
+import { loadServices, persistService, setLocalCache, deriveStatus, deleteService, loadServicesAsync, deleteClient } from "../data/serviceStore";
 import { useState, useEffect } from "react";
 import {
   Users,
@@ -635,9 +635,7 @@ function ClientDetail({
   const handleDeleteClient = async () => {
     setIsDeleting(true);
     try {
-      for (const s of localServices) {
-        await deleteService(s.id);
-      }
+      await deleteClient(client.rut, client.name);
       onUpdate();
       onBack();
     } finally {
@@ -1032,16 +1030,16 @@ export function Clients() {
     }
   };
 
-  useEffect(() => { reload(); }, []);
+  useEffect(() => {
+    reload();
+  }, []);
   const [isDeletingGlobal, setIsDeletingGlobal] = useState(false);
 
   const handleDeleteClient = async (client: Client) => {
     setIsDeletingGlobal(true);
     try {
-      for (const s of client.services) {
-        await deleteService(s.id);
-      }
-      reload();
+      await deleteClient(client.rut, client.name);
+      await reload();
       setDeleteClientTarget(null);
     } finally {
       setIsDeletingGlobal(false);

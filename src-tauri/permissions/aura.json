@@ -1,0 +1,14 @@
+{
+  "identifier": "default",
+  "description": "Permisos por defecto para el plugin funerario AURA",
+  "commands": [
+    "init_database",
+    "get_all_services",
+    "upsert_service",
+    "delete_client_services",
+    "create_backup",
+    "restore_backup",
+    "get_app_version",
+    "print_html"
+  ]
+}

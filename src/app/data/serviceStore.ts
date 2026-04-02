@@ -1,17 +1,72 @@
 import { FuneralService, PaymentStatus } from "./mockData";
 import { apiPersistService, apiDeleteService } from "./serviceApi";
 import { enqueueOperation } from "../utils/offlineQueue";
+import { invoke } from "@tauri-apps/api/core";
 
 const SERVICES_KEY = "funeral_services";
 const MIGRATED_KEY = "funeral_supabase_migrated";
 const SQLITE_MIGRATED_KEY = "funeral_sqlite_migrated";
 
-// Verificar si estamos en Electron con SQLite disponible
-const isElectronWithDB = () => {
-  return typeof window !== 'undefined' && 
-         window.electronAPI?.isElectron && 
-         window.electronAPI?.db;
+// Verificar si estamos en modo escritorio (Electron o Tauri)
+const isDesktopWithDB = () => {
+  if (typeof window === 'undefined') return false;
+  
+  const isElectron = !!(window as any).electronAPI?.db;
+  const isTauri = !!(window as any).__TAURI__ || !!(window as any).__TAURI_INTERNALS__ || !!(window as any).__TAURI_METADATA__;
+  
+  return isElectron || isTauri;
 };
+
+import { jsonDb } from "./jsonDb";
+
+// Helper para invocar comandos de escritorio (Migrado a JSON Directo para Tauri v2)
+async function desktopInvoke(command: string, args: any = {}): Promise<any> {
+  const isTauri = typeof window !== 'undefined' && 
+    (!!(window as any).__TAURI__ || 
+     !!(window as any).__TAURI_INTERNALS__ || 
+     !!(window as any).__TAURI_METADATA__);
+  
+  if (isTauri) {
+    try {
+      const state = await jsonDb.load();
+      
+      switch (command) {
+        case 'get-all-services':
+          return { success: true, data: state.services };
+        case 'upsert-service':
+          const services = [...state.services];
+          const serviceToSave = args.service;
+          const idx = services.findIndex(s => s.id === serviceToSave.id);
+          if (idx >= 0) services[idx] = serviceToSave;
+          else services.unshift(serviceToSave);
+          await jsonDb.updateSection('services', services);
+          return { success: true };
+        case 'delete-client-services':
+          const { rut, name } = args;
+          const now = new Date().toISOString();
+          const updated = state.services.map(s => {
+            const match = (rut && s.contractorRut === rut) || (!rut && s.contractorName === name);
+            if (match) return { ...s, isDeleted: true, deletedAt: now };
+            return s;
+          });
+          await jsonDb.updateSection('services', updated);
+          return { success: true, count: updated.filter(s => s.isDeleted).length };
+        default:
+          console.warn("Comando de escritorio no implementado en modo Zero-Rust:", command);
+          return { success: false, error: "Tauri Zero-Rust engine: command not implemented" };
+      }
+    } catch (e) {
+      console.error("Error en motor de persistencia Frontend:", e);
+      return { success: false, error: String(e) };
+    }
+  } else if ((window as any).electronAPI?.db) {
+    // Legacy Electron support
+    const electronMethod = (window as any).electronAPI.db[command.replace('db:', '')];
+    if (electronMethod) return await electronMethod(args);
+  }
+  
+  return { success: false, error: "No desktop environment found" };
+}
 
 // ── Lectura local (síncrona, rápida) ─────────────────────────────────────────
 
@@ -96,18 +151,15 @@ export function loadServices(): FuneralService[] {
  * Cargar servicios desde SQLite si está disponible, sino desde localStorage
  */
 export async function loadServicesAsync(): Promise<FuneralService[]> {
-  if (isElectronWithDB()) {
+  if (isDesktopWithDB()) {
     try {
-      const isAvailable = await window.electronAPI.db.isAvailable();
-      if (isAvailable) {
-        const response = await window.electronAPI.db.getAllServices();
-        if (response.success) {
-          console.log('✅ Servicios cargados desde SQLite:', response.data.length);
-          return response.data;
-        }
+      const response = await desktopInvoke('get-all-services');
+      if (response.success) {
+        console.log('✅ Servicios cargados desde base de datos local:', response.data.length);
+        return response.data;
       }
     } catch (error) {
-      console.error('Error cargando desde SQLite, usando localStorage:', error);
+      console.error('Error cargando desde DB local, usando localStorage:', error);
     }
   }
   
@@ -140,8 +192,8 @@ export function markSQLiteMigrated(): void {
  * Migrar datos de localStorage a SQLite
  */
 export async function migrateToSQLite(): Promise<boolean> {
-  if (!isElectronWithDB()) {
-    console.log('⚠️  SQLite no disponible, saltando migración');
+  if (!isDesktopWithDB()) {
+    console.log('⚠️  Ambiente de escritorio no disponible, saltando migración');
     return false;
   }
 
@@ -151,7 +203,7 @@ export async function migrateToSQLite(): Promise<boolean> {
   }
 
   try {
-    const isAvailable = await window.electronAPI.db.isAvailable();
+    const isAvailable = await (window as any).electronAPI.db.isAvailable();
     if (!isAvailable) {
       console.log('⚠️  SQLite no está disponible');
       return false;
@@ -165,9 +217,9 @@ export async function migrateToSQLite(): Promise<boolean> {
       return true;
     }
 
-    console.log(`🔄 Migrando ${localServices.length} servicios a SQLite...`);
+    console.log(`🔄 Migrando ${localServices.length} servicios a la base de datos local...`);
     
-    const response = await window.electronAPI.db.migrateFromLocalStorage(localServices);
+    const response = await desktopInvoke('migrate-from-localstorage', { services: localServices });
     
     if (response.success) {
       console.log(`✅ Migración completada: ${response.count} servicios`);
@@ -186,9 +238,9 @@ export async function migrateToSQLite(): Promise<boolean> {
 // ── Escritura: local inmediata + Supabase en background ──────────────────────
 
 export async function persistService(service: FuneralService): Promise<void> {
-  // Si estamos en Electron, usar SQLite
-  if (isElectronWithDB()) {
-    await persistServiceElectron(service);
+  // Si estamos en entorno de escritorio, usar base de datos local
+  if (isDesktopWithDB()) {
+    await persistServiceDesktop(service);
     return;
   }
 
@@ -197,24 +249,17 @@ export async function persistService(service: FuneralService): Promise<void> {
 }
 
 /**
- * Persistir servicio en Electron (SQLite)
+ * Persistir servicio en Escritorio (SQLite nativo)
  */
-async function persistServiceElectron(service: FuneralService): Promise<void> {
+async function persistServiceDesktop(service: FuneralService): Promise<void> {
   try {
-    const isAvailable = await window.electronAPI.db.isAvailable();
-    if (!isAvailable) {
-      console.warn('SQLite no disponible, usando localStorage');
-      persistServiceWeb(service);
-      return;
-    }
-
-    // Guardar en SQLite
-    const response = await window.electronAPI.db.upsertService(service);
+    // Guardar en la base de datos local (Tauri o Electron)
+    const response = await desktopInvoke('upsert-service', { service });
     
     if (response.success) {
-      console.log(`✅ Servicio ${service.id} guardado en SQLite`);
+      console.log(`✅ Servicio ${service.id} guardado en DB Local`);
       
-      // También actualizar localStorage como caché
+      // También actualizar localStorage como caché rápido
       const current = loadServices();
       const idx = current.findIndex((s) => s.id === service.id);
       if (idx >= 0) {
@@ -224,12 +269,11 @@ async function persistServiceElectron(service: FuneralService): Promise<void> {
       }
       localStorage.setItem(SERVICES_KEY, JSON.stringify(current));
     } else {
-      console.error(`Error guardando en SQLite: ${response.error}`);
-      // Fallback a localStorage
+      console.error(`Error guardando en DB Local: ${response.error}`);
       persistServiceWeb(service);
     }
   } catch (error) {
-    console.error('Error en persistServiceElectron:', error);
+    console.error('Error en persistServiceDesktop:', error);
     persistServiceWeb(service);
   }
 }
@@ -264,15 +308,56 @@ function persistServiceWeb(service: FuneralService): void {
   }
 }
 
+
 export async function deleteService(id: string): Promise<void> {
-  // Si estamos en Electron, usar SQLite
-  if (isElectronWithDB()) {
-    await deleteServiceElectron(id);
+  // Si estamos en entorno de escritorio, usar DB local
+  if (isDesktopWithDB()) {
+    await deleteServiceDesktop(id);
     return;
   }
 
   // Fallback a localStorage + Supabase
   deleteServiceWeb(id);
+}
+
+/**
+ * Eliminar un cliente completo (Atómico)
+ */
+export async function deleteClient(rut: string, name: string): Promise<void> {
+  if (isDesktopWithDB()) {
+    try {
+      const response = await desktopInvoke('delete-client-services', { rut, name });
+      if (response.success) {
+        console.log(`✅ Cliente y sus servicios eliminados en DB Local`);
+        
+        // Actualizar localStorage
+        const current = loadServices();
+        const updated = current.map(s => {
+          const key = s.contractorRut || s.contractorName;
+          const match = (rut && s.contractorRut === rut) || (!rut && s.contractorName === name);
+          if (match) {
+            return { ...s, isDeleted: true, deletedAt: new Date().toISOString() };
+          }
+          return s;
+        });
+        localStorage.setItem(SERVICES_KEY, JSON.stringify(updated));
+      }
+    } catch (e) {
+      console.error("Error eliminando cliente en escritorio:", e);
+    }
+    return;
+  }
+
+  // Web fallback: loop manual
+  const current = loadServices();
+  const updated = current.map(s => {
+    const match = (rut && s.contractorRut === rut) || (!rut && s.contractorName === name);
+    if (match) {
+      return { ...s, isDeleted: true, deletedAt: new Date().toISOString() };
+    }
+    return s;
+  });
+  localStorage.setItem(SERVICES_KEY, JSON.stringify(updated));
 }
 
 /**
@@ -306,25 +391,22 @@ export async function hardDeleteService(id: string): Promise<void> {
 }
 
 /**
- * Eliminar servicio en Electron (SQLite)
+ * Eliminar servicio en Escritorio (SQLite nativo)
  */
-async function deleteServiceElectron(id: string): Promise<void> {
+async function deleteServiceDesktop(id: string): Promise<void> {
   try {
-    const isAvailable = await window.electronAPI.db.isAvailable();
-    if (!isAvailable) {
-      console.warn('SQLite no disponible, usando localStorage');
-      deleteServiceWeb(id);
-      return;
-    }
-
-    // En SQLite lo tratamos como un Upsert con isDeleted: true
+    // Marcamos como eliminado lógicamente para la vista
     const services = loadServices();
     const srv = services.find(s => s.id === id);
+    
     if (srv) {
        const updated = { ...srv, isDeleted: true, deletedAt: new Date().toISOString() };
-       const response = await window.electronAPI.db.upsertService(updated);
+       
+       // Guardar cambio en base de datos local
+       const response = await desktopInvoke('upsert-service', { service: updated });
+       
        if (response.success) {
-          console.log(`✅ Servicio ${id} movido a papelera en SQLite`);
+          console.log(`✅ Servicio ${id} movido a papelera en DB Local`);
           // Actualizar localStorage
           const idx = services.findIndex(s => s.id === id);
           services[idx] = updated;
@@ -339,7 +421,7 @@ async function deleteServiceElectron(id: string): Promise<void> {
        }
     }
   } catch (error) {
-    console.error('Error en deleteServiceElectron:', error);
+    console.error('Error en deleteServiceDesktop:', error);
     deleteServiceWeb(id);
   }
 }

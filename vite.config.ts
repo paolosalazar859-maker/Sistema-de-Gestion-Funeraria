@@ -28,7 +28,7 @@ function figmaAssetFallbackPlugin() {
 }
 
 export default defineConfig({
-  base: './', // Usar rutas relativas para Electron
+  base: '/', // Rutas relativas para Electron, absolutas para Tauri dev
   plugins: [
     figmaAssetFallbackPlugin(),
     // The React and Tailwind plugins are both required for Make, even if
@@ -160,7 +160,7 @@ export default defineConfig({
         clientsClaim: true,
       },
       devOptions: {
-        enabled: true,
+        enabled: false,
         type: 'module',
       },
     }),
@@ -174,4 +174,10 @@ export default defineConfig({
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
+
+  server: {
+    port: 5173,
+    strictPort: true,
+    host: '127.0.0.1'
+  }
 })

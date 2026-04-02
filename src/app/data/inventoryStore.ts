@@ -9,8 +9,20 @@ export interface InventoryItem {
   createdAt: string;
 }
 
+import { jsonDb } from "./jsonDb";
+
 export function loadInventory(): InventoryItem[] {
   try {
+    const isTauri = typeof window !== 'undefined' && (!!(window as any).__TAURI__ || !!(window as any).__TAURI_INTERNALS__);
+    
+    // Si estamos en Tauri, intentamos cargar desde JSON
+    if (isTauri) {
+      // Nota: la carga asíncrona real se maneja en el componente, 
+      // esto es un fallback síncrono para la UI inicial.
+      const raw = localStorage.getItem(INVENTORY_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+
     const raw = localStorage.getItem(INVENTORY_KEY);
     if (!raw) return [];
     return JSON.parse(raw);
@@ -20,9 +32,28 @@ export function loadInventory(): InventoryItem[] {
   }
 }
 
-export function saveInventory(items: InventoryItem[]): void {
+/** Carga asíncrona real para Tauri */
+export async function loadInventoryAsync(): Promise<InventoryItem[]> {
+  const isTauri = !!(window as any).__TAURI__ || !!(window as any).__TAURI_INTERNALS__;
+  if (isTauri) {
+    const state = await jsonDb.load();
+    // Cache en localStorage para velocidad
+    localStorage.setItem(INVENTORY_KEY, JSON.stringify(state.inventory));
+    return state.inventory;
+  }
+  return loadInventory();
+}
+
+export async function saveInventory(items: InventoryItem[]): Promise<void> {
   try {
+    const isTauri =!!(window as any).__TAURI__ || !!(window as any).__TAURI_INTERNALS__;
+    
+    // Guardar en localStorage siempre como caché
     localStorage.setItem(INVENTORY_KEY, JSON.stringify(items));
+
+    if (isTauri) {
+      await jsonDb.updateSection('inventory', items);
+    }
   } catch (error) {
     console.error("Error saving inventory:", error);
   }

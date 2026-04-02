@@ -266,10 +266,10 @@ export function Layout({ children }: { children: React.ReactNode }) {
   );
 
   return (
-    <div className="min-h-screen flex" style={{ background: "#f0f2f5" }}>
+    <div className="h-screen flex overflow-hidden" style={{ background: "#f0f2f5" }}>
       {/* Desktop Sidebar */}
       <aside
-        className="hidden lg:flex flex-col w-64 min-h-screen shadow-xl"
+        className="hidden lg:flex flex-col w-64 h-screen shadow-xl"
         style={{ background: "linear-gradient(180deg, #0d1b3e 0%, #1a2f5a 50%, #0d1b3e 100%)" }}
       >
         <SidebarContent />
@@ -301,7 +301,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
       )}
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col min-h-screen">
+      <div className="flex-1 flex flex-col h-screen overflow-hidden">
         {/* Top Header */}
         <header
           className="sticky top-0 z-40 px-6 py-4 flex items-center justify-between shadow-sm"
@@ -418,7 +418,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page Content */}
-        <main className="flex-1 p-4 lg:p-6 overflow-auto">
+        <main className="flex-1 p-4 lg:p-6 overflow-y-auto w-full">
           {children}
         </main>
       </div>

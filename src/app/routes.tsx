@@ -9,6 +9,8 @@ import { ExpensesManager } from "./components/ExpensesManager";
 import { RouteErrorPage } from "./components/RouteErrorPage";
 import { InventoryManager } from "./components/InventoryManager";
 
+import { PrintPreviewPage } from "./components/PrintPreviewPage";
+
 export const router = createHashRouter([
   {
     path: "/",
@@ -23,5 +25,9 @@ export const router = createHashRouter([
       { path: "gastos", Component: ExpensesManager },
       { path: "inventario", Component: InventoryManager },
     ],
+  },
+  {
+    path: "/print-preview",
+    Component: PrintPreviewPage,
   },
 ]);

@@ -904,8 +904,6 @@ export function CollectionStatus() {
     setSelectedService(updated);
   };
 
-  const totalRecaudado = services.reduce((s, c) => s + c.totalPaid, 0);
-  const totalDeuda = services.reduce((s, c) => s + c.pendingBalance, 0);
 
   const filtered = services
     .filter((s) => {
@@ -948,6 +946,20 @@ export function CollectionStatus() {
       return 0;
     });
 
+  const {
+    periodRecaudado,
+    periodDeuda,
+    periodPagados,
+    periodConDeuda
+  } = useMemo(() => {
+    return {
+      periodRecaudado: filtered.reduce((s, c) => s + (c.totalPaid || 0), 0),
+      periodDeuda: filtered.reduce((s, c) => s + (c.pendingBalance || 0), 0),
+      periodPagados: filtered.filter(s => s.status === "Pagado").length,
+      periodConDeuda: filtered.filter(s => s.pendingBalance > 0).length
+    };
+  }, [filtered]);
+
   const toggleSort = (field: string) => {
     if (sortField === field) setSortAsc(!sortAsc);
     else { setSortField(field); setSortAsc(true); }
@@ -974,17 +986,17 @@ export function CollectionStatus() {
       {isAdmin && (
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
           {[
-            { label: "Total Recaudado", value: formatCLP(totalRecaudado), color: "#16a34a", bg: "#dcfce7", icon: TrendingUp, filter: "Todos" },
-            { label: "Deuda Pendiente", value: formatCLP(totalDeuda), color: "#dc2626", bg: "#fee2e2", icon: TrendingDown, filter: "Deudores" },
+            { label: "Total Recaudado", value: formatCLP(periodRecaudado), color: "#16a34a", bg: "#dcfce7", icon: TrendingUp, filter: "Todos" },
+            { label: "Deuda Pendiente", value: formatCLP(periodDeuda), color: "#dc2626", bg: "#fee2e2", icon: TrendingDown, filter: "Deudores" },
             {
               label: "Cuentas Pagadas",
-              value: services.filter((s) => s.status === "Pagado").length.toString(),
+              value: periodPagados.toString(),
               color: "#16a34a", bg: "#dcfce7", icon: CheckCircle2,
               filter: "Pagado"
             },
             {
               label: "Con Deuda",
-              value: services.filter((s) => s.status !== "Pagado").length.toString(),
+              value: periodConDeuda.toString(),
               color: "#dc2626", bg: "#fee2e2", icon: AlertCircle,
               filter: "Deudores"
             },

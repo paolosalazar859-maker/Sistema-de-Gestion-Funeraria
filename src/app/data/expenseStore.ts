@@ -5,8 +5,18 @@ const CUSTOM_CATEGORIES_KEY = "funeral_custom_categories";
 
 // ── Lectura local (síncrona, rápida) ─────────────────────────────────────────
 
+import { jsonDb } from "./jsonDb";
+
 export function loadExpenses(): Expense[] {
   try {
+    const isTauri = typeof window !== 'undefined' && (!!(window as any).__TAURI__ || !!(window as any).__TAURI_INTERNALS__);
+    
+    // Fallback síncrono para la UI inicial
+    if (isTauri) {
+      const raw = localStorage.getItem(EXPENSES_KEY);
+      return raw ? JSON.parse(raw) : [];
+    }
+
     const raw = localStorage.getItem(EXPENSES_KEY);
     if (!raw) return [];
     return JSON.parse(raw) as Expense[];
@@ -16,9 +26,20 @@ export function loadExpenses(): Expense[] {
   }
 }
 
+/** Carga asíncrona para Tauri */
+export async function loadExpensesAsync(): Promise<Expense[]> {
+  const isTauri = !!(window as any).__TAURI__ || !!(window as any).__TAURI_INTERNALS__;
+  if (isTauri) {
+    const state = await jsonDb.load();
+    localStorage.setItem(EXPENSES_KEY, JSON.stringify(state.expenses));
+    return state.expenses;
+  }
+  return loadExpenses();
+}
+
 // ── Escritura Local ──────────────────────────────────────────────────────────
 
-export function persistExpense(expense: Expense): void {
+export async function persistExpense(expense: Expense): Promise<void> {
   const current = loadExpenses();
   const idx = current.findIndex((e) => e.id === expense.id);
   if (idx >= 0) {
@@ -27,14 +48,24 @@ export function persistExpense(expense: Expense): void {
     current.unshift(expense);
   }
   localStorage.setItem(EXPENSES_KEY, JSON.stringify(current));
+
+  const isTauri = !!(window as any).__TAURI__ || !!(window as any).__TAURI_INTERNALS__;
+  if (isTauri) {
+    await jsonDb.updateSection('expenses', current);
+  }
   
-  // Emitir evento para notificar cambios (opcional)
   window.dispatchEvent(new CustomEvent("expensesChanged"));
 }
 
-export function deleteExpense(id: string): void {
+export async function deleteExpense(id: string): Promise<void> {
   const current = loadExpenses().filter((e) => e.id !== id);
   localStorage.setItem(EXPENSES_KEY, JSON.stringify(current));
+
+  const isTauri = !!(window as any).__TAURI__ || !!(window as any).__TAURI_INTERNALS__;
+  if (isTauri) {
+    await jsonDb.updateSection('expenses', current);
+  }
+
   window.dispatchEvent(new CustomEvent("expensesChanged"));
 }
 

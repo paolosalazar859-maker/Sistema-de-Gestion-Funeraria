@@ -8,6 +8,8 @@ import { UserProvider, useUser } from "./context/UserContext";
 import { SyncProvider } from "./context/SyncContext";
 import { apiLoadServices, apiMigrateServices } from "./data/serviceApi";
 import { setLocalCache, loadServices, isMigrated, markMigrated, recalculateAllStatuses } from "./data/serviceStore";
+import { isAppActivated } from "./data/licenseStore";
+import ActivationScreen from "./components/ActivationScreen";
 
 // Routes accessible by 'oficina' role
 const OFICINA_ALLOWED = ["/registro", "/cobros", "/inventario"];
@@ -21,6 +23,16 @@ function RootContent() {
   const location = useLocation();
   const [syncState, setSyncState] = useState<SyncState>("loading");
   const [syncError, setSyncError] = useState("");
+  const [isActivated, setIsActivated] = useState<boolean | null>(null);
+
+  // 0. Check Activation on mount
+  useEffect(() => {
+    async function check() {
+      const active = await isAppActivated();
+      setIsActivated(active);
+    }
+    check();
+  }, []);
 
   // Redirect oficina away from forbidden routes
   useEffect(() => {
@@ -31,7 +43,7 @@ function RootContent() {
 
   // Supabase sync on mount (only when logged in)
   useEffect(() => {
-    if (!role) {
+    if (!role || !isActivated) {
       setSyncState("ready");
       return;
     }
@@ -90,7 +102,24 @@ function RootContent() {
       }
     }
     init();
-  }, [role]);
+  }, [role, isActivated]);
+
+  // Handle Loading Activation State
+  if (isActivated === null) {
+    return (
+      <div className="fixed inset-0 flex items-center justify-center bg-[#0c1322]">
+        <div className="flex flex-col items-center gap-4">
+          <div className="w-12 h-12 border-4 rounded-full animate-spin" style={{ borderColor: "rgba(201,168,76,0.2)", borderTopColor: "#c9a84c" }} />
+          <p className="text-sm font-medium" style={{ color: "rgba(255,255,255,0.4)" }}>Verificando licencia de AURA...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // Not activated → show activation screen
+  if (!isActivated) {
+    return <ActivationScreen onActivated={() => setIsActivated(true)} />;
+  }
 
   // Not logged in → show login screen
   if (!role) return <LoginScreen />;

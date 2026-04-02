@@ -1,0 +1,27 @@
+[package]
+name = "aura"
+version = "0.1.0"
+description = "Sistema de Gestión Funeraria AURA"
+authors = ["AURA"]
+license = "MIT"
+repository = ""
+edition = "2021"
+rust-version = "1.70"
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
+
+[dependencies]
+serde_json = "1.0"
+serde = { version = "1.0", features = ["derive"] }
+tauri = { version = "2.0", features = [] }
+tauri-plugin-dialog = "2.1"
+tauri-plugin-fs = "2.2"
+tauri-plugin-shell = "2.1"
+machine-id = "0.5"
+
+[features]
+# by default Tauri runs in production mode
+# this feature is used for dev mode (standard)
+default = [ "custom-protocol" ]
+custom-protocol = [ "tauri/custom-protocol" ]
