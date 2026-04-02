@@ -40,3 +40,9 @@ dist-cliente/
 *.exe
 *.dmg
 *.zip
+
+# Tauri / Rust
+src-tauri/target/
+src-tauri/gen/
+target/
+**/target/
