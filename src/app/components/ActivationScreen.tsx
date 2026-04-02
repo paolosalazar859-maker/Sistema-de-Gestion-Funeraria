@@ -4,7 +4,7 @@ import { licenseService } from "../services/licenseService";
 import { LicenseToken } from "../data/licenseStore";
 
 interface ActivationScreenProps {
-  onActivated: (token: LicenseToken) => void;
+  onActivated: (token?: LicenseToken) => void;
 }
 
 export default function ActivationScreen({ onActivated }: ActivationScreenProps) {
