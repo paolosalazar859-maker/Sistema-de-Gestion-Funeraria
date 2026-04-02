@@ -3,26 +3,14 @@
   "private": true,
   "version": "1.1.0",
   "type": "module",
-  "main": "electron.js",
   "author": "AURA Funeraria",
   "description": "Sistema de gestión para funeraria AURA",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
-    "electron": "electron electron.js",
-    "vite": "vite",
-    "build:electron": "vite build && electron-builder",
-    "build:mac": "vite build && electron-builder --mac",
-    "build:win": "vite build && electron-builder --win",
-    "build:linux": "vite build && electron-builder --linux",
-    "publish:mac": "vite build && electron-builder --mac --publish always",
-    "publish:win": "vite build && electron-builder --win --publish always",
-    "publish:linux": "vite build && electron-builder --linux --publish always",
-    "rebuild": "npm rebuild better-sqlite3 --build-from-source",
     "tauri": "tauri",
     "tauri:dev": "tauri dev",
-    "tauri:build": "tauri build",
-    "postinstall": "if [ -z \"$VERCEL\" ]; then electron-builder install-app-deps; fi"
+    "tauri:build": "tauri build"
   },
   "dependencies": {
     "@emotion/react": "11.14.0",
@@ -88,17 +76,13 @@
     "vite-plugin-pwa": "^1.2.0"
   },
   "optionalDependencies": {
-    "better-sqlite3": "^11.8.1",
-    "electron-log": "^5.4.3",
-    "electron-updater": "^6.3.9"
+    "better-sqlite3": "^11.8.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "4.1.12",
     "@tauri-apps/cli": "^2.1.0",
     "@vitejs/plugin-react": "4.7.0",
     "concurrently": "^9.1.2",
-    "electron": "^34.0.0",
-    "electron-builder": "^25.1.8",
     "tailwindcss": "4.1.12",
     "vite": "^6.3.5",
     "wait-on": "^8.0.1"
@@ -106,55 +90,6 @@
   "pnpm": {
     "overrides": {
       "vite": "6.3.5"
-    }
-  },
-  "build": {
-    "appId": "com.aura.funeraria",
-    "productName": "AURA",
-    "directories": {
-      "output": "release",
-      "buildResources": "build"
-    },
-    "files": [
-      "dist/**/*",
-      "electron.js",
-      "preload.cjs",
-      "database.js",
-      "backup-manager.js",
-      "update-manager.js",
-      "package.json"
-    ],
-    "mac": {
-      "target": [
-        "dmg",
-        "zip"
-      ],
-      "category": "public.app-category.business",
-      "artifactName": "AURA-${version}-mac.${ext}"
-    },
-    "dmg": {
-      "title": "AURA ${version}"
-    },
-    "win": {
-      "target": [
-        "nsis"
-      ],
-      "artifactName": "AURA-Setup-${version}.${ext}"
-    },
-    "nsis": {
-      "oneClick": false,
-      "allowToChangeInstallationDirectory": true,
-      "createDesktopShortcut": true,
-      "createStartMenuShortcut": true,
-      "shortcutName": "AURA"
-    },
-    "linux": {
-      "target": [
-        "AppImage",
-        "deb"
-      ],
-      "category": "Office",
-      "artifactName": "AURA-${version}.${ext}"
     }
   }
 }
